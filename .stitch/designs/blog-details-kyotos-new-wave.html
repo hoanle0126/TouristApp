@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Architectural Poetry of Kyoto’s New Wave - THE JOURNAL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-container": "#effff1",
+                    "surface-container-low": "#f3f4f0",
+                    "outline": "#717972",
+                    "on-surface": "#1a1c1a",
+                    "outline-variant": "#c1c9c1",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#b5ccc1",
+                    "on-tertiary-fixed": "#350e14",
+                    "on-secondary-fixed-variant": "#374b43",
+                    "on-background": "#1a1c1a",
+                    "primary": "#38644a",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#d1e8dd",
+                    "tertiary-container": "#9d6469",
+                    "surface-tint": "#3b674e",
+                    "tertiary-fixed-dim": "#f9b5ba",
+                    "on-surface-variant": "#414943",
+                    "surface-container": "#edeeea",
+                    "surface": "#f9faf6",
+                    "tertiary": "#814c51",
+                    "surface-container-highest": "#e2e3df",
+                    "inverse-primary": "#a1d2b2",
+                    "secondary": "#4e635a",
+                    "primary-container": "#507d62",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#52675e",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#bdeecd",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#a1d2b2",
+                    "inverse-surface": "#2e312f",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed": "#0b1f18",
+                    "on-primary-fixed": "#002111",
+                    "surface-bright": "#f9faf6",
+                    "surface-variant": "#e2e3df",
+                    "surface-dim": "#d9dad6",
+                    "surface-container-high": "#e8e9e4",
+                    "secondary-container": "#cee5da",
+                    "on-tertiary-container": "#fffaf9",
+                    "background": "#f9faf6",
+                    "tertiary-fixed": "#ffdadb",
+                    "inverse-on-surface": "#f0f1ed",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#69383d",
+                    "on-primary-fixed-variant": "#234f37"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                "20": "5rem",
+                "24": "6rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans", "sans-serif"],
+                    "display": ["Plus Jakarta Sans", "sans-serif"],
+                    "body": ["Inter", "sans-serif"],
+                    "label": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                "display-lg": ["3.5rem", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
+                "body-lg": ["1rem", { lineHeight: "1.6" }],
+                "label-sm": ["0.6875rem", { lineHeight: "1.2" }]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .text-balance {
+            text-wrap: balance;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-[#f9faf6]/80 dark:bg-[#1a1c1a]/80 backdrop-blur-[20px] transition-all duration-300">
+<div class="flex justify-between items-center px-12 h-24 max-w-[1920px] mx-auto">
+<!-- Brand Logo -->
+<a class="font-['Plus_Jakarta_Sans'] text-2xl font-black tracking-tighter text-[#1a1c1a] dark:text-[#f9faf6] hover:opacity-70 transition-opacity duration-300" href="#">
+                THE JOURNAL
+            </a>
+<!-- Desktop Navigation -->
+<div class="hidden md:flex items-center space-x-12">
+<a class="font-['Plus_Jakarta_Sans'] uppercase tracking-[0.2em] text-[11px] font-semibold text-[#414943] dark:text-[#c1c9c1] hover:text-[#1a1c1a] dark:hover:text-[#f9faf6] hover:opacity-70 transition-opacity duration-300" href="#">
+                    Destinations
+                </a>
+<a class="font-['Plus_Jakarta_Sans'] uppercase tracking-[0.2em] text-[11px] font-semibold text-[#38644a] dark:text-[#cee5da] border-b border-[#38644a] pb-1 scale-95 transition-transform hover:opacity-70" href="#">
+                    Stories
+                </a>
+<a class="font-['Plus_Jakarta_Sans'] uppercase tracking-[0.2em] text-[11px] font-semibold text-[#414943] dark:text-[#c1c9c1] hover:text-[#1a1c1a] dark:hover:text-[#f9faf6] hover:opacity-70 transition-opacity duration-300" href="#">
+                    Guides
+                </a>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center space-x-6">
+<button aria-label="Search" class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<a class="hidden md:inline-flex items-center justify-center bg-primary text-on-primary font-label text-sm font-medium px-6 py-3 rounded-full hover:bg-primary-container transition-colors duration-300" href="#">
+                    Subscribe
+                </a>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-20">
+<!-- Hero Section -->
+<section class="relative w-full h-[716px] min-h-[600px] mb-20 bg-surface-container-low overflow-hidden">
+<img alt="Modern Kyoto machiya" class="w-full h-full object-cover object-center" data-alt="expansive view of a minimalist modern kyoto machiya interior looking out into a serene moss garden, soft natural daylight, dark wood accents, sliding shoji screens" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRuQr9V1acsG1dEc5Q9cmO3EjhyGN8Z7OcrTc7hjGCi0jkvscmHhqcCPQdTuHnbYAIl-cD_Dwkm2MTuuacNL0eCdwUlRnPeS00GrA0l6wbI3wsTiZvIZPV7JA5ESUDtAP5I16POUfdZBmWKgtK9H8G2-Fv3eP94J-0s9TMBuQEJFnKD7e07OxOJSr7R1Cn2yyax8znYcGClWN9eufw-3C3O-t0aIkCxIasqotuyA_qyMy1D2XDMZjMtC09ULW2p8tUehLRXMqVluEv"/>
+<!-- Subtle gradient overlay for text readability if needed later, but keeping it clean for now -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+</section>
+<!-- Editorial Header -->
+<header class="max-w-4xl mx-auto px-6 md:px-12 mb-20 text-center relative z-10 -mt-32 md:-mt-48 bg-surface-container-lowest p-10 md:p-16 rounded-xl shadow-[0_20px_40px_-15px_rgba(26,28,26,0.06)]">
+<div class="mb-6 flex justify-center">
+<span class="inline-block bg-secondary-container text-on-secondary-container font-label text-xs uppercase tracking-widest px-4 py-2 rounded-full font-medium">
+                    LIFESTYLE
+                </span>
+</div>
+<h1 class="font-display text-display-lg text-on-surface mb-8 text-balance">
+                The Architectural Poetry of Kyoto’s New Wave
+            </h1>
+<div class="flex items-center justify-center space-x-4 font-label text-sm text-on-surface-variant">
+<span class="font-medium text-on-surface">By Elena Rostova</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>8 min read</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>October 12, 2024</span>
+</div>
+</header>
+<!-- Body Content -->
+<article class="max-w-3xl mx-auto px-6 md:px-0 font-body text-body-lg text-on-surface-variant space-y-12">
+<p class="text-xl leading-relaxed text-on-surface font-medium">
+                In the heart of Japan's ancient capital, a quiet revolution is taking place behind unassuming wooden facades. The traditional machiya—wooden townhouses that have defined Kyoto's streetscape for centuries—are being reimagined by a new generation of architects who understand that preserving history doesn't mean freezing it in amber.
+            </p>
+<p>
+                Walking down a narrow alleyway in the Higashiyama district, the scent of damp moss and aged cedar lingers in the air. From the outside, these structures remain dutifully respectful of their Edo-period origins. Their dark, slatted wooden screens (koushi) protect the privacy of the inhabitants while allowing dappled light to filter through. But step inside, and you are transported into spaces that are radically, breath-takingly contemporary.
+            </p>
+<!-- Inline Image Full Width (relative to article) -->
+<figure class="my-16">
+<img alt="Interior detail of modern machiya" class="w-full h-auto rounded-xl shadow-[0_20px_40px_-15px_rgba(26,28,26,0.06)]" data-alt="close up of minimalist interior details in a modern machiya, interplay of light and shadow on textured washi paper walls, warm oak wood flooring, subtle sage green accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBls2C-L5hEObg2-_cGKtAAQj412i7FCtkIgOVaXv_z1NK2G16oicKa0j6z21m_fHJ0yLGdnMh1Sab9Mmx5wbrByvKyD_0l8Qle18rZMgb9w98a0_YfzQ9cPI9QPoTrwNfAcYH1pWPou9o_5Tp4w6CGpd5tLXShNAqhtKIRY_M0MzjB4-HtlrZ9spcoisxmaFG7GnA7gmX09wCZrgZCCgRYUbREWbuG8jwhbFBbqzI1xIcKO1uB7FLKFa_-17up2uH53lJPdyt4yGIZ"/>
+<figcaption class="mt-4 font-label text-xs text-outline text-center">
+                    The interplay of light and shadow is central to the new machiya aesthetic.
+                </figcaption>
+</figure>
+<h2 class="font-display text-3xl font-bold text-on-surface mt-16 mb-6">The Modern Machiya</h2>
+<p>
+                This movement isn't about sterile minimalism. It's about 'culling'—stripping away the unnecessary to reveal the essential spirit of the structure. Architects are removing drop ceilings to expose massive, century-old roof beams, creating soaring vertical spaces that contrast sharply with the modest exteriors.
+            </p>
+<blockquote class="my-12 pl-6 border-l-2 border-primary-container italic text-xl text-primary font-serif leading-relaxed">
+                "We are not designing houses; we are designing vessels for shadows. The beauty of a machiya lies not in the light it captures, but in the darkness it holds."
+            </blockquote>
+<p>
+                Materials play a crucial role in this dialogue between old and new. Hand-troweled earthen walls (juraku-kabe) sit alongside expansive planes of structural glass. Traditional tatami mats are often restricted to a single, elevated tea room, while the main living areas feature heated floors of polished concrete or rich, dark-stained oak.
+            </p>
+<!-- Asymmetrical Image Grid -->
+<div class="my-16 grid grid-cols-1 md:grid-cols-12 gap-6">
+<div class="md:col-span-7">
+<img alt="Machiya courtyard garden" class="w-full h-full object-cover rounded-xl" data-alt="small intimate tsubo-niwa courtyard garden in a machiya, carefully placed stepping stones, lush green maple tree, rain chain, serene and meditative atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBF1cV9Ws3lkIPRwFlQ73Vaqju9gA83yj_lyfHXZApdY0an4Nuao6GzUF_OEc33Y2F7mT6LccfOWnMYeWgZqVZzQQSLdTf-S5K7d4F8WLM6UHybkiJJXLPCqteOpQr8y2G5SRViGFTHQmSq3Mbr-0e8I2UEMb_pxi8On4CPbfIH2_7Zm1Qq-HVyjTKNb2W_y5jgO5hpPwJ-xf2AUvB7gidhFvQGHhnoGUgenqroF0q1qw_syv6giJKspuwow4_mYVmRu7lBZsPsRAOC"/>
+</div>
+<div class="md:col-span-5 flex flex-col justify-center bg-surface-container-low p-8 rounded-xl">
+<h3 class="font-display text-xl font-bold text-on-surface mb-4">A Dialogue with Nature</h3>
+<p class="text-sm text-on-surface-variant">
+                        The tsubo-niwa, or pocket garden, remains the spiritual heart of the home. These tiny outdoor spaces are no longer just visual amenities; they are integrated into the living areas, separated only by retractable glass walls that dissolve the boundary between inside and out.
+                    </p>
+</div>
+</div>
+<h2 class="font-display text-3xl font-bold text-on-surface mt-16 mb-6">Curation of Space</h2>
+<p>
+                Ultimately, the new wave of Kyoto architecture is a masterclass in curation. It dictates a slower pace of life. When your home is built around a single, perfectly framed view of a Japanese maple changing colors through the seasons, you cannot help but pause. In an era defined by noise and clutter, these reborn machiyas offer something incredibly rare: architectural silence.
+            </p>
+</article>
+<!-- Divider -->
+<div class="max-w-3xl mx-auto my-20 border-t border-surface-variant/50"></div>
+<!-- Back to Journal Link -->
+<div class="max-w-3xl mx-auto px-6 md:px-0 mb-20 text-center">
+<a class="inline-flex items-center text-primary font-label text-sm font-medium hover:text-primary-container transition-colors group" href="#">
+<span class="material-symbols-outlined mr-2 transform group-hover:-translate-x-1 transition-transform" data-icon="arrow_back">arrow_back</span>
+                Back to Journal
+            </a>
+</div>
+<!-- Related Stories -->
+<section class="max-w-[1920px] mx-auto px-6 md:px-12 py-20 bg-surface-container-low rounded-t-3xl">
+<h3 class="font-display text-2xl font-bold text-on-surface mb-12 text-center">Continue Reading</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Story Card 1 -->
+<a class="group block bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(26,28,26,0.06)] transition-all duration-300" href="#">
+<div class="aspect-[4/3] overflow-hidden relative">
+<img alt="Tokyo minimalist cafe" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" data-alt="minimalist cafe interior in tokyo, concrete walls, warm wooden furniture, natural light pouring in from large windows, quiet morning atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6PBa25g4IGnTnhQksQnprLGt00mqSSBSUf5oLrXhR5g4PIMgNF5hpq-q0e8wnqS7_7w1y7aKfH-wnFVsQnvgzK0LHVvlykveGbUpfSJeWd1rb6v7FHsT6lj9V4u9__7RzT0gspyvXJSoPRDLzklcaFdkL2ysGkHkSBqTso-8-wOfO5cEcYyx3yE_j57K66BnpRJ3DTKU1jDh2gnyftSUD5sjjqCCsvviQmpC2B1VQG2-bk02zyq2chw2fXVsWW61k0ZOzrJyUu5HD"/>
+</div>
+<div class="p-8">
+<span class="text-[10px] font-label font-semibold text-primary uppercase tracking-widest block mb-3">Design</span>
+<h4 class="font-display text-lg font-bold text-on-surface mb-2">Concrete &amp; Canvas: Tokyo's Hidden Galleries</h4>
+<p class="text-sm text-on-surface-variant line-clamp-2">Exploring the brutalist spaces housing Japan's emerging contemporary artists.</p>
+</div>
+</a>
+<!-- Story Card 2 -->
+<a class="group block bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(26,28,26,0.06)] transition-all duration-300" href="#">
+<div class="aspect-[4/3] overflow-hidden relative">
+<img alt="Japanese tea ceremony" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" data-alt="close up of hands preparing matcha tea in a traditional chawan bowl, bamboo whisk, serene mood, soft side lighting emphasizing textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaJ_7cRSaRnFNHfj9qNmpWM0t98cyvRVWWhYwBFRfhes8n9ogEOfA01hzJ6URxH27MvQef27Dx-d1pDMdyQ13UsXtR86ZTqhKR73GzqzxFyoNFaX0QnWpGuOq_brKt6SPF4KiBWdTgI8hlb82S0QTfn-2xZMQn0ju9pfTUSPqpCUMYpVYKsdpH1_GP36O8644iGbseRBMWg2-dwvIRxL8nO8yhByspaMjp1syFMgVEYH1Z6U288jLOJ6J-Xu2ttXuRNTa7IZ6UxdLY"/>
+</div>
+<div class="p-8">
+<span class="text-[10px] font-label font-semibold text-primary uppercase tracking-widest block mb-3">Culture</span>
+<h4 class="font-display text-lg font-bold text-on-surface mb-2">The Silence of the Chashitsu</h4>
+<p class="text-sm text-on-surface-variant line-clamp-2">A modern interpretation of the traditional tea ceremony protocol.</p>
+</div>
+</a>
+<!-- Story Card 3 -->
+<a class="group block bg-surface-container-lowest rounded-xl overflow-hidden hover:shadow-[0_20px_40px_-15px_rgba(26,28,26,0.06)] transition-all duration-300" href="#">
+<div class="aspect-[4/3] overflow-hidden relative">
+<img alt="Modern ryokan" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" data-alt="exterior of a high-end modern ryokan in the mountains, glowing warmly at dusk, minimal architectural lines blending with natural forest surroundings" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7zHzYdF26we3kp55ckeQiXcd53Ey1UG4Idfoyk25-ryyX_imAmqZGkj-bXZOln5wBrv9_fzaW15LpftbPhBKU8W_Y2S6JC2HOlgd1aDws3bJ_KpwhJhb-CozyctlUJETFTgtTGm5ouGGfllJb0bD7406ZXreCScp3x4SDNpaYLtlB_yCe-l5bjsCkGnqp_WUn5ArVe2ZoNC2V1I4LKe_SMOSFgLNFBjj-32rSSDnd5P2GEQQJb2qmE9-V4luOCcqO3VmRMo8ikr4W"/>
+</div>
+<div class="p-8">
+<span class="text-[10px] font-label font-semibold text-primary uppercase tracking-widest block mb-3">Destinations</span>
+<h4 class="font-display text-lg font-bold text-on-surface mb-2">Redefining the Ryokan</h4>
+<p class="text-sm text-on-surface-variant line-clamp-2">Where barefoot luxury meets centuries-old hospitality traditions.</p>
+</div>
+</a>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="w-full rounded-t-none border-t-0 bg-[#f3f4f0] dark:bg-[#121412] mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center px-12 py-20 gap-12 max-w-[1920px] mx-auto">
+<!-- Brand & Copyright -->
+<div class="flex flex-col space-y-4">
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-lg text-[#1a1c1a] dark:text-[#f9faf6]">
+                    THE JOURNAL
+                </span>
+<span class="font-['Inter'] text-sm tracking-tight leading-relaxed text-[#414943] dark:text-[#c1c9c1]">
+                    © 2024 CURATOR TRAVEL. THE DIGITAL CURATOR COLLECTION.
+                </span>
+</div>
+<!-- Footer Links -->
+<div class="flex flex-wrap gap-x-8 gap-y-4">
+<a class="font-['Inter'] text-sm tracking-tight leading-relaxed text-[#414943] dark:text-[#c1c9c1] hover:text-[#38644a] dark:hover:text-[#507d62] transition-colors duration-200" href="#">
+                    Newsletter
+                </a>
+<a class="font-['Inter'] text-sm tracking-tight leading-relaxed text-[#414943] dark:text-[#c1c9c1] hover:text-[#38644a] dark:hover:text-[#507d62] transition-colors duration-200" href="#">
+                    Journal Archive
+                </a>
+<a class="font-['Inter'] text-sm tracking-tight leading-relaxed text-[#414943] dark:text-[#c1c9c1] hover:text-[#38644a] dark:hover:text-[#507d62] transition-colors duration-200" href="#">
+                    About
+                </a>
+<a class="font-['Inter'] text-sm tracking-tight leading-relaxed text-[#414943] dark:text-[#c1c9c1] hover:text-[#38644a] dark:hover:text-[#507d62] transition-colors duration-200" href="#">
+                    Privacy
+                </a>
+</div>
+</div>
+</footer>
+</body></html>

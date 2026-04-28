@@ -5,15 +5,14 @@ import {
   Heart,
   Mail,
   MapPin,
-  Navigation,
   Phone,
   Search,
   Send,
-  Sparkles,
   Star,
   Users,
 } from "lucide-react";
 
+import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { VisualDiaryCarousel } from "@/src/components/travel/VisualDiaryCarousel";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
@@ -31,7 +30,6 @@ import {
   blogPosts,
   destinationCards,
   heroImage,
-  navigationItems,
   suggestionCards,
   visualDiaryItems,
   type BlogPost,
@@ -45,10 +43,6 @@ interface SectionHeadingProps {
   readonly eyebrow: string;
   readonly subtitle?: string;
   readonly title: string;
-}
-
-interface NavBarProps {
-  readonly items: readonly string[];
 }
 
 interface HeroSectionProps {
@@ -97,38 +91,6 @@ function SectionHeading({ align = "left", eyebrow, subtitle, title }: Readonly<S
         <p className="mt-4 max-w-xl text-stone-600">{subtitle}</p>
       ) : null}
     </div>
-  );
-}
-
-function NavBar({ items }: Readonly<NavBarProps>) {
-  return (
-    <nav className="fixed top-0 z-50 w-full bg-white/80 shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-6 py-5 lg:px-8">
-        <a className="font-headline inline-flex items-center gap-2 text-2xl font-bold uppercase tracking-tighter text-stone-950" href="#">
-          <Navigation className="size-6 text-emerald-800" strokeWidth={2.4} />
-          CURATOR
-        </a>
-        <div className="hidden items-center space-x-8 md:flex">
-          {items.map((item) => (
-            <a
-              className={
-                item === "Home"
-                  ? "border-b-2 border-emerald-700 pb-1 text-sm font-medium tracking-tight text-emerald-700"
-                  : "text-sm font-medium tracking-tight text-stone-600 transition-colors hover:text-stone-950"
-              }
-              href="#"
-              key={item}
-            >
-              {item}
-            </a>
-          ))}
-        </div>
-        <Button className="shadow-emerald-950/10 active:scale-95">
-          <Sparkles className="size-4" />
-          Book Now
-        </Button>
-      </div>
-    </nav>
   );
 }
 
@@ -438,43 +400,17 @@ function ContactSection() {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="border-t border-stone-200 bg-stone-100">
-      <div className="mx-auto grid max-w-screen-2xl grid-cols-1 gap-12 px-8 py-16 md:grid-cols-4">
-        <div className="space-y-6">
-          <a className="inline-flex items-center gap-2 text-xl font-bold uppercase tracking-tighter text-stone-950" href="#">
-            <Navigation className="size-5 text-emerald-800" />
-            CURATOR
-          </a>
-          <p className="max-w-xs text-sm leading-relaxed text-stone-600">Elevating travel into an art form. We curate experiences that transcend the ordinary and define a new standard of global exploration.</p>
-        </div>
-        {['Quick Links', 'Contact Info', 'Monograph Monthly'].map((title) => (
-          <div key={title}>
-            <h4 className="mb-6 text-xs font-bold uppercase tracking-widest text-stone-950">{title}</h4>
-            <Sparkles className="mb-3 size-5 text-emerald-700" />
-            <p className="text-sm leading-relaxed text-stone-600">Receive curated travel inspiration, thoughtful guides, and exclusive member-only offers.</p>
-          </div>
-        ))}
-      </div>
-      <div className="mx-auto max-w-screen-2xl border-t border-stone-200 px-8 py-8 text-center">
-        <p className="text-sm text-stone-500">© 2024 CURATOR Digital Monograph. All rights reserved.</p>
-      </div>
-    </footer>
-  );
-}
-
 export default function TravelLandingPage() {
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
-      <NavBar items={navigationItems} />
+      <TravelHeader activeItem="Home" />
       <HeroSection image={heroImage} />
       <VisualDiarySection items={visualDiaryItems} />
       <DestinationSection destinations={destinationCards} />
       <SuggestionsSection suggestions={suggestionCards} />
       <BlogSection posts={blogPosts} />
       <ContactSection />
-      <Footer />
+      <TravelFooter />
     </main>
   );
 }

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#234f37",
+              "secondary-fixed-dim": "#b5ccc1",
+              "primary-fixed-dim": "#a1d2b2",
+              "on-tertiary-container": "#fffaf9",
+              "inverse-surface": "#2e312f",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#effff1",
+              "tertiary-fixed-dim": "#f9b5ba",
+              "surface-dim": "#d9dad6",
+              "on-background": "#1a1c1a",
+              "secondary": "#4e635a",
+              "error": "#ba1a1a",
+              "surface-tint": "#3b674e",
+              "on-tertiary-fixed": "#350e14",
+              "on-surface": "#1a1c1a",
+              "primary-fixed": "#bdeecd",
+              "surface-container": "#edeeea",
+              "background": "#f9faf6",
+              "surface-container-highest": "#e2e3df",
+              "on-surface-variant": "#414943",
+              "primary-container": "#507d62",
+              "outline-variant": "#c1c9c1",
+              "on-secondary-fixed-variant": "#374b43",
+              "surface-container-low": "#f3f4f0",
+              "error-container": "#ffdad6",
+              "outline": "#717972",
+              "surface-variant": "#e2e3df",
+              "secondary-fixed": "#d1e8dd",
+              "on-primary-fixed": "#002111",
+              "surface": "#f9faf6",
+              "on-tertiary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-error-container": "#93000a",
+              "secondary-container": "#cee5da",
+              "tertiary-container": "#9d6469",
+              "on-secondary-fixed": "#0b1f18",
+              "primary": "#38644a",
+              "tertiary": "#814c51",
+              "surface-container-high": "#e8e9e4",
+              "inverse-primary": "#a1d2b2",
+              "surface-bright": "#f9faf6",
+              "inverse-on-surface": "#f0f1ed",
+              "on-secondary-container": "#52675e",
+              "tertiary-fixed": "#ffdadb",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed-variant": "#69383d"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0 20px 40px -20px rgba(26, 28, 26, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- Header: Shared TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl shadow-sm shadow-emerald-900/5">
+<div class="flex justify-between items-center px-8 py-6 max-w-[1440px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-emerald-900 dark:text-emerald-100 font-headline">CURATOR</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm uppercase font-semibold text-zinc-500 dark:text-zinc-400 hover:text-emerald-700 transition-colors" href="#">Destinations</a>
+<a class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm uppercase font-semibold text-emerald-800 dark:text-emerald-400 border-b-2 border-emerald-800 dark:border-emerald-400 pb-1" href="#">Journeys</a>
+<a class="font-['Plus_Jakarta_Sans'] tracking-tight text-sm uppercase font-semibold text-zinc-500 dark:text-zinc-400 hover:text-emerald-700 transition-colors" href="#">About</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity">search</button>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-headline text-sm font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity duration-300">Book Now</button>
+</div>
+</div>
+</nav>
+<main class="pt-32">
+<!-- Page Header -->
+<section class="max-w-[1440px] mx-auto px-8 lg:px-24 mb-20">
+<div class="max-w-3xl">
+<span class="inline-block text-primary font-headline font-bold tracking-[0.2em] text-xs uppercase mb-4">Curated Collection</span>
+<h1 class="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter text-on-surface mb-8 leading-[1.1]">
+                    Tours &amp; Journeys
+                </h1>
+<p class="text-xl text-on-surface-variant font-light leading-relaxed">
+                    Explore our meticulously crafted itineraries designed for the discerning traveler. From the rugged peaks of the Andes to the quiet temples of Kyoto, every journey is a masterpiece of discovery.
+                </p>
+</div>
+</section>
+<!-- Filter Bar -->
+<section class="max-w-[1440px] mx-auto px-8 lg:px-24 mb-16">
+<div class="bg-surface-container-low p-2 rounded-2xl flex flex-wrap items-center gap-2 editorial-shadow">
+<div class="flex-1 min-w-[200px] relative group">
+<button class="w-full flex items-center justify-between px-6 py-4 bg-surface-container-lowest rounded-xl text-sm font-medium transition-all group-hover:bg-surface-bright">
+<span class="text-on-surface-variant">Destination</span>
+<span class="material-symbols-outlined text-primary-container">expand_more</span>
+</button>
+</div>
+<div class="flex-1 min-w-[200px]">
+<button class="w-full flex items-center justify-between px-6 py-4 bg-surface-container-lowest rounded-xl text-sm font-medium">
+<span class="text-on-surface-variant">Duration</span>
+<span class="material-symbols-outlined text-primary-container">expand_more</span>
+</button>
+</div>
+<div class="flex-1 min-w-[200px]">
+<button class="w-full flex items-center justify-between px-6 py-4 bg-primary-container text-on-primary-container rounded-xl text-sm font-medium">
+<span>Travel Style</span>
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<div class="flex-1 min-w-[200px]">
+<button class="w-full flex items-center justify-between px-6 py-4 bg-surface-container-lowest rounded-xl text-sm font-medium">
+<span class="text-on-surface-variant">Price Range</span>
+<span class="material-symbols-outlined text-primary-container">expand_more</span>
+</button>
+</div>
+<button class="p-4 bg-on-surface text-surface rounded-xl hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</section>
+<!-- Tours Grid -->
+<section class="max-w-[1440px] mx-auto px-8 lg:px-24 mb-24">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+<!-- Card 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-6">
+<img alt="Kyoto Temple" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="serene traditional japanese temple in kyoto surrounded by vibrant autumn maple leaves and soft morning mist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAh3hM7r7j1NqionS7BHcRlJzsFp1V-GSHIpS8gQ7Ya1nnAiw-GmjGETAI9cl6hetP0eqYDaKq3SSm6OP3maIQvohn2M7yiEwcRlWFHQHePA5kSu6ZLjekkfiAKdVeWw_9YnOiYvlCo7wYSTVb4deBDn4kZHqFUgovOn37CFLkhgOs1jOlo7g6VmaC2S9cbHNSLAKHinJGkjIJLRy6QcTrwPFtm-F2sEoWpjLTxptvP-bov11UwXCrJsYbnI6c_P_xAeYKeiYeIcdw"/>
+<div class="absolute top-4 left-4 bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Featured</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+<span>10 Days</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span>Max 8 Guests</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors">The Soul of Kyoto</h3>
+<p class="text-on-surface-variant line-clamp-2 text-sm leading-relaxed">Experience the quiet majesty of Gion, private tea ceremonies, and dawn meditations in hidden forest shrines.</p>
+<div class="pt-4 flex items-center justify-between border-t border-outline-variant/20">
+<span class="text-lg font-headline font-bold text-on-surface">From $4,200</span>
+<a class="text-primary font-headline text-xs font-bold uppercase tracking-widest flex items-center gap-2 group/link" href="#">
+                                View Details
+                                <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-6">
+<img alt="Amalfi Coast" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="colorful cliffside houses of positano overlooking the deep blue mediterranean sea during bright sunny afternoon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAinWNPrC4lqPJ3oN3u3G_2Pw-POkdlA4DHDyBFc-uIWVEIYa-Va8GjfSzJQSWGXRFx4k_dHsK1HhzeCBO098yUXc__V26CnSyzkraTZOO2S9hJUIsiaWTeIuxQIFW9IhYtVdK9JFeAhx9MWfjKR4Oa_s8SrkaFu_OfM3KnSCF8zG9gdT8IpzXWgqEjU8mV5GA3El9avCFzM2DHiUOUulxtESHJTsGpTBTdqi9snG0Om230fqlPlBhA_aOx7RZAPHlcCYsuL4r5rtDw"/>
+<div class="absolute top-4 left-4 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">New</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+<span>8 Days</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span>Max 12 Guests</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors">Amalfi Coast Discovery</h3>
+<p class="text-on-surface-variant line-clamp-2 text-sm leading-relaxed">Sailing the Tyrrhenian sea, lemon grove lunches, and private access to the villas of Ravello.</p>
+<div class="pt-4 flex items-center justify-between border-t border-outline-variant/20">
+<span class="text-lg font-headline font-bold text-on-surface">From $3,850</span>
+<a class="text-primary font-headline text-xs font-bold uppercase tracking-widest flex items-center gap-2 group/link" href="#">
+                                View Details
+                                <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-6">
+<img alt="Northern Lights" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="ethereal green aurora borealis dancing over a snowy arctic landscape with silhouette of pine trees and star-filled sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_oUN-pn7cDOIZrdDeQw2HLHcNQfbxMUVF5vI3RsQ3D6naYHz11VK1pXaQlPV8CvM3XA6xWlzZPtKMxRBIBRsmlgTLnO47CjxqZzAsc2N3QK69n9vSCrp31KfOw6HocT7B0UmuYeth9G3b7zvHSq7RHhsXyW3ochgIsdoIWxhlG3987x_eKgZqq240ZE4Lp1rUud2qzrsGfHSAOQJ2V7M5CLO2jhbgGTyCnJfcJwVgJBECNTt2gETkE0_OQG1iwtiqsDy1eXIaBB6N"/>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+<span>7 Days</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span>Max 6 Guests</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors">Arctic Sky Expedition</h3>
+<p class="text-on-surface-variant line-clamp-2 text-sm leading-relaxed">Chase the Northern Lights in luxury glass igloos with expert astronomers and local Nordic guides.</p>
+<div class="pt-4 flex items-center justify-between border-t border-outline-variant/20">
+<span class="text-lg font-headline font-bold text-on-surface">From $5,600</span>
+<a class="text-primary font-headline text-xs font-bold uppercase tracking-widest flex items-center gap-2 group/link" href="#">
+                                View Details
+                                <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-6">
+<img alt="Moroccan Market" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="atmospheric moroccan riad courtyard with intricate tilework, warm lantern light, and lush green plants in decorative pots" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeQ_kmK2F5wxmLTY05ai7NaxCtXI4lBIqpLJ2WeCCJL3z95N91zP0mDQde8Ej7Yrlz_07OJ_Vb37rXsr2dH3RXDsYwiKILqD9y0-a55bzhMW24I8KhN-_shWn0xaQb-SX0QV3-ckK0M6XcujdK3X7kb9fBkYJVSFcRw8RDriie4AoZ-ET2tK1vLJR7Xwq9WP3-fl_MxlaJXocwgW9YGHQnSM_fHWwTNpdujf2c9deWCJdT_ZTpXkjL7XVnu78braJkgvJHo1ChKJhG"/>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+<span>12 Days</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span>Max 10 Guests</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors">Colors of Marrakech</h3>
+<p class="text-on-surface-variant line-clamp-2 text-sm leading-relaxed">From the vibrant souks to the quiet of the Sahara, immerse yourself in the textures of Morocco.</p>
+<div class="pt-4 flex items-center justify-between border-t border-outline-variant/20">
+<span class="text-lg font-headline font-bold text-on-surface">From $3,200</span>
+<a class="text-primary font-headline text-xs font-bold uppercase tracking-widest flex items-center gap-2 group/link" href="#">
+                                View Details
+                                <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-6">
+<img alt="Greek Islands" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="luxury sailing yacht anchored in a turquoise mediterranean bay with white volcanic cliffs in the background under golden hour sun" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLY1AyZMOreX629e8pUe7p6gsbmfsf4dPC0E_5fAnyaWo3Rm8C5AxgcRTZZKHcxILKQ1IV9H4oDqyWJdObmWIlyYE0w0ZPWQKzor0b9RJ0kXNoFGOWx0WBPuf5JBd1As-yJJrHA-GVqAeSnz12NzxnU6C0a_BKZIc93ir5v3sDoZkinu7LScRmU5Ia2C1rCcxtond6DmerV_Yza2xQojaP8-FNetj_NX9GZ0w9mw10ivcEHLNaxtLk_LNBt8rk1j37-t52oqL0dpc2"/>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+<span>14 Days</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span>Private Charter</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors">Cyclades Silk Sails</h3>
+<p class="text-on-surface-variant line-clamp-2 text-sm leading-relaxed">A private nautical journey through the lesser-known islands of the Aegean on a heritage wood schooner.</p>
+<div class="pt-4 flex items-center justify-between border-t border-outline-variant/20">
+<span class="text-lg font-headline font-bold text-on-surface">From $8,900</span>
+<a class="text-primary font-headline text-xs font-bold uppercase tracking-widest flex items-center gap-2 group/link" href="#">
+                                View Details
+                                <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-6">
+<img alt="Venice Canal" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="classic venetian gondola floating on a quiet emerald canal between ancient sun-drenched stone palaces at dusk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdE24k_Cg3TOIdsrAGbqLmzx4G1JFs6m-Q8oTaOgEPQEuYQgyEf8tvrtEtR-bi2gcjM47OjxyOcZ_c5fYwFqxUqxqEha0lN1_26b9PoM-bI9Eq2RCe1dxAC2jF7cEZbAcjVOv1Jr2wiGzWkmnFoan596iuV60kqwXb-P2UwRk3elUGC07h7j84g9Q1tcz84bjhNvH4UISjNDmuQtHOAMoDZgjCpsaJ5Jbksgc61TK4vwkLZNQue6j1Bz-Kw8nRic_c3csexBzaCXLi"/>
+<div class="absolute top-4 left-4 bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Featured</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 text-[11px] font-bold tracking-widest uppercase text-on-surface-variant">
+<span>9 Days</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span>Max 6 Guests</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-on-surface group-hover:text-primary transition-colors">Venetian Renaissance</h3>
+<p class="text-on-surface-variant line-clamp-2 text-sm leading-relaxed">Exclusive after-hours tours of St. Mark's Basilica and private dinners in historic canal-side palazzos.</p>
+<div class="pt-4 flex items-center justify-between border-t border-outline-variant/20">
+<span class="text-lg font-headline font-bold text-on-surface">From $5,200</span>
+<a class="text-primary font-headline text-xs font-bold uppercase tracking-widest flex items-center gap-2 group/link" href="#">
+                                View Details
+                                <span class="material-symbols-outlined text-sm transition-transform group-hover/link:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-24 flex flex-col items-center gap-8">
+<button class="px-12 py-4 bg-surface border border-outline text-on-surface font-headline font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-on-surface hover:text-surface transition-all duration-300">
+                    Load More Journeys
+                </button>
+<div class="flex items-center gap-6">
+<button class="text-outline-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">west</span>
+</button>
+<div class="flex items-center gap-4 text-xs font-bold font-headline tracking-widest">
+<span class="text-on-surface">01</span>
+<span class="w-8 h-[1px] bg-outline-variant"></span>
+<span class="text-outline-variant">08</span>
+</div>
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined">east</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer: Shared Footer -->
+<footer class="w-full pt-24 pb-12 border-t border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50 dark:bg-zinc-900">
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-12 px-8 lg:px-24 max-w-[1440px] mx-auto">
+<div class="col-span-2">
+<div class="text-xl font-bold text-emerald-900 dark:text-emerald-100 mb-6 font-headline">CURATOR TRAVEL</div>
+<p class="font-['Inter'] text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-xs mb-8">
+                    Defining the future of luxury exploration through intentional design and authentic local connection.
+                </p>
+</div>
+<div>
+<h4 class="text-xs font-bold uppercase tracking-widest text-on-surface mb-6 font-headline">Explore</h4>
+<ul class="space-y-4">
+<li><a class="text-zinc-500 hover:text-emerald-600 transition-colors text-sm font-['Inter']" href="#">Journal</a></li>
+<li><a class="text-zinc-500 hover:text-emerald-600 transition-colors text-sm font-['Inter']" href="#">Sustainability</a></li>
+<li><a class="text-zinc-500 hover:text-emerald-600 transition-colors text-sm font-['Inter']" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-xs font-bold uppercase tracking-widest text-on-surface mb-6 font-headline">Legal</h4>
+<ul class="space-y-4">
+<li><a class="text-zinc-500 hover:text-emerald-600 transition-colors text-sm font-['Inter']" href="#">Privacy</a></li>
+<li><a class="text-zinc-500 hover:text-emerald-600 transition-colors text-sm font-['Inter']" href="#">Terms</a></li>
+</ul>
+</div>
+<div class="col-span-2">
+<h4 class="text-xs font-bold uppercase tracking-widest text-on-surface mb-6 font-headline">Newsletter</h4>
+<div class="flex gap-2">
+<input class="flex-1 bg-surface-container-lowest border-none rounded-xl text-sm p-4 focus:ring-1 focus:ring-primary" placeholder="Email address" type="email"/>
+<button class="bg-primary text-on-primary px-6 rounded-xl font-headline font-bold text-xs uppercase tracking-widest hover:opacity-90">Join</button>
+</div>
+</div>
+</div>
+<div class="max-w-[1440px] mx-auto px-8 lg:px-24 mt-20 pt-8 border-t border-zinc-200/50 dark:border-zinc-800/50">
+<p class="font-['Inter'] text-[10px] tracking-[0.2em] uppercase text-zinc-400">© 2024 CURATOR TRAVEL. THE DIGITAL CURATOR EXPERIENCE.</p>
+</div>
+</footer>
+</body></html>

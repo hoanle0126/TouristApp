@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CURATOR | High-End Travel Monograph</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "secondary-fixed": "#d1e8dd",
+                "outline": "#717972",
+                "on-error": "#ffffff",
+                "surface-container-low": "#f3f4f0",
+                "primary-container": "#507d62",
+                "on-surface-variant": "#414943",
+                "surface-dim": "#d9dad6",
+                "surface-tint": "#3b674e",
+                "on-primary-fixed": "#002111",
+                "on-primary": "#ffffff",
+                "surface-container": "#edeeea",
+                "on-primary-fixed-variant": "#234f37",
+                "on-secondary-fixed-variant": "#374b43",
+                "tertiary-fixed-dim": "#f9b5ba",
+                "surface-variant": "#e2e3df",
+                "on-error-container": "#93000a",
+                "secondary-fixed-dim": "#b5ccc1",
+                "surface": "#f9faf6",
+                "secondary": "#4e635a",
+                "on-surface": "#1a1c1a",
+                "on-tertiary-fixed-variant": "#69383d",
+                "tertiary-fixed": "#ffdadb",
+                "surface-bright": "#f9faf6",
+                "tertiary": "#814c51",
+                "surface-container-lowest": "#ffffff",
+                "on-secondary-fixed": "#0b1f18",
+                "on-background": "#1a1c1a",
+                "tertiary-container": "#9d6469",
+                "on-primary-container": "#effff1",
+                "error-container": "#ffdad6",
+                "error": "#ba1a1a",
+                "inverse-surface": "#2e312f",
+                "background": "#f9faf6",
+                "primary-fixed-dim": "#a1d2b2",
+                "primary": "#38644a",
+                "on-tertiary-container": "#fffaf9",
+                "on-tertiary": "#ffffff",
+                "secondary-container": "#cee5da",
+                "on-tertiary-fixed": "#350e14",
+                "primary-fixed": "#bdeecd",
+                "inverse-on-surface": "#f0f1ed",
+                "surface-container-highest": "#e2e3df",
+                "surface-container-high": "#e8e9e4",
+                "outline-variant": "#c1c9c1",
+                "inverse-primary": "#a1d2b2",
+                "on-secondary-container": "#52675e",
+                "on-secondary": "#ffffff"
+              },
+              fontFamily: {
+                "headline": ["Plus Jakarta Sans"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- Navbar Component -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-8 py-5 max-w-screen-2xl mx-auto">
+<a class="text-2xl font-bold tracking-tighter text-stone-900 dark:text-stone-50 font-headline uppercase" href="#">CURATOR</a>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-700 pb-1 font-headline font-medium tracking-tight text-sm" href="#">Home</a>
+<a class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors font-headline font-medium tracking-tight text-sm" href="#">Destinations</a>
+<a class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors font-headline font-medium tracking-tight text-sm" href="#">Tours</a>
+<a class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors font-headline font-medium tracking-tight text-sm" href="#">Hotels</a>
+<a class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors font-headline font-medium tracking-tight text-sm" href="#">Blog</a>
+<a class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors font-headline font-medium tracking-tight text-sm" href="#">Contact</a>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-headline font-semibold text-sm hover:opacity-90 active:scale-95 transition-all">
+                Book Now
+            </button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative h-[921px] flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img alt="Hero background" class="w-full h-full object-cover brightness-75 scale-105" data-alt="cinematic wide shot of misty mountains reflected in a still crystal lake at first light with soft atmospheric blues and greens" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCg0tkFvUSRvjjSmOt_subHDKhJnyXcL3rlIfQE3Jb5M_r5QYZLt7YYVGblQ7SEn7DyHzD4lbE6dP-rLtymSWNVTb0BpjBaHzyBqDsgcK-23bpxaciOe89sOtBNSKUn8lvUDT0keX8HCxGIi5aDbQ6b--KeiIEO92PDpg-4lohkr4kdYn1MW_cz2p-zxMbsbB2rGLdjzfEf0S4Oa_d2I-vbwJoUtJ380bcKXWIVhiBfVp113dBGZJGald2rtFVCwcGcFuIxB1KSxG94"/>
+</div>
+<div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
+<h1 class="text-display-lg text-5xl md:text-7xl font-headline font-extrabold text-white tracking-tighter mb-6 leading-tight">
+                Crafting Your <span class="text-primary-fixed">Personal Odyssey</span>
+</h1>
+<p class="text-xl md:text-2xl text-white/90 font-light tracking-wide mb-12 max-w-2xl mx-auto">
+                A digital monograph of the world's most curated destinations and exclusive experiences.
+            </p>
+<!-- Unified Search Bar -->
+<div class="bg-surface-container-lowest p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row gap-2 max-w-5xl mx-auto">
+<div class="flex-1 grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-outline-variant/30">
+<div class="px-6 py-4 text-left">
+<label class="block text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Destination</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface placeholder:text-outline/50 font-medium" placeholder="Where to?" type="text"/>
+</div>
+<div class="px-6 py-4 text-left">
+<label class="block text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Check-in</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface font-medium" type="date"/>
+</div>
+<div class="px-6 py-4 text-left">
+<label class="block text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Check-out</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface font-medium" type="date"/>
+</div>
+<div class="px-6 py-4 text-left">
+<label class="block text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Guests</label>
+<select class="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface font-medium">
+<option>1 Adult</option>
+<option selected="">2 Adults</option>
+<option>Family</option>
+</select>
+</div>
+</div>
+<button class="bg-primary text-on-primary md:px-10 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined">search</span>
+                    Search
+                </button>
+</div>
+</div>
+</section>
+<!-- Photo Carousel -->
+<section class="py-24 bg-surface overflow-hidden">
+<div class="px-8 max-w-screen-2xl mx-auto flex items-end justify-between mb-12">
+<div>
+<span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Visual Diary</span>
+<h2 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Moments Captured</h2>
+</div>
+<div class="flex gap-4">
+<button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">west</span>
+</button>
+<button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">east</span>
+</button>
+</div>
+</div>
+<div class="flex gap-8 px-8 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
+<div class="min-w-[400px] h-[500px] relative rounded-2xl overflow-hidden snap-start group">
+<img alt="Bali" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="luxurious infinity pool overlooking tropical jungle in bali at sunset with warm amber glows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXt_uOk39Ti37dURaaAO9Gv1kYVRVrW8XysehQZYZ-kt8ZIZ2bwtsNbCd8AQ10u4z3Ws-ygeCNJUv5Gop1UT63u6X8MxMOwsc3rhdMRY3tsgjeEe7qMzcd2149-FycyLeFDO7xpx9kcEWk2_fS8DKpX_9kDbN7JeuBgbv1G_I2vQxg6YBjFVxc2nyFZne7rAd3m-oBrS93hnfaOSPn5-SrDsWnmzW4Kbf9FhEm3BsIhBf9ZX3-3YD5FUAC77BSp5tPXQZqXBkT11Kv"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-8 left-8">
+<p class="text-white/70 text-sm font-bold tracking-widest uppercase mb-1">Indonesia</p>
+<h3 class="text-white text-3xl font-bold font-headline">Ubud Sanctuary</h3>
+</div>
+</div>
+<div class="min-w-[600px] h-[500px] relative rounded-2xl overflow-hidden snap-start group">
+<img alt="Greece" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="sunset over the caldera in santorini with white domed buildings and deep blue sea background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPOgbPq_XwQHxqcdV8CyyHHmuASmYTCmNh8iC7Qa31o9m88sCugttUqmVEJ9bS5RPzElQEn3SYK-jK_z3ZTIrVazznHG0pefnGU_WXvkW-iVA_-PFDRH_IKzie9_WL8XUqXMxcvGZ2MQlUIH04iFzpzi0-Dw9h8BagV-0zsnmNHMyzCNzFKofG6m8Jgt1H4eP9Kmlfbm3tlEv7MKPMhepN0PChYlQh5bYZy_lqG6VpCO0OfdJSwkDnmnv66dBHDhuW2r9OkGCMoo0l"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-8 left-8">
+<p class="text-white/70 text-sm font-bold tracking-widest uppercase mb-1">Greece</p>
+<h3 class="text-white text-3xl font-bold font-headline">Oia Heights</h3>
+</div>
+</div>
+<div class="min-w-[400px] h-[500px] relative rounded-2xl overflow-hidden snap-start group">
+<img alt="Japan" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="vibrant orange torii gates at fushimi inari shrine in kyoto japan with dappled sunlight through trees" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF4vsCxEPUT55N-RY2qaIvB_vfZFOivZwZ9iOvf16bFRt0ntzY8S9f8SN1Y69IGH9UEwQJJ4z-s409ytBeuTtHET1tRKmmZZ7purJkx80yYpcbQu-HMrFGCLFQrH9MmxYVPtwbNMaGNC0pX5pHQFf6Pf20qr-d6DU5b8mbJ09TwyrMdeGgJK7i0ug1bPf7MuX84yyLKpMlihdxXp-Rx3Wny5jGquG2LmnAUEA0Xk-SSmox9ULLpYVMrzC7tbttWUuf-vk8cdjTvwoC"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-8 left-8">
+<p class="text-white/70 text-sm font-bold tracking-widest uppercase mb-1">Japan</p>
+<h3 class="text-white text-3xl font-bold font-headline">Kyoto Tradition</h3>
+</div>
+</div>
+<div class="min-w-[500px] h-[500px] relative rounded-2xl overflow-hidden snap-start group">
+<img alt="Swiss" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="snow capped alpine mountains reflecting in a turquoise mountain lake with pine trees in the foreground" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmQGXS04u9LQQr8k62J4bbs5yRMtU1_3unbCZXTbhnDlAJZd6PTnWl9ObnEBg_XeHpk1EW78JTlcFrpgc03E6GF_GD30D8cTau7EFb48AKzznjX8M3MAwWIJrOGch91X09_JxAecQVTs0keSp11X99OraPR_Nmvc-aV-NT4PPebtaG5J9v2tIMaM5eCrLoVdStV6ZMQr2G8xdbmvLDtw1ByehwABdtCZGgp9ceBVrFy-U-3crNf73iAB6_pRpzvDuMxU397e3baeGv"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-8 left-8">
+<p class="text-white/70 text-sm font-bold tracking-widest uppercase mb-1">Switzerland</p>
+<h3 class="text-white text-3xl font-bold font-headline">Alpine Bliss</h3>
+</div>
+</div>
+</div>
+</section>
+<!-- Most Attractive Destinations -->
+<section class="py-24 bg-surface-container-low">
+<div class="px-8 max-w-screen-2xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface mb-6">The Most Attractive Destinations</h2>
+<div class="flex justify-center gap-2 p-1 bg-surface w-fit mx-auto rounded-full border border-outline-variant/30 shadow-sm">
+<button class="px-8 py-3 rounded-full bg-primary text-on-primary font-bold text-sm transition-all">Northern</button>
+<button class="px-8 py-3 rounded-full text-on-surface-variant font-bold text-sm hover:bg-surface-container transition-all">Central</button>
+<button class="px-8 py-3 rounded-full text-on-surface-variant font-bold text-sm hover:bg-surface-container transition-all">Southern</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500 border border-outline-variant/10">
+<div class="h-80 overflow-hidden relative">
+<img alt="Norway" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="stunning aerial view of rugged norwegian fjords with deep blue water and dramatic mountain peaks" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCg4Pc4Hz2ckphmn1PXS-ra4wYOkUqi7PMGWKx61d5rMwLWxEwWY9yD9IAF7y6ED_dd3XsvuYHLJpjONv34C5d-NT7TZNwMJ3GE2UEGHGQosEdJI1MXtNKDRueIJXq0fSBHje9meDPhmJuiXmHKGqBBLuE93xjrlgt64-QMJgo8xyI1ZlOPUNmSQ95M1p-VknE5zyYismU3NeJlov_lokR9yBG_xV_ioAQIrI3-iCN6Zs7bY0PzXTqJb2qkYxvPYK24z3G9ZP2hIvls"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold text-on-surface">4.9</span>
+</div>
+</div>
+<div class="p-8">
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-2">Lofoten Islands</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Experience the dramatic landscape of mountains, deep fjords, and squawking seabird colonies.</p>
+<div class="flex items-center justify-between pt-6 border-t border-outline-variant/20">
+<span class="text-primary font-bold text-lg">$1,299 <span class="text-xs text-on-surface-variant font-normal">/ person</span></span>
+<button class="text-primary font-bold text-sm hover:underline underline-offset-4">Explore More</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500 border border-outline-variant/10">
+<div class="h-80 overflow-hidden relative">
+<img alt="London" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="the iconic big ben and westminster bridge in london at dusk with warm city lights reflecting on the thames" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIBL4yRfAkIWlPfBg6EEXIpLsxANGUc4HpdqvjcNLWLR0lbcucB_In7Pae-G1W_plTCRD_6zPSFdgBo5pyaSvUqSkvbeJ3g8zcr_OdCdwHnL7fVZOkJ3Gmu4KisipjrzsOfWFy8oUkLpAYP9TA7AxZrfRVQVasOVWebBj5tS3v2iW24WaImU46qVZPgKWuBOzvOkPUYdMdEwGWodlbYLlSKUBynxUkh4nMkwc5A1eTBOHm7nme0BufNc858zAwcmU5kw0sEEJohfGq"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold text-on-surface">4.7</span>
+</div>
+</div>
+<div class="p-8">
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-2">London Essence</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Discover the perfect blend of historic architecture and cutting-edge modern culture.</p>
+<div class="flex items-center justify-between pt-6 border-t border-outline-variant/20">
+<span class="text-primary font-bold text-lg">$850 <span class="text-xs text-on-surface-variant font-normal">/ person</span></span>
+<button class="text-primary font-bold text-sm hover:underline underline-offset-4">Explore More</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500 border border-outline-variant/10">
+<div class="h-80 overflow-hidden relative">
+<img alt="Germany" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="charming half-timbered houses in a medieval german town with cobblestone streets and flower boxes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiPv71cX-SLFEC50j5ADgesaGwtxXoy8-nT-4_OE9DE3MyblA4EmKN-pbYDYqd_zAlunErJEyN7zjXebxA8PdMGtsJeJMYwJaG-TwPKOUprlw7k4n5F6Y7P2mV2eisvlduz5KufDqUoQrUdB-QBXWkkJqFqYT-770OyBNIL4Ow2iRHEG2p7Kaxv78AkbJ2UwynnS1fcSIPcWFb4Fe7gTRF0UBPlvETC_US-Jyt_AR5HEnvAK7DYhRnXtnPuoKlxKaLakZnYYAUgrIP"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold text-on-surface">4.8</span>
+</div>
+</div>
+<div class="p-8">
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-2">Bavarian Trails</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Wander through fairy-tale villages and explore the majestic castles of the Black Forest.</p>
+<div class="flex items-center justify-between pt-6 border-t border-outline-variant/20">
+<span class="text-primary font-bold text-lg">$1,100 <span class="text-xs text-on-surface-variant font-normal">/ person</span></span>
+<button class="text-primary font-bold text-sm hover:underline underline-offset-4">Explore More</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Suggestions For You -->
+<section class="py-24 bg-surface">
+<div class="px-8 max-w-screen-2xl mx-auto">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
+<div>
+<h2 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface mb-4">Suggestions For You</h2>
+<p class="text-on-surface-variant max-w-lg">Bespoke selections tailored to your aesthetic preferences and travel philosophy.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="px-5 py-2 rounded-full bg-secondary-container text-on-secondary-container font-bold text-xs uppercase tracking-widest">All</button>
+<button class="px-5 py-2 rounded-full border border-outline-variant/30 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:bg-surface-container transition-all">Tours</button>
+<button class="px-5 py-2 rounded-full border border-outline-variant/30 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:bg-surface-container transition-all">Hotels</button>
+<button class="px-5 py-2 rounded-full border border-outline-variant/30 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:bg-surface-container transition-all">Villas</button>
+<button class="px-5 py-2 rounded-full border border-outline-variant/30 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:bg-surface-container transition-all">Activities</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Product Card 1 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] rounded-2xl overflow-hidden mb-4 relative">
+<img alt="Villa" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="minimalist modern villa with clean white lines and a sleek infinity pool overlooking a vineyard" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkw-TrvS0JWahNeSAf6KTALx0u6Rrbegt31EcXVvHFPieRtl6V4vkxzCrPVPfr-uJdef8bDhsPQAAsmrOKPN9nEp--h-3RKSZMaaeTWeFJzHXxc4DPvu-TlMqNBuiRiokaMn9oaDpjZZzrHR6WPPDcbtqdvXYHqBg-F3i1A7EDk3LIaTBVWdOZbuJBOzyVc0R1lTwiIAbcshvds1h4fCvFvUkca_rU4umBUWHDPVZE5EiQiAmBGQ5ugcAhWYgdja275XacPDgfxQwp"/>
+<button class="absolute top-4 left-4 bg-white/30 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/50 transition-all">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">The Glass House Villa</h4>
+<p class="text-sm text-on-surface-variant">Tuscany, Italy</p>
+</div>
+<p class="font-bold text-primary">$450/nt</p>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] rounded-2xl overflow-hidden mb-4 relative">
+<img alt="Hotel" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="luxury eco-resort nestled in a dense tropical forest with thatched roofs and natural stone pathways" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJobfkEYOAXGvJu_F0oRnLZJYZqLgRyDtVQraRwbpXsYOD5-tqPyPvIJk2mWwD4xlXvXdkoo8is-cGJwMsh3yrolNyZzeaHMbCUG5xWbTgcoYDvJTWZef4SCZ7UsrIKqYOtIlpZmYrrkNUhs4cfvCMOL7A-8oS_1VVJFuK_oY0FEo2E1p-1BvGOxF_j6DVYSRIMefSEWYhAjNOm0xvaarbJVsFa1-IzSBLv6VCSX5FYjc3xVWr-ciGCsNDiyU1_brubeMTUevO81il"/>
+<button class="absolute top-4 left-4 bg-white/30 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/50 transition-all">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">Azure Bay Resort</h4>
+<p class="text-sm text-on-surface-variant">Maldives</p>
+</div>
+<p class="font-bold text-primary">$890/nt</p>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] rounded-2xl overflow-hidden mb-4 relative">
+<img alt="Rentals" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="close-up of a high-end luxury yacht sailing through turquoise mediterranean waters under bright sun" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLmxLbLp9No_ehZTLqY_5nrYVKNIbcsUFHvN1FUo4YsJpn4BuuGJVhtps750yfqY0ciORlKhhjKeysB7j1foXXHbxTcx_PeW_5m9u1ySIFMK6p2ojBfOuA_MafNjfnBvrxt6EnTjL2Ye8cvhRyGcR2A63G11F2mFesiN8VJBVmtoJBbO6frIhbmgoYzVauyaM_E2Ao0ddeJNjoHKJo_dp0Jz9bLx-MQ6v4Fq5IkxCZytnAhLyEpl6qbVWn4PDbqzyWrKsz-Vd9c_wB"/>
+<button class="absolute top-4 left-4 bg-white/30 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/50 transition-all">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">Private Yacht Charter</h4>
+<p class="text-sm text-on-surface-variant">Monaco</p>
+</div>
+<p class="font-bold text-primary">$2,500/day</p>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] rounded-2xl overflow-hidden mb-4 relative">
+<img alt="Activities" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="an adventurer sitting by a crackling campfire in a vast desert landscape under a starry night sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn4NNneXeR47MVW6PYI_VVfrTIRc_zR52zyEoO7o-N5KG1K-1-dADaAwpuQepsbr31DuwHTETK-I_sComrcw3U-HPGSaH1_waCYeKnBD9YzvVH3uqI0WjXh4jDAWGGWnxysrpJvdgg96a3B7QggLy9-MvRJMIRvy1BFXseWdOHm_e-w5lptHzoL_wqECmJiAfew5JU4IXbUSeTg5bdzg4ikqDTxU3CxDuwlm0d1Iom-PqGJDcEOhmIkpJoFGUrTnzUR8qPSf4nnPHX"/>
+<button class="absolute top-4 left-4 bg-white/30 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/50 transition-all">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline font-bold text-on-surface">Desert Stargazing</h4>
+<p class="text-sm text-on-surface-variant">Wadi Rum, Jordan</p>
+</div>
+<p class="font-bold text-primary">$120/xp</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stories, Tips & Guides -->
+<section class="py-24 bg-surface-container-low">
+<div class="px-8 max-w-screen-2xl mx-auto">
+<div class="text-center mb-16">
+<span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Editorial</span>
+<h2 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Stories, Tips &amp; Guides</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- Blog 1 -->
+<article class="flex flex-col">
+<div class="rounded-2xl overflow-hidden mb-6 aspect-[16/10]">
+<img alt="Blog Post" class="w-full h-full object-cover" data-alt="aesthetic travel journal and vintage camera lying on a rustic wooden table next to a cup of espresso" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtt0oAPt9XMzwKJnSHhK7PcgWbJfRDVqVk6mjPhH2rCG8YpEX5SxQZC2R2T9bT-9mHvJWNQyynnK1QHcLJte8qLPLK2KbdMzQ11gzUG4IMy6eq0KGl_CbjVXUL6X3W7Vts1TseBCB6Co3h4Nf0pcKM0FNJX4RO6JOxQVCkqjunkrHRZCEwn44IYcIgtSk0KLeM8AJZEINdMWVxoRfVwTR_4XlnUvI7uoHZp5IJlMR7mR9byLrRP4_uZhkpYNZnW1JIqzgeg1M1MdlM"/>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-3">Slow Travel</span>
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-4 leading-snug">The Art of Getting Lost in Tokyo</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">A deep dive into the quiet neighborhoods that define the soul of the world's most vibrant metropolis.</p>
+<a class="inline-flex items-center gap-2 text-primary font-bold text-sm group" href="#">
+                        Read More
+                        <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">east</span>
+</a>
+</article>
+<!-- Blog 2 -->
+<article class="flex flex-col">
+<div class="rounded-2xl overflow-hidden mb-6 aspect-[16/10]">
+<img alt="Blog Post" class="w-full h-full object-cover" data-alt="breathtaking landscape of the italian dolomites at sunrise with golden light hitting the jagged peaks" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeDwT8WT54Ej4puGch3RH38le1A7QZqNXe2UEHzVendx3EpQxBDW1q35Qepftc_SXwGdx9hT-jPNNBZMpyr_LFwCnb1g2AJckK7bsd1esGEU3RDpDJEycIL3dJsDW4iFvDeZomGQ9OBkG5Wnifbax-UnHnkgfea7lXl_C0tCIuX6ZQxwb0CpiRCBDfpxRPw8XcJBe1WG8pr0jplWz1bNOKgkIODiro7FbuZxyGK-SfY3E6ENOb2OzVUYtuXoXY1Gk55OrvTEpw9NPQ"/>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-3">Adventure</span>
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-4 leading-snug">Dolomites: A Vertical Symphony</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">Why the Italian Alps remain the ultimate sanctuary for those seeking silence and scale.</p>
+<a class="inline-flex items-center gap-2 text-primary font-bold text-sm group" href="#">
+                        Read More
+                        <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">east</span>
+</a>
+</article>
+<!-- Blog 3 -->
+<article class="flex flex-col">
+<div class="rounded-2xl overflow-hidden mb-6 aspect-[16/10]">
+<img alt="Blog Post" class="w-full h-full object-cover" data-alt="aerial view of parisian streets with classic haussmann architecture and the eiffel tower in the distance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOG1GqkAafE8BPlrfHvv_BNKHOGgQCF45XIqo08tfmbX3XEv43HnGBVNOYzbHin8voUJMmbAzNAVSXB5Yyw0QJ9ooQBR28QnH-l6PpoNCCVnP1E4wG4a6OhBUhiF9UaEdON6PZpFXxOsM5vno4-_VkJ5mimmWf6QLtRaYMK210umzVOVXyu1P6k1m5uG8sZHuRqc_7FZlmMv1eOp7YjlRA-miXbRIXJAGmxWub8X3OJy-8_JX0cvDXdlZavvHfwXj1RokPilnI5IkG"/>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-3">Lifestyle</span>
+<h3 class="text-2xl font-headline font-bold text-on-surface mb-4 leading-snug">The Best Parisian Bistros of 2024</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6 flex-grow">Our curated list of the hidden culinary gems where locals go to escape the tourist crowds.</p>
+<a class="inline-flex items-center gap-2 text-primary font-bold text-sm group" href="#">
+                        Read More
+                        <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">east</span>
+</a>
+</article>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section class="py-32 bg-surface">
+<div class="px-8 max-w-screen-2xl mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-24">
+<div>
+<h2 class="text-5xl font-headline font-extrabold tracking-tighter text-on-surface mb-8">Let's Design Your Journey</h2>
+<p class="text-xl text-on-surface-variant font-light mb-12">Have a specific vision for your next escape? Our curators are ready to bring it to life with unparalleled detail.</p>
+<div class="space-y-8">
+<div class="flex gap-6 items-start">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary">location_on</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Global Headquaters</h4>
+<p class="text-on-surface-variant">124 Curated Way, London, UK</p>
+</div>
+</div>
+<div class="flex gap-6 items-start">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary">call</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Direct Line</h4>
+<p class="text-on-surface-variant">+44 20 7946 0123</p>
+</div>
+</div>
+<div class="flex gap-6 items-start">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary">mail</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">General Inquiries</h4>
+<p class="text-on-surface-variant">hello@curator.travel</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-12 rounded-3xl">
+<form class="space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">First Name</label>
+<input class="w-full bg-surface border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all text-sm" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Last Name</label>
+<input class="w-full bg-surface border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all text-sm" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Email Address</label>
+<input class="w-full bg-surface border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all text-sm" type="email"/>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Desired Destination</label>
+<select class="w-full bg-surface border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all text-sm appearance-none">
+<option>Europe</option>
+<option>Asia</option>
+<option>The Americas</option>
+<option>Oceania</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Message</label>
+<textarea class="w-full bg-surface border-none rounded-xl p-4 focus:ring-2 focus:ring-primary transition-all text-sm" rows="4"></textarea>
+</div>
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-bold hover:opacity-90 transition-all" type="submit">Send Inquiry</button>
+</form>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer Component -->
+<footer class="w-full border-t border-stone-200/50 dark:border-stone-800/50 bg-stone-50 dark:bg-stone-950">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 px-8 py-16 max-w-screen-2xl mx-auto">
+<div class="space-y-6">
+<a class="text-xl font-bold tracking-tighter text-stone-900 dark:text-stone-50 font-headline uppercase" href="#">CURATOR</a>
+<p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed max-w-xs">Elevating travel into an art form. We curate experiences that transcend the ordinary and define a new standard of global exploration.</p>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-lg">public</span>
+</a>
+<a class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-lg">photo_camera</span>
+</a>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-6 uppercase tracking-widest text-xs">Quick Links</h4>
+<ul class="space-y-4">
+<li><a class="text-stone-500 dark:text-stone-400 hover:text-emerald-600 transition-colors font-['Inter'] text-sm leading-relaxed hover:underline decoration-emerald-500/30 underline-offset-4" href="#">About Us</a></li>
+<li><a class="text-stone-500 dark:text-stone-400 hover:text-emerald-600 transition-colors font-['Inter'] text-sm leading-relaxed hover:underline decoration-emerald-500/30 underline-offset-4" href="#">Sustainability</a></li>
+<li><a class="text-stone-500 dark:text-stone-400 hover:text-emerald-600 transition-colors font-['Inter'] text-sm leading-relaxed hover:underline decoration-emerald-500/30 underline-offset-4" href="#">Privacy Policy</a></li>
+<li><a class="text-stone-500 dark:text-stone-400 hover:text-emerald-600 transition-colors font-['Inter'] text-sm leading-relaxed hover:underline decoration-emerald-500/30 underline-offset-4" href="#">Terms of Service</a></li>
+<li><a class="text-stone-500 dark:text-stone-400 hover:text-emerald-600 transition-colors font-['Inter'] text-sm leading-relaxed hover:underline decoration-emerald-500/30 underline-offset-4" href="#">Press Kit</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-6 uppercase tracking-widest text-xs">Contact Info</h4>
+<ul class="space-y-4">
+<li class="flex items-center gap-3 text-stone-500 dark:text-stone-400 text-sm">
+<span class="material-symbols-outlined text-primary text-base">location_on</span>
+                        London HQ, UK
+                    </li>
+<li class="flex items-center gap-3 text-stone-500 dark:text-stone-400 text-sm">
+<span class="material-symbols-outlined text-primary text-base">call</span>
+                        +44 20 7946 0123
+                    </li>
+<li class="flex items-center gap-3 text-stone-500 dark:text-stone-400 text-sm">
+<span class="material-symbols-outlined text-primary text-base">mail</span>
+                        hello@curator.travel
+                    </li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-6 uppercase tracking-widest text-xs">Monograph Monthly</h4>
+<p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed mb-6">Receive curated travel inspiration and exclusive member-only offers.</p>
+<div class="flex flex-col gap-3">
+<input class="w-full bg-surface-container border-none rounded-xl p-4 text-sm focus:ring-2 focus:ring-primary" placeholder="Your email address" type="email"/>
+<button class="bg-primary text-on-primary py-3 rounded-xl font-bold text-sm">Subscribe</button>
+</div>
+</div>
+</div>
+<div class="max-w-screen-2xl mx-auto px-8 py-8 border-t border-stone-200/50 dark:border-stone-800/50 text-center">
+<p class="text-stone-500 dark:text-stone-400 text-sm">© 2024 CURATOR Digital Monograph. All rights reserved.</p>
+</div>
+</footer>
+</body></html>

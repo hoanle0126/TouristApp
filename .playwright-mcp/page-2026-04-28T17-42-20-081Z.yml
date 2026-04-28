@@ -1,0 +1,293 @@
+- generic:
+  - main:
+    - navigation:
+      - generic:
+        - link:
+          - /url: "#"
+          - text: CURATOR
+        - generic:
+          - link:
+            - /url: "#"
+            - text: Home
+          - link:
+            - /url: "#"
+            - text: Destinations
+          - link:
+            - /url: "#"
+            - text: Tours
+          - link:
+            - /url: "#"
+            - text: Hotels
+          - link:
+            - /url: "#"
+            - text: Blog
+          - link:
+            - /url: "#"
+            - text: Contact
+        - button: Book Now
+    - generic:
+      - img
+      - generic:
+        - heading [level=1]: Crafting Your Personal Odyssey
+        - paragraph: A digital monograph of the world's most curated destinations and exclusive experiences.
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: Destination
+                - textbox:
+                  - /placeholder: Where to?
+              - generic:
+                - generic: Check-in
+                - textbox
+              - generic:
+                - generic: Check-out
+                - textbox
+              - generic:
+                - generic: Guests
+                - combobox:
+                  - generic: 2 Adults
+                  - img
+            - button:
+              - img
+              - text: Search
+    - generic:
+      - generic:
+        - generic:
+          - generic: Visual Diary
+          - heading [level=2]: Moments Captured
+        - generic:
+          - button: ←
+          - button: →
+      - generic:
+        - article:
+          - img
+          - generic:
+            - paragraph: Indonesia
+            - heading [level=3]: Ubud Sanctuary
+        - article:
+          - img
+          - generic:
+            - paragraph: Greece
+            - heading [level=3]: Oia Heights
+        - article:
+          - img
+          - generic:
+            - paragraph: Japan
+            - heading [level=3]: Kyoto Rituals
+        - article:
+          - img
+          - generic:
+            - paragraph: Switzerland
+            - heading [level=3]: Alpine Silence
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Featured Escapes
+            - heading [level=2]: Curated Destinations
+            - paragraph: Selected journeys that balance thoughtful pace, cinematic landscapes, and high-touch hospitality.
+          - button: View all
+        - generic:
+          - article:
+            - generic:
+              - img
+              - generic:
+                - generic: ★
+                - generic: "4.9"
+            - generic:
+              - heading [level=3]: Nordic Fjords
+              - paragraph: Sail through cinematic cliffs and quiet coastal villages shaped by ancient glacial landscapes.
+              - generic:
+                - generic: $1,200 / person
+                - button: Explore More
+          - article:
+            - generic:
+              - img
+              - generic:
+                - generic: ★
+                - generic: "4.7"
+            - generic:
+              - heading [level=3]: London Essence
+              - paragraph: Discover the perfect blend of historic architecture and cutting-edge modern culture.
+              - generic:
+                - generic: $850 / person
+                - button: Explore More
+          - article:
+            - generic:
+              - img
+              - generic:
+                - generic: ★
+                - generic: "4.8"
+            - generic:
+              - heading [level=3]: Bavarian Trails
+              - paragraph: Wander through fairy-tale villages and explore the majestic castles of the Black Forest.
+              - generic:
+                - generic: $1,100 / person
+                - button: Explore More
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Private Collection
+            - heading [level=2]: Suggestions For You
+            - paragraph: Bespoke selections tailored to your aesthetic preferences and travel philosophy.
+          - generic:
+            - button: All
+            - button: Tours
+            - button: Hotels
+            - button: Villas
+            - button: Activities
+        - generic:
+          - article:
+            - generic:
+              - img
+              - button: ♡
+            - generic:
+              - generic:
+                - heading [level=4]: The Glass House Villa
+                - paragraph: Tuscany, Italy
+              - paragraph: $450/nt
+          - article:
+            - generic:
+              - img
+              - button: ♡
+            - generic:
+              - generic:
+                - heading [level=4]: Azure Bay Resort
+                - paragraph: Maldives
+              - paragraph: $890/nt
+          - article:
+            - generic:
+              - img
+              - button: ♡
+            - generic:
+              - generic:
+                - heading [level=4]: Private Yacht Charter
+                - paragraph: Monaco
+              - paragraph: $2,500/day
+          - article:
+            - generic:
+              - img
+              - button: ♡
+            - generic:
+              - generic:
+                - heading [level=4]: Desert Stargazing
+                - paragraph: Wadi Rum, Jordan
+              - paragraph: $120/xp
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Editorial
+            - heading [level=2]: Stories, Tips & Guides
+        - generic:
+          - article:
+            - generic:
+              - img
+            - generic: Slow Travel
+            - heading [level=3]: The Art of Getting Lost in Tokyo
+            - paragraph: A deep dive into the quiet neighborhoods that define the soul of the world's most vibrant metropolis.
+            - link:
+              - /url: "#"
+              - text: Read More
+              - generic: →
+          - article:
+            - generic:
+              - img
+            - generic: Adventure
+            - heading [level=3]: "Dolomites: A Vertical Symphony"
+            - paragraph: Why the Italian Alps remain the ultimate sanctuary for those seeking silence and scale.
+            - link:
+              - /url: "#"
+              - text: Read More
+              - generic: →
+          - article:
+            - generic:
+              - img
+            - generic: Lifestyle
+            - heading [level=3]: The Best Parisian Bistros of 2024
+            - paragraph: Our curated list of hidden culinary gems where locals go to escape the tourist crowds.
+            - link:
+              - /url: "#"
+              - text: Read More
+              - generic: →
+    - generic:
+      - generic:
+        - generic:
+          - heading [level=2]: Let's Design Your Journey
+          - paragraph: Have a specific vision for your next escape? Our curators are ready to bring it to life with unparalleled detail.
+          - generic:
+            - generic:
+              - generic: •
+              - generic:
+                - heading [level=4]: Global Headquarters
+                - paragraph: 124 Curated Way, London, UK
+            - generic:
+              - generic: •
+              - generic:
+                - heading [level=4]: Direct Line
+                - paragraph: +44 20 7946 0123
+            - generic:
+              - generic: •
+              - generic:
+                - heading [level=4]: General Inquiries
+                - paragraph: hello@curator.travel
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic: First Name
+                  - textbox:
+                    - /placeholder: First Name
+                - generic:
+                  - generic: Last Name
+                  - textbox:
+                    - /placeholder: Last Name
+              - generic:
+                - generic: Email Address
+                - textbox:
+                  - /placeholder: Email Address
+              - generic:
+                - generic: Desired Destination
+                - combobox [expanded]:
+                  - generic: Europe
+                  - img
+                - combobox
+              - generic:
+                - generic: Message
+                - textbox:
+                  - /placeholder: Message
+              - button: Send Inquiry
+    - generic:
+      - generic:
+        - generic:
+          - link:
+            - /url: "#"
+            - text: CURATOR
+          - paragraph: Elevating travel into an art form. We curate experiences that transcend the ordinary and define a new standard of global exploration.
+        - generic:
+          - heading [level=4]: Quick Links
+          - paragraph: Receive curated travel inspiration, thoughtful guides, and exclusive member-only offers.
+        - generic:
+          - heading [level=4]: Contact Info
+          - paragraph: Receive curated travel inspiration, thoughtful guides, and exclusive member-only offers.
+        - generic:
+          - heading [level=4]: Monograph Monthly
+          - paragraph: Receive curated travel inspiration, thoughtful guides, and exclusive member-only offers.
+      - generic:
+        - paragraph: © 2024 CURATOR Digital Monograph. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e263] [cursor=pointer]:
+    - img [ref=e264]
+  - alert
+  - listbox [ref=e268]:
+    - option "Europe" [active] [selected] [ref=e269]:
+      - img [ref=e272]
+      - generic [ref=e274]: Europe
+    - option "Asia" [ref=e275]:
+      - generic [ref=e277]: Asia
+    - option "The Americas" [ref=e278]:
+      - generic [ref=e280]: The Americas
+    - option "Oceania" [ref=e281]:
+      - generic [ref=e283]: Oceania

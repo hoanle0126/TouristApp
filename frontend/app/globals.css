@@ -21,6 +21,12 @@ body {
   color: var(--foreground);
 }
 
+@layer base {
+  button {
+    cursor: pointer;
+  }
+}
+
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }

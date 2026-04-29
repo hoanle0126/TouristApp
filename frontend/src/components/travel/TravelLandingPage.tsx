@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
@@ -113,7 +114,7 @@ function HeroSection({ image }: Readonly<HeroSectionProps>) {
           A digital monograph of the world&apos;s most curated destinations and exclusive experiences.
         </p>
         <Card className="mx-auto max-w-5xl rounded-3xl border-white/60 bg-white/95 p-2 shadow-2xl shadow-black/25 backdrop-blur-xl">
-          <div className="flex flex-col gap-2 md:flex-row">
+          <form action="/search" className="flex flex-col gap-2 md:flex-row">
             <div className="grid flex-1 grid-cols-1 gap-2 md:grid-cols-4">
               <div className="rounded-2xl bg-stone-50/80 p-4 text-left">
                 <Label className="inline-flex items-center gap-1.5" htmlFor="destination">
@@ -123,6 +124,7 @@ function HeroSection({ image }: Readonly<HeroSectionProps>) {
                 <Input
                   className="h-10 border-none bg-transparent px-0 py-0 shadow-none focus-visible:ring-0"
                   id="destination"
+                  name="q"
                   placeholder="Where to?"
                 />
               </div>
@@ -165,11 +167,11 @@ function HeroSection({ image }: Readonly<HeroSectionProps>) {
                 </Select>
               </div>
             </div>
-            <Button className="h-auto min-h-16 px-10 text-base font-bold" size="lg">
+            <Button className="h-auto min-h-16 px-10 text-base font-bold" size="lg" type="submit">
               <Search className="size-5" />
               Search
             </Button>
-          </div>
+          </form>
         </Card>
       </div>
     </section>
@@ -201,9 +203,11 @@ function DestinationCardView({ destination }: Readonly<DestinationCardViewProps>
           <span className="text-lg font-bold text-emerald-800">
             {destination.price} <span className="text-xs font-normal text-stone-500">/ person</span>
           </span>
-          <Button className="px-0" variant="ghost">
-            Explore More
-            <ArrowRight className="size-4" />
+          <Button asChild className="rounded-full px-4" variant="ghost">
+            <Link href="/search">
+              Explore More
+              <ArrowRight className="size-4" />
+            </Link>
           </Button>
         </div>
       </div>

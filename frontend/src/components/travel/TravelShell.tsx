@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Navigation, Search, Sparkles } from "lucide-react";
 
+import { CartSidebar } from "@/src/components/travel/CartSidebar";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { navigationItems } from "@/src/data/mockData";
@@ -61,12 +62,17 @@ export function TravelHeader({ activeItem = "Home" }: Readonly<TravelHeaderProps
           ))}
         </div>
         <div className="flex items-center gap-4">
-          <Button aria-label="Search" className="hidden text-stone-600 hover:text-emerald-800 md:inline-flex" size="icon" variant="ghost">
-            <Search className="size-5" />
+          <CartSidebar />
+          <Button asChild aria-label="Search" className="hidden text-stone-600 hover:text-emerald-800 md:inline-flex" size="icon" variant="ghost">
+            <Link href="/search">
+              <Search className="size-5" />
+            </Link>
           </Button>
-          <Button className="shadow-emerald-950/10 active:scale-95">
-            <Sparkles className="size-4" />
-            Book Now
+          <Button asChild className="shadow-emerald-950/10 active:scale-95">
+            <Link href="/checkout">
+              <Sparkles className="size-4" />
+              Book Now
+            </Link>
           </Button>
         </div>
       </div>

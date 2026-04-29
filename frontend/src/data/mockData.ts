@@ -252,6 +252,15 @@ export interface ContactPageData {
   readonly offices: readonly ContactOffice[];
 }
 
+export interface CartItem {
+  readonly alt: string;
+  readonly date: string;
+  readonly image: string;
+  readonly meta: string;
+  readonly price: string;
+  readonly title: string;
+}
+
 export const navigationItems = [
   "Home",
   "Tours",
@@ -672,6 +681,27 @@ export const bayMauTourDetail: TourDetail = {
   title: "Traveling to Bay Mau Coconut Forest",
   type: "Small Group",
 } as const;
+
+export const cartItems: readonly CartItem[] = [
+  {
+    alt: "Round bamboo basket boats floating through Bay Mau coconut forest at dawn",
+    date: "Jun 14, 2024",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAo8noBnaTnSEeA4yEz0-rRKslv_QVN8t2mju5icPgeLY6q1BmMoShJ0UXUm6Vfqo-D0zU9klXK2kSX1sxKDZol5QhrB9BcgGAPUw20oMRbce9ZnOdxjsK8xHWtbx5IcBo614vxvjdT7wLQ1solZ6LOA2vVCYnkfse4EHKrApJkiNev4jN2RplpEW8QmBSkpOqZsxZn9ODmYJF-equyV8HGfUCkbfpxggUAQDfHs1S2YHYk9rIU0vSt3DmzsJneWbUcovmSNVt1GWza",
+    meta: "4.5 Hours • Max 12 Guests",
+    price: "$45",
+    title: "Bay Mau Coconut Forest",
+  },
+  {
+    alt: "Luxury hotel pool overlooking a tranquil river at dusk with warm lantern lighting",
+    date: "Jun 12–18, 2024",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCGgMhSZ7OI-OmQjgd8tjrgm-KQcTLyLE-EY2PSQ7CXpG-Ok8vTNcSknldM_atvqEHntRHqCFxzCFmliTe1QBQJs2cyBm2jNphWn3G-i0bxSyBuhkWZtSRk5DOX88r-asPeSxD8aAXDdaFk4LadiKSVNRivTcHXsRFBNXeDPAKl-LRURF36Tyx6QT-2yjcmrPrjOedZHAeHR_R-vpnT-VP0DROFmgqROULDThmgm2SIlpz6YlF_uE2EB5EAYA3Gawh8CCVjyoBI1fKv",
+    meta: "6 nights • 2 Adults",
+    price: "$1,125",
+    title: "Shining Riverside Suite",
+  },
+] as const;
 
 export const contactPageData: ContactPageData = {
   departments: [

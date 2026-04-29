@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronDown, ChevronRight, Dumbbell, MapPin, MessageCircle, Sparkles, Star, Utensils, Waves } from "lucide-react";
+import { ArrowRight, ChevronRight, Dumbbell, MapPin, Sparkles, Star, Utensils, Waves } from "lucide-react";
 
+import { HotelBookingCard } from "@/src/components/travel/HotelBookingCard";
 import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import { shiningRiversideHotelDetail, type HotelDetail, type HotelDetailAmenity } from "@/src/data/mockData";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
@@ -208,68 +208,6 @@ function ReviewsSection({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   );
 }
 
-function BookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
-  return (
-    <aside className="lg:sticky lg:top-32 lg:col-span-4">
-      <div className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-2xl shadow-stone-950/5 md:p-10">
-        <div className="mb-10 flex items-baseline justify-between">
-          <div>
-            <span className="text-4xl font-black text-stone-950">{hotel.price}</span>
-            <span className="ml-2 text-stone-500">/ night</span>
-          </div>
-          <div className="flex items-center gap-1 text-sm font-black text-stone-950">
-            <Star className="size-4 fill-emerald-800 text-emerald-800" />
-            {hotel.booking.rating}
-          </div>
-        </div>
-        <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl bg-stone-100 p-4">
-              <label className="mb-1 block text-[10px] font-black uppercase tracking-widest text-stone-500" htmlFor="hotel-check-in">Check-in</label>
-              <Input className="h-auto border-none bg-transparent p-0 text-sm font-bold shadow-none focus-visible:ring-0" id="hotel-check-in" readOnly value={hotel.booking.checkIn} />
-            </div>
-            <div className="rounded-xl bg-stone-100 p-4">
-              <label className="mb-1 block text-[10px] font-black uppercase tracking-widest text-stone-500" htmlFor="hotel-check-out">Check-out</label>
-              <Input className="h-auto border-none bg-transparent p-0 text-sm font-bold shadow-none focus-visible:ring-0" id="hotel-check-out" readOnly value={hotel.booking.checkOut} />
-            </div>
-          </div>
-          <button className="flex w-full items-center justify-between rounded-xl bg-stone-100 p-4 text-left" type="button">
-            <span>
-              <span className="mb-1 block text-[10px] font-black uppercase tracking-widest text-stone-500">Travelers</span>
-              <span className="text-sm font-bold text-stone-950">{hotel.booking.travelers}</span>
-            </span>
-            <ChevronDown className="size-5 text-stone-500" />
-          </button>
-          <Button className="mt-2 w-full py-6 text-lg font-black" size="lg">
-            Check Availability
-          </Button>
-          <p className="text-center text-xs text-stone-500">You won&apos;t be charged yet</p>
-          <div className="space-y-4 border-t border-stone-200 pt-8">
-            <div className="flex justify-between text-stone-500">
-              <span>{hotel.price} x {hotel.booking.nights}</span>
-              <span>{hotel.booking.nightlyTotal}</span>
-            </div>
-            <div className="flex justify-between text-stone-500">
-              <span>Wellness Service Fee</span>
-              <span>{hotel.booking.fee}</span>
-            </div>
-            <div className="flex justify-between border-t border-stone-200 pt-4 text-lg font-black text-stone-950">
-              <span>Total</span>
-              <span>{hotel.booking.total}</span>
-            </div>
-          </div>
-          <div className="border-t border-stone-200 pt-8">
-            <Button className="w-full gap-2 text-xs uppercase tracking-widest" variant="outline">
-              <MessageCircle className="size-4" />
-              Ask a Curator
-            </Button>
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
-}
-
 export default function HotelDetailPage() {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
@@ -282,7 +220,7 @@ export default function HotelDetailPage() {
           <SuitesSection hotel={shiningRiversideHotelDetail} />
           <ReviewsSection hotel={shiningRiversideHotelDetail} />
         </div>
-        <BookingCard hotel={shiningRiversideHotelDetail} />
+        <HotelBookingCard hotel={shiningRiversideHotelDetail} />
       </div>
       <TravelFooter />
     </main>

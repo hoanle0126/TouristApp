@@ -9,10 +9,40 @@ export interface VisualDiaryItem {
 export interface DestinationCard {
   readonly alt: string;
   readonly description: string;
+  readonly href: string;
   readonly image: string;
   readonly price: string;
   readonly rating: string;
   readonly title: string;
+}
+
+export interface DestinationDetailFact {
+  readonly label: string;
+  readonly value: string;
+}
+
+export interface DestinationDetailHighlight {
+  readonly description: string;
+  readonly title: string;
+}
+
+export interface DestinationDetailRelatedLink {
+  readonly href: string;
+  readonly label: string;
+  readonly meta: string;
+  readonly title: string;
+}
+
+export interface DestinationDetail {
+  readonly card: DestinationCard;
+  readonly facts: readonly DestinationDetailFact[];
+  readonly heroEyebrow: string;
+  readonly heroImage: string;
+  readonly intro: readonly string[];
+  readonly relatedHotels: readonly DestinationDetailRelatedLink[];
+  readonly relatedTours: readonly DestinationDetailRelatedLink[];
+  readonly spotlight: readonly DestinationDetailHighlight[];
+  readonly summary: string;
 }
 
 export interface SuggestionCard {
@@ -253,6 +283,7 @@ export interface ContactPageData {
 }
 
 export interface CartItem {
+  readonly id: string;
   readonly alt: string;
   readonly date: string;
   readonly image: string;
@@ -263,6 +294,7 @@ export interface CartItem {
 
 export const navigationItems = [
   "Home",
+  "Destinations",
   "Tours",
   "Hotels",
   "Blog",
@@ -311,6 +343,7 @@ export const destinationCards: readonly DestinationCard[] = [
     alt: "Norwegian fjords with deep blue water and dramatic mountain peaks",
     description:
       "Sail through cinematic cliffs and quiet coastal villages shaped by ancient glacial landscapes.",
+    href: "/destinations/nordic-fjords",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCg4Pc4Hz2ckphmn1PXS-ra4wYOkUqi7PMGWKx61d5rMwLWxEwWY9yD9IAF7y6ED_dd3XsvuYHLJpjONv34C5d-NT7TZNwMJ3GE2UEGHGQosEdJI1MXtNKDRueIJXq0fSBHje9meDPhmJuiXmHKGqBBLuE93xjrlgt64-QMJgo8xyI1ZlOPUNmSQ95M1p-VknE5zyYismU3NeJlov_lokR9yBG_xV_ioAQIrI3-iCN6Zs7bY0PzXTqJb2qkYxvPYK24z3G9ZP2hIvls",
     price: "$1,200",
@@ -321,6 +354,7 @@ export const destinationCards: readonly DestinationCard[] = [
     alt: "Big Ben and Westminster Bridge in London at dusk",
     description:
       "Discover the perfect blend of historic architecture and cutting-edge modern culture.",
+    href: "/destinations/london-essence",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCIBL4yRfAkIWlPfBg6EEXIpLsxANGUc4HpdqvjcNLWLR0lbcucB_In7Pae-G1W_plTCRD_6zPSFdgBo5pyaSvUqSkvbeJ3g8zcr_OdCdwHnL7fVZOkJ3Gmu4KisipjrzsOfWFy8oUkLpAYP9TA7AxZrfRVQVasOVWebBj5tS3v2iW24WaImU46qVZPgKWuBOzvOkPUYdMdEwGWodlbYLlSKUBynxUkh4nMkwc5A1eTBOHm7nme0BufNc858zAwcmU5kw0sEEJohfGq",
     price: "$850",
@@ -331,6 +365,7 @@ export const destinationCards: readonly DestinationCard[] = [
     alt: "Medieval German town with half-timbered houses",
     description:
       "Wander through fairy-tale villages and explore the majestic castles of the Black Forest.",
+    href: "/destinations/bavarian-trails",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDiPv71cX-SLFEC50j5ADgesaGwtxXoy8-nT-4_OE9DE3MyblA4EmKN-pbYDYqd_zAlunErJEyN7zjXebxA8PdMGtsJeJMYwJaG-TwPKOUprlw7k4n5F6Y7P2mV2eisvlduz5KufDqUoQrUdB-QBXWkkJqFqYT-770OyBNIL4Ow2iRHEG2p7Kaxv78AkbJ2UwynnS1fcSIPcWFb4Fe7gTRF0UBPlvETC_US-Jyt_AR5HEnvAK7DYhRnXtnPuoKlxKaLakZnYYAUgrIP",
     price: "$1,100",
@@ -338,6 +373,93 @@ export const destinationCards: readonly DestinationCard[] = [
     title: "Bavarian Trails",
   },
 ] as const;
+
+export const destinationDetails: Readonly<Record<string, DestinationDetail>> = {
+  "nordic-fjords": {
+    card: destinationCards[0],
+    facts: [
+      { label: "Best season", value: "May to September" },
+      { label: "Ideal stay", value: "7 to 10 days" },
+      { label: "Travel mood", value: "Scenic expedition" },
+      { label: "Pace", value: "Slow and cinematic" },
+    ],
+    heroEyebrow: "Northern Europe",
+    heroImage: destinationCards[0].image,
+    intro: [
+      "Nordic Fjords is the kind of destination that rewards restraint. The drama is already built into the land: cliffs that fall directly into dark blue water, villages scaled to human quiet, and weather that changes the scene by the hour.",
+      "This is not a place to rush through on a checklist. It works best as a composed route of ferries, small harbors, design-led stays, and long daylight that keeps the landscape open late into the evening.",
+    ],
+    relatedHotels: [
+      { href: "/hotels/shining-riverside-hoi-an", label: "Stay", meta: "Quiet architecture-led retreat", title: "Shining Riverside Suite" },
+    ],
+    relatedTours: [
+      { href: "/tours", label: "Journey", meta: "Private charter pacing and premium scenic routing", title: "Cyclades Silk Sails" },
+      { href: "/tours", label: "Journey", meta: "Cold-climate expedition energy and boutique scale", title: "Arctic Sky Expedition" },
+    ],
+    spotlight: [
+      { title: "Water-first routing", description: "The strongest fjord itineraries are built around ferries, private launches, and coastal transfers instead of long road mileage." },
+      { title: "Small harbor stays", description: "Design hotels and intimate lodges work better here than large resorts because the destination is about perspective and silence." },
+      { title: "High summer daylight", description: "Extended light hours let you spread out movement and experiences without crowding the middle of the day." },
+    ],
+    summary: "A premium scenic destination for travelers who want atmosphere, nature, and calm logistical flow rather than constant activity.",
+  },
+  "london-essence": {
+    card: destinationCards[1],
+    facts: [
+      { label: "Best season", value: "April to June" },
+      { label: "Ideal stay", value: "4 to 6 days" },
+      { label: "Travel mood", value: "Urban culture" },
+      { label: "Pace", value: "Layered and social" },
+    ],
+    heroEyebrow: "Western Europe",
+    heroImage: destinationCards[1].image,
+    intro: [
+      "London works when the itinerary balances ceremonial landmarks with neighborhoods that feel alive after the postcards are done. Its value is not just heritage; it is density, access, and cultural range.",
+      "For this audience, the city is strongest when framed through architecture, food, galleries, and hotels that let the traveler move easily between classic London and contemporary energy.",
+    ],
+    relatedHotels: [
+      { href: "/hotels", label: "Stay", meta: "Refined city-base positioning for a cultural itinerary", title: "Urban collection stays" },
+    ],
+    relatedTours: [
+      { href: "/tours", label: "Journey", meta: "City-led discovery with strong local access", title: "Amalfi Coast Discovery" },
+      { href: "/blog/kyotos-new-wave", label: "Editorial", meta: "Reference point for culture-forward curation", title: "Kyoto's New Wave" },
+    ],
+    spotlight: [
+      { title: "Museum and design circuits", description: "The city supports highly curated cultural days that can move from institution-scale galleries to independent studios and private dining." },
+      { title: "Strong hotel base value", description: "Location matters more than excess amenity here. The right stay reduces friction and unlocks the city on foot." },
+      { title: "Multi-audience appeal", description: "London can sit inside a first-time Europe itinerary or serve as a focused return trip for shopping, food, and theater." },
+    ],
+    summary: "A flexible urban destination that performs best when treated as a culture and neighborhood itinerary, not only a monuments stop.",
+  },
+  "bavarian-trails": {
+    card: destinationCards[2],
+    facts: [
+      { label: "Best season", value: "May to October" },
+      { label: "Ideal stay", value: "6 to 8 days" },
+      { label: "Travel mood", value: "Storybook heritage" },
+      { label: "Pace", value: "Balanced touring" },
+    ],
+    heroEyebrow: "Central Europe",
+    heroImage: destinationCards[2].image,
+    intro: [
+      "Bavarian Trails combines fairytale townscapes with a route structure that is unusually practical. It gives travelers visual payoff quickly without needing extreme logistics or remote transfers.",
+      "The destination is strongest when castles, old-town stays, lake districts, and forest roads are edited into a compact sequence. It feels rich without becoming overly dense.",
+    ],
+    relatedHotels: [
+      { href: "/hotels", label: "Stay", meta: "Countryside and heritage stay pairings", title: "Curated alpine-adjacent stays" },
+    ],
+    relatedTours: [
+      { href: "/tours", label: "Journey", meta: "Classic Europe pacing with cultural stops", title: "Venetian Renaissance" },
+      { href: "/tours", label: "Journey", meta: "Textural city-to-landscape contrast", title: "Colors of Marrakech" },
+    ],
+    spotlight: [
+      { title: "High visual density", description: "The destination delivers quickly through villages, castle silhouettes, and seasonal landscape shifts that feel legible even on a shorter trip." },
+      { title: "Good family and multigen fit", description: "Routes can stay comfortable while still feeling elevated, which makes this strong for broad traveler mixes." },
+      { title: "Easy itinerary bundling", description: "It pairs well with city extensions, rail segments, and soft-active days without breaking the journey rhythm." },
+    ],
+    summary: "A dependable, high-appeal destination for travelers who want European heritage with efficient logistics and immediate visual return.",
+  },
+} as const;
 
 export const suggestionCards: readonly SuggestionCard[] = [
   {
@@ -684,6 +806,7 @@ export const bayMauTourDetail: TourDetail = {
 
 export const cartItems: readonly CartItem[] = [
   {
+    id: "bay-mau-coconut-forest-jun-14-2024-2-guests",
     alt: "Round bamboo basket boats floating through Bay Mau coconut forest at dawn",
     date: "Jun 14, 2024",
     image:
@@ -693,6 +816,7 @@ export const cartItems: readonly CartItem[] = [
     title: "Bay Mau Coconut Forest",
   },
   {
+    id: "shining-riverside-suite-jun-12-18-2024-2-adults",
     alt: "Luxury hotel pool overlooking a tranquil river at dusk with warm lantern lighting",
     date: "Jun 12–18, 2024",
     image:

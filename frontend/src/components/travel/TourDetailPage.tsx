@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, CircleX, Fish, Leaf, MessageCircle, Sailboat, Utensils } from "lucide-react";
+import { CheckCircle2, ChevronRight, CircleX, Fish, Leaf, Sailboat, Utensils } from "lucide-react";
 
-import { Button } from "@/src/components/ui/button";
+import { TourBookingCard } from "@/src/components/travel/TourBookingCard";
 import { bayMauTourDetail, type TourDetail, type TourDetailHighlight } from "@/src/data/mockData";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
@@ -172,53 +172,6 @@ function InclusionList({ items, title, variant }: Readonly<{ items: readonly str
   );
 }
 
-function BookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
-  return (
-    <aside className="lg:sticky lg:top-32 lg:col-span-4">
-      <div className="rounded-xl border border-stone-200 bg-white p-8 shadow-2xl shadow-stone-950/5 md:p-10">
-        <div className="mb-8">
-          <span className="text-sm font-bold uppercase tracking-widest text-stone-500">Journey Price</span>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-4xl font-black text-stone-950">From {tour.price}</span>
-            <span className="text-stone-500">/ person</span>
-          </div>
-        </div>
-        <div className="mb-8 space-y-4">
-          {[
-            ["Duration", tour.duration],
-            ["Type", tour.type],
-            ["Availability", tour.availability],
-          ].map(([label, value]) => (
-            <div className="flex items-center justify-between border-b border-stone-200 py-3" key={label}>
-              <span className="text-stone-500">{label}</span>
-              <span className={label === "Availability" ? "font-semibold text-emerald-800" : "font-semibold text-stone-950"}>{value}</span>
-            </div>
-          ))}
-        </div>
-        <Button className="mb-4 w-full py-6 text-lg font-bold uppercase tracking-widest" size="lg">
-          Book This Journey
-        </Button>
-        <p className="text-center text-xs uppercase tracking-widest text-stone-500">Instant confirmation available</p>
-        <div className="mt-10 border-t border-stone-200 pt-8">
-          <h4 className="mb-4 font-bold text-stone-950">Need help planning?</h4>
-          <div className="flex items-center gap-4">
-            <div className="relative size-12 overflow-hidden rounded-full bg-stone-200">
-              <Image alt={tour.curatorImageAlt} className="object-cover" fill sizes="48px" src={tour.curatorImage} />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-stone-950">Talk to a Curator</p>
-              <a className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-tight text-emerald-800 hover:underline" href="#">
-                <MessageCircle className="size-3.5" />
-                Chat with us now
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
-}
-
 export default function TourDetailPage() {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
@@ -234,7 +187,7 @@ export default function TourDetailPage() {
             <InclusionList items={bayMauTourDetail.exclusions} title="Exclusions" variant="excluded" />
           </section>
         </div>
-        <BookingCard tour={bayMauTourDetail} />
+        <TourBookingCard tour={bayMauTourDetail} />
       </div>
       <TravelFooter />
     </main>

@@ -18,6 +18,7 @@ import {
 
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
+import { useCart } from "@/src/components/travel/CartProvider";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { cn } from "@/src/lib/utils";
@@ -52,16 +53,6 @@ const paymentOptions = [
 ] as const;
 
 type PaymentMethod = (typeof paymentOptions)[number]["value"];
-
-const journey = {
-  carbonContribution: "$2",
-  date: "Nov 12, 2024",
-  imageAlt: cartItems[0].alt,
-  imageSrc: cartItems[0].image,
-  title: cartItems[0].title,
-  totalPrice: "$90.00",
-  travelers: "2 Guests",
-};
 
 function SectionHeading({
   index,
@@ -146,12 +137,39 @@ function SummaryRow({
 }
 
 export default function CheckoutPage() {
+  const { items, subtotal } = useCart();
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("credit-card");
+  const primaryItem = items[0];
+
+  const journey = useMemo(() => {
+    if (!primaryItem) {
+        return {
+          carbonContribution: "$0",
+          date: "No departure selected",
+          imageAlt: cartItems[0].alt,
+          imageSrc: cartItems[0].image,
+          title: "Your cart is empty",
+          totalPrice: "$0.00",
+          travelers: "0 Guests",
+      };
+    }
+
+    return {
+      carbonContribution: "$2",
+      date: primaryItem.date,
+      imageAlt: primaryItem.alt,
+      imageSrc: primaryItem.image,
+      title:
+        items.length > 1 ? `${primaryItem.title} + ${items.length - 1} more` : primaryItem.title,
+      totalPrice: `$${subtotal.toFixed(2)}`,
+      travelers: items.length > 1 ? `${items.length} items in cart` : primaryItem.meta,
+    };
+  }, [items, primaryItem, subtotal]);
 
   const securePaymentLabel = useMemo(() => {
     return `Secure Payment - ${journey.totalPrice}`;
-  }, []);
+  }, [journey.totalPrice]);
 
   return (
     <div className={cn(bodyFont.className, "min-h-screen bg-[#f9faf6] text-stone-950")}>

@@ -31,7 +31,7 @@ function OfficeItem({ office }: Readonly<{ office: ContactOffice }>) {
             <span className="block" key={line}>{line}</span>
           ))}
         </p>
-        <Button className="h-auto px-0 text-sm font-bold text-emerald-800 hover:bg-transparent" variant="ghost">
+        <Button className="h-auto text-sm font-bold text-emerald-800 hover:bg-transparent" variant="ghost">
           View on map
           <ArrowRight className="size-4" />
         </Button>
@@ -160,7 +160,7 @@ function MapSection() {
         <div className="absolute bottom-8 left-8 max-w-xs rounded-2xl border border-stone-200/70 bg-white/90 p-6 shadow-xl backdrop-blur-md">
           <h2 className="mb-2 text-lg font-black text-stone-950">{contactPageData.map.title}</h2>
           <p className="mb-4 text-sm leading-relaxed text-stone-600">{contactPageData.map.note}</p>
-          <Button className="h-auto px-0 text-sm font-bold text-emerald-800 hover:bg-transparent" variant="ghost">
+          <Button className="h-auto text-sm font-bold text-emerald-800 hover:bg-transparent" variant="ghost">
             Get Directions
             <ExternalLink className="size-4" />
           </Button>

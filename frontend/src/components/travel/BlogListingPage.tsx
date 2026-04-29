@@ -51,8 +51,8 @@ function CategoryBar() {
           <Button
             className={
               category === "All Stories"
-                ? "h-auto rounded-none border-b-2 border-emerald-800 bg-transparent px-0 py-1 text-sm font-black uppercase tracking-widest text-emerald-800 hover:bg-transparent"
-                : "h-auto bg-transparent px-0 py-1 text-sm font-bold uppercase tracking-widest text-stone-500 hover:bg-transparent hover:text-emerald-800"
+                ? "h-auto rounded-none border-b-2 border-emerald-800 bg-transparent py-1 text-sm font-black uppercase tracking-widest text-emerald-800 hover:bg-transparent"
+                : "h-auto bg-transparent py-1 text-sm font-bold uppercase tracking-widest text-stone-500 hover:bg-transparent hover:text-emerald-800"
             }
             key={category}
             type="button"
@@ -61,7 +61,7 @@ function CategoryBar() {
             {category}
           </Button>
         ))}
-        <Button className="ml-0 h-auto gap-2 bg-transparent px-0 py-1 text-sm font-bold text-stone-500 hover:bg-transparent hover:text-emerald-800 md:ml-auto" type="button" variant="ghost">
+        <Button className="ml-0 h-auto gap-2 bg-transparent py-1 text-sm font-bold text-stone-500 hover:bg-transparent hover:text-emerald-800 md:ml-auto" type="button" variant="ghost">
           <Search className="size-4" />
           Search
         </Button>
@@ -86,7 +86,7 @@ function JournalCard({ post }: Readonly<{ post: JournalPost }>) {
         <span className="text-xs font-black uppercase tracking-widest text-emerald-800">{post.category}</span>
         <h3 className="text-2xl font-black leading-tight text-stone-950 transition-colors group-hover:text-emerald-800">{post.title}</h3>
         <p className="leading-relaxed text-stone-600">{post.excerpt}</p>
-        <Button asChild className="px-0 text-sm font-black text-stone-950 hover:bg-transparent hover:text-emerald-800" variant="ghost">
+        <Button asChild className="text-sm font-black text-stone-950 hover:bg-transparent hover:text-emerald-800" variant="ghost">
           <Link href="/blog/kyotos-new-wave">
             Read Story
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />

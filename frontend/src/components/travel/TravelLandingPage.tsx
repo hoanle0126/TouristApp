@@ -204,7 +204,7 @@ function DestinationCardView({ destination }: Readonly<DestinationCardViewProps>
             {destination.price} <span className="text-xs font-normal text-stone-500">/ person</span>
           </span>
           <Button asChild className="rounded-full px-4" variant="ghost">
-            <Link href="/search">
+            <Link href={destination.href}>
               Explore More
               <ArrowRight className="size-4" />
             </Link>
@@ -217,7 +217,7 @@ function DestinationCardView({ destination }: Readonly<DestinationCardViewProps>
 
 function DestinationSection({ destinations }: Readonly<DestinationSectionProps>) {
   return (
-    <section className="bg-stone-100 py-24">
+    <section className="bg-stone-100 py-24" id="destinations">
       <div className="mx-auto max-w-screen-2xl px-8">
         <div className="mb-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <SectionHeading
@@ -225,9 +225,11 @@ function DestinationSection({ destinations }: Readonly<DestinationSectionProps>)
             subtitle="Selected journeys that balance thoughtful pace, cinematic landscapes, and high-touch hospitality."
             title="Curated Destinations"
           />
-          <Button className="w-fit" size="pill" variant="outline">
-            View all
-            <ArrowRight className="size-4" />
+          <Button asChild className="w-fit" size="pill" variant="outline">
+            <Link href="/destinations">
+              View all
+              <ArrowRight className="size-4" />
+            </Link>
           </Button>
         </div>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">

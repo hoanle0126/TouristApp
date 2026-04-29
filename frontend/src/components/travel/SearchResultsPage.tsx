@@ -100,7 +100,7 @@ function SearchResultCard({
           </p>
           <p className="text-lg font-medium text-stone-950">{result.price}</p>
         </div>
-        <Button asChild className="px-0 text-xs font-semibold tracking-[0.08em] text-emerald-800 hover:text-emerald-900" size="sm" variant="ghost">
+        <Button asChild className="text-xs font-semibold tracking-[0.08em] text-emerald-800 hover:text-emerald-900" size="sm" variant="ghost">
           <Link href={result.href}>{result.cta}</Link>
         </Button>
       </div>
@@ -131,7 +131,7 @@ export default function SearchResultsPage({ query }: Readonly<SearchResultsPageP
                 defaultValue={query}
                 name="q"
               />
-              <Button className="ml-3 h-auto px-0 py-0 font-medium text-emerald-800 hover:bg-transparent hover:text-emerald-900" size={null} type="submit" variant="ghost">
+              <Button className="ml-3 h-auto py-0 font-medium text-emerald-800 hover:bg-transparent hover:text-emerald-900" size={null} type="submit" variant="ghost">
                 Update
               </Button>
             </form>

@@ -15,6 +15,10 @@ function itemHref(item: string) {
     return "/";
   }
 
+  if (item === "Destinations") {
+    return "/destinations";
+  }
+
   if (item === "Tours") {
     return "/tours";
   }

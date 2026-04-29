@@ -42,7 +42,7 @@ function StorySection() {
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-        <Button className="px-0 text-sm font-black text-emerald-800 hover:bg-transparent" variant="ghost">
+        <Button className="text-sm font-black text-emerald-800 hover:bg-transparent" variant="ghost">
           Learn about our philosophy
           <ArrowRight className="size-4" />
         </Button>
@@ -98,7 +98,7 @@ function CuratorsSection() {
             Our team is composed of former editors, architects, and anthropologists who view the world through a different lens.
           </p>
         </div>
-        <Button className="hidden rounded-none border-b-2 border-emerald-800 px-0 text-emerald-800 hover:bg-transparent md:inline-flex" variant="ghost">
+        <Button className="hidden rounded-none border-b-2 border-emerald-800 text-emerald-800 hover:bg-transparent md:inline-flex" variant="ghost">
           View all team members
         </Button>
       </div>

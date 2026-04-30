@@ -1,15 +1,7 @@
-import Image from "next/image";
-import {
-  ArrowRight,
-  Compass,
-  Globe2,
-  MapPinned,
-  Plus,
-  Sparkles,
-  Star,
-  TrendingUp,
-} from "lucide-react";
+import Link from "next/link";
+import { Compass, MapPinned, Plus, Sparkles, TrendingUp } from "lucide-react";
 
+import { AdminDestinationCatalogPreview } from "@/src/components/admin/AdminDestinationCatalogPreview";
 import { AdminShell } from "@/src/components/admin/AdminShell";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
@@ -87,101 +79,6 @@ function DestinationStatGrid() {
         </Card>
       ))}
     </section>
-  );
-}
-
-function DestinationCatalogPanel() {
-  return (
-    <Card>
-      <CardContent className="p-6 sm:p-7">
-        <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
-              Destination catalog
-            </p>
-            <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
-              Editorial destinations and commercial signal
-            </h3>
-          </div>
-          <Button size="sm" variant="ghost">
-            Review placements
-            <ArrowRight className="size-4" />
-          </Button>
-        </div>
-
-        <div className="mt-6 grid gap-4 xl:grid-cols-2">
-          {destinationCards.map((destination) => (
-            <article
-              className="overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-stone-50"
-              key={destination.title}
-            >
-              <div className="relative aspect-[16/10] bg-stone-200">
-                <Image
-                  alt={destination.alt}
-                  className="object-cover"
-                  fill
-                  sizes="(min-width: 1280px) 33vw, 100vw"
-                  src={destination.image}
-                />
-              </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h4 className="text-2xl font-bold tracking-tight text-stone-950">
-                      {destination.title}
-                    </h4>
-                    <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                      {destination.description}
-                    </p>
-                  </div>
-                  <span className="rounded-2xl bg-stone-900 px-3 py-2 text-sm font-semibold text-white">
-                    {destination.price}
-                  </span>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl bg-white p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                      Rating
-                    </p>
-                    <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-stone-950">
-                      <Star className="size-4 fill-amber-400 text-amber-400" />
-                      {destination.rating}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-white p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                      Positioning
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-stone-950">
-                      {destination.price === "$1,200" ? "Premium scenic" : "Core city escape"}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-white p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                      Commercial
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-stone-950">
-                      {destination.rating === "4.9" ? "High priority" : "Steady demand"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline">
-                    <Globe2 className="size-4" />
-                    Preview
-                  </Button>
-                  <Button size="sm" variant="ghost">
-                    Edit copy
-                  </Button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -276,9 +173,11 @@ export default function AdminDestinationsPage() {
     <AdminShell
       activePath="/admin/destinations"
       action={
-        <Button>
-          <Plus className="size-4" />
-          Add destination
+        <Button asChild>
+          <Link href="/admin/destinations/new">
+            <Plus className="size-4" />
+            Add destination
+          </Link>
         </Button>
       }
       dateLabel="Wednesday, April 29, 2026"
@@ -290,7 +189,7 @@ export default function AdminDestinationsPage() {
       <DestinationStatGrid />
 
       <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.6fr)_420px]">
-        <DestinationCatalogPanel />
+        <AdminDestinationCatalogPreview destinations={destinationCards} />
         <WatchlistPanel />
       </section>
 

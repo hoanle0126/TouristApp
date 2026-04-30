@@ -1,15 +1,8 @@
-import {
-  ArrowRight,
-  CalendarClock,
-  Eye,
-  MapPinned,
-  Plus,
-  Sparkles,
-  Star,
-  Users,
-} from "lucide-react";
+import Link from "next/link";
+import { CalendarClock, MapPinned, Plus, Sparkles, Star, Users } from "lucide-react";
 
 import { AdminShell } from "@/src/components/admin/AdminShell";
+import { AdminTourCatalogPreview } from "@/src/components/admin/AdminTourCatalogPreview";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { tourCards } from "@/src/data/mockData";
@@ -75,98 +68,6 @@ function ToursStatGrid() {
         </Card>
       ))}
     </section>
-  );
-}
-
-function TourCatalogPanel() {
-  return (
-    <Card>
-      <CardContent className="p-6 sm:p-7">
-        <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
-              Tour catalog
-            </p>
-            <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
-              Signature products and occupancy posture
-            </h3>
-          </div>
-          <Button size="sm" variant="ghost">
-            Refresh inventory
-            <ArrowRight className="size-4" />
-          </Button>
-        </div>
-
-        <div className="mt-6 grid gap-4 xl:grid-cols-2">
-          {tourCards.map((tour) => (
-            <article
-              className="rounded-[1.75rem] border border-stone-200/80 bg-stone-50 p-5"
-              key={tour.title}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {tour.badge ? (
-                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-900">
-                        {tour.badge}
-                      </span>
-                    ) : null}
-                    <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500">
-                      {tour.duration}
-                    </span>
-                  </div>
-                  <h4 className="mt-3 text-2xl font-bold tracking-tight text-stone-950">
-                    {tour.title}
-                  </h4>
-                </div>
-                <span className="rounded-2xl bg-stone-900 px-3 py-2 text-sm font-semibold text-white">
-                  {tour.price}
-                </span>
-              </div>
-
-              <p className="mt-4 text-sm leading-relaxed text-stone-600">
-                {tour.description}
-              </p>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl bg-white p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                    Capacity
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-stone-950">{tour.guests}</p>
-                </div>
-                <div className="rounded-2xl bg-white p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                    Interest
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-stone-950">
-                    {tour.badge === "Featured" ? "High intent" : "Stable demand"}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-white p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                    Margin
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-stone-950">
-                    {tour.price === "$8,900" ? "Premium" : "Core tier"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Button size="sm" variant="outline">
-                  <Eye className="size-4" />
-                  Preview
-                </Button>
-                <Button size="sm" variant="ghost">
-                  Edit details
-                </Button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -284,9 +185,11 @@ export default function AdminToursPage() {
     <AdminShell
       activePath="/admin/tours"
       action={
-        <Button>
-          <Plus className="size-4" />
-          Add new tour
+        <Button asChild>
+          <Link href="/admin/tours/new">
+            <Plus className="size-4" />
+            Add new tour
+          </Link>
         </Button>
       }
       dateLabel="Wednesday, April 29, 2026"
@@ -298,7 +201,7 @@ export default function AdminToursPage() {
       <ToursStatGrid />
 
       <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.6fr)_420px]">
-        <TourCatalogPanel />
+        <AdminTourCatalogPreview tours={tourCards} />
         <InsightsPanel />
       </section>
 

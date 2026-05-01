@@ -1,4 +1,4 @@
-import { bayMauTourDetail, tourCards, type TourCard, type TourDetail } from "@/src/data/mockData";
+import type { TourCard, TourDetail } from "@/src/types/travel";
 
 export type TourBadge = "none" | "Featured" | "New";
 export type GalleryLayout = "portrait" | "landscape";
@@ -126,10 +126,6 @@ export const createTourInitialValues: AdminTourFormInitialValues = {
   ],
 };
 
-function detailForTour(slug: string): TourDetail | undefined {
-  return slug === "bay-mau-coconut-forest" ? bayMauTourDetail : undefined;
-}
-
 function operationalDefaults(card: TourCard): Pick<TourFormState, "departureDate" | "guide" | "bookedSeats" | "capacitySeats" | "operationalStatus" | "merchandisingNote"> {
   if (card.title === "The Soul of Kyoto") {
     return {
@@ -174,81 +170,66 @@ function operationalDefaults(card: TourCard): Pick<TourFormState, "departureDate
   };
 }
 
-function valuesFromTourCard(card: TourCard): ResolvedAdminTourEditData {
-  const slug = slugifyTourTitle(card.title);
-  const detail = detailForTour(slug);
+function toTourBadge(badge: TourCard["badge"]): TourBadge {
+  return badge === "Featured" || badge === "New" ? badge : "none";
+}
+
+export function valuesFromTourDetail(detail: TourDetail): ResolvedAdminTourEditData {
+  const slug = detail.slug ?? slugifyTourTitle(detail.title);
+  const card: TourCard = {
+    alt: detail.heroAlt,
+    badge: "Featured",
+    description: detail.subtitle,
+    duration: detail.duration,
+    guests: detail.guests,
+    image: detail.heroImage,
+    price: detail.price,
+    slug,
+    title: detail.title,
+  };
   const operations = operationalDefaults(card);
 
   return {
     slug,
-    title: card.title,
+    title: detail.title,
     form: {
-      title: detail?.title ?? card.title,
+      title: detail.title,
       slug,
-      badge: card.badge ?? "none",
-      type: detail?.type ?? "Signature Journey",
-      duration: detail?.duration ?? card.duration,
-      guests: detail?.guests ?? card.guests,
-      price: detail?.price ?? card.price,
-      availability: detail?.availability ?? "Seasonal departures",
-      shortDescription: card.description,
-      cardImage: card.image,
-      cardAlt: card.alt,
-      heroImage: detail?.heroImage ?? card.image,
-      heroAlt: detail?.heroAlt ?? card.alt,
-      curatorImage: detail?.curatorImage ?? "",
-      curatorAlt: detail?.curatorImageAlt ?? "Portrait of a travel curator",
-      subtitle: detail?.subtitle ?? card.description,
-      descriptionParagraphs: detail?.description.join("\n") ?? card.description,
-      inclusions: detail?.inclusions.join("\n") ?? "Private trip design\nCurated local experiences\nConcierge support before departure",
-      exclusions: detail?.exclusions.join("\n") ?? "International flights\nPersonal expenses\nTravel insurance",
+      badge: toTourBadge(card.badge),
+      type: detail.type,
+      duration: detail.duration,
+      guests: detail.guests,
+      price: detail.price,
+      availability: detail.availability,
+      shortDescription: detail.subtitle,
+      cardImage: detail.heroImage,
+      cardAlt: detail.heroAlt,
+      heroImage: detail.heroImage,
+      heroAlt: detail.heroAlt,
+      curatorImage: detail.curatorImage,
+      curatorAlt: detail.curatorImageAlt,
+      subtitle: detail.subtitle,
+      descriptionParagraphs: detail.description.join("\n"),
+      inclusions: detail.inclusions.join("\n"),
+      exclusions: detail.exclusions.join("\n"),
       ...operations,
     },
-    gallery:
-      detail?.gallery.map((item, index) => ({
-        id: `gallery-${index + 1}`,
-        image: item.image,
-        alt: item.alt,
-        layout: item.layout,
-      })) ?? [
-        {
-          id: "gallery-1",
-          image: card.image,
-          alt: card.alt,
-          layout: "landscape",
-        },
-      ],
-    highlights:
-      detail?.highlights.map((item, index) => ({
-        id: `highlight-${index + 1}`,
-        icon: item.icon,
-        title: item.title,
-        description: item.description,
-      })) ?? [
-        {
-          id: "highlight-1",
-          icon: "eco",
-          title: "Curated access",
-          description: "A polished journey shaped around the strongest moments in this itinerary.",
-        },
-      ],
-    itinerary:
-      detail?.itinerary.map((item, index) => ({
-        id: `itinerary-${index + 1}`,
-        title: item.title,
-        description: item.description,
-      })) ?? [
-        {
-          id: "itinerary-1",
-          title: "Signature arrival",
-          description: "Begin with a concierge-led arrival and orientation tailored to the destination.",
-        },
-      ],
+    gallery: detail.gallery.map((item, index) => ({
+      id: `gallery-${index + 1}`,
+      image: item.image,
+      alt: item.alt,
+      layout: item.layout,
+    })),
+    highlights: detail.highlights.map((item, index) => ({
+      id: `highlight-${index + 1}`,
+      icon: item.icon,
+      title: item.title,
+      description: item.description,
+    })),
+    itinerary: detail.itinerary.map((item, index) => ({
+      id: `itinerary-${index + 1}`,
+      title: item.title,
+      description: item.description,
+    })),
   };
-}
-
-export const adminTourEditData = tourCards.map(valuesFromTourCard);
-
-export function getAdminTourEditData(slug: string) {
-  return adminTourEditData.find((tour) => tour.slug === slug);
 }

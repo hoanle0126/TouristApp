@@ -1,10 +1,11 @@
-import { destinationDetails } from "@/src/data/mockData";
+import type { DestinationDetail } from "@/src/types/travel";
 
 export type DestinationCommercialStatus = "Draft" | "Ready for review" | "Published";
 
 export interface DestinationFormState {
   readonly title: string;
   readonly slug: string;
+  readonly href: string;
   readonly market: string;
   readonly price: string;
   readonly rating: string;
@@ -22,12 +23,27 @@ export interface DestinationTextRow {
   readonly value: string;
 }
 
+export interface DestinationFactRow {
+  readonly id: string;
+  readonly label: string;
+  readonly value: string;
+}
+
+export interface DestinationLinkRow {
+  readonly id: string;
+  readonly href: string;
+  readonly label: string;
+  readonly meta: string;
+  readonly title: string;
+}
+
 export interface DestinationFormInitialValues {
   readonly form: DestinationFormState;
   readonly intro: readonly DestinationTextRow[];
+  readonly facts: readonly DestinationFactRow[];
   readonly spotlight: readonly DestinationTextRow[];
-  readonly relatedTours: readonly DestinationTextRow[];
-  readonly relatedHotels: readonly DestinationTextRow[];
+  readonly relatedTours: readonly DestinationLinkRow[];
+  readonly relatedHotels: readonly DestinationLinkRow[];
 }
 
 export interface ResolvedAdminDestinationEditData {
@@ -45,6 +61,7 @@ export const createDestinationInitialValues: DestinationFormInitialValues = {
   form: {
     title: "",
     slug: "",
+    href: "",
     market: "Asia Pacific",
     price: "",
     rating: "",
@@ -60,18 +77,22 @@ export const createDestinationInitialValues: DestinationFormInitialValues = {
     { id: "intro-1", value: "" },
     { id: "intro-2", value: "" },
   ],
+  facts: [
+    { id: "fact-1", label: "", value: "" },
+    { id: "fact-2", label: "", value: "" },
+  ],
   spotlight: [
     { id: "spotlight-1", value: "" },
     { id: "spotlight-2", value: "" },
     { id: "spotlight-3", value: "" },
   ],
   relatedTours: [
-    { id: "related-tour-1", value: "" },
-    { id: "related-tour-2", value: "" },
+    { id: "related-tour-1", href: "", label: "", meta: "", title: "" },
+    { id: "related-tour-2", href: "", label: "", meta: "", title: "" },
   ],
   relatedHotels: [
-    { id: "related-hotel-1", value: "" },
-    { id: "related-hotel-2", value: "" },
+    { id: "related-hotel-1", href: "", label: "", meta: "", title: "" },
+    { id: "related-hotel-2", href: "", label: "", meta: "", title: "" },
   ],
 };
 
@@ -91,12 +112,30 @@ function textRows(prefix: string, values: readonly string[]) {
   return values.map((value, index) => ({ id: `${prefix}-${index + 1}`, value }));
 }
 
-export function resolveAdminDestinationEditData(slug: string): ResolvedAdminDestinationEditData | null {
-  const destination = Object.values(destinationDetails).find((item) => slugifyDestinationTitle(item.card.title) === slug);
-
-  if (!destination) {
-    return null;
+function factRows(values: readonly { readonly label: string; readonly value: string }[]) {
+  if (values.length === 0) {
+    return [{ id: "fact-1", label: "", value: "" }];
   }
+
+  return values.map((fact, index) => ({ id: `fact-${index + 1}`, label: fact.label, value: fact.value }));
+}
+
+function linkRows(prefix: string, values: readonly { readonly href: string; readonly label: string; readonly meta: string; readonly title: string }[]) {
+  if (values.length === 0) {
+    return [{ id: `${prefix}-1`, href: "", label: "", meta: "", title: "" }];
+  }
+
+  return values.map((item, index) => ({
+    id: `${prefix}-${index + 1}`,
+    href: item.href,
+    label: item.label,
+    meta: item.meta,
+    title: item.title,
+  }));
+}
+
+export function valuesFromDestinationDetail(destination: DestinationDetail): ResolvedAdminDestinationEditData {
+  const slug = destination.card.href.split("/").filter(Boolean).at(-1) ?? slugifyDestinationTitle(destination.card.title);
 
   return {
     destinationTitle: destination.card.title,
@@ -104,9 +143,10 @@ export function resolveAdminDestinationEditData(slug: string): ResolvedAdminDest
       form: {
         title: destination.card.title,
         slug,
+        href: `/destinations/${slug}`,
         market: destination.heroEyebrow,
         price: destination.card.price,
-        rating: destination.card.rating,
+        rating: String(destination.card.rating),
         status: "Published",
         cardImage: destination.card.image,
         cardAlt: destination.card.alt,
@@ -116,18 +156,13 @@ export function resolveAdminDestinationEditData(slug: string): ResolvedAdminDest
         summary: destination.summary,
       },
       intro: textRows("intro", destination.intro),
+      facts: factRows(destination.facts),
       spotlight: textRows(
         "spotlight",
         destination.spotlight.map((item) => `${item.title}: ${item.description}`),
       ),
-      relatedTours: textRows(
-        "related-tour",
-        destination.relatedTours.map((item) => item.title),
-      ),
-      relatedHotels: textRows(
-        "related-hotel",
-        destination.relatedHotels.map((item) => item.title),
-      ),
+      relatedTours: linkRows("related-tour", destination.relatedTours),
+      relatedHotels: linkRows("related-hotel", destination.relatedHotels),
     },
   };
 }

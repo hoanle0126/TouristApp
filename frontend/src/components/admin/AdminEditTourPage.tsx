@@ -3,16 +3,26 @@ import { ArrowLeft, SearchX } from "lucide-react";
 
 import { AdminShell } from "@/src/components/admin/AdminShell";
 import { AdminTourForm } from "@/src/components/admin/AdminTourForm";
-import { getAdminTourEditData } from "@/src/components/admin/adminTourFormData";
+import { valuesFromTourDetail } from "@/src/components/admin/adminTourFormData";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
+import { ApiError } from "@/src/lib/api/client";
+import { getTour } from "@/src/lib/api/tours";
 
 interface AdminEditTourPageProps {
   readonly slug: string;
 }
 
-export default function AdminEditTourPage({ slug }: AdminEditTourPageProps) {
-  const tour = getAdminTourEditData(slug);
+export default async function AdminEditTourPage({ slug }: AdminEditTourPageProps) {
+  const tour = await getTour(slug)
+    .then(valuesFromTourDetail)
+    .catch((error: unknown) => {
+      if (error instanceof ApiError && error.status === 404) {
+        return null;
+      }
+
+      throw error;
+    });
 
   return (
     <AdminShell
@@ -39,9 +49,11 @@ export default function AdminEditTourPage({ slug }: AdminEditTourPageProps) {
             submitLabel: "Save changes",
             savedSubmitLabel: "Saved changes",
             successTitle: "Tour changes ready for review",
-            successDescription: "This mock save keeps changes on this page and does not update the catalog.",
+            successDescription: "The tour changes have been saved to the backend catalog.",
           }}
           initialValues={tour}
+          mode="update"
+          originalSlug={tour.slug}
         />
       ) : (
         <Card>
@@ -56,7 +68,7 @@ export default function AdminEditTourPage({ slug }: AdminEditTourPageProps) {
               No editable tour matches this slug
             </h3>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-stone-500">
-              The mocked admin catalog only supports editing tours that appear in the current tour list.
+              Return to the tour listing and choose an existing backend tour.
             </p>
             <Button asChild className="mt-6">
               <Link href="/admin/tours">Back to tours</Link>

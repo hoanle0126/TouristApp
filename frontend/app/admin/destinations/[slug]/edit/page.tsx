@@ -1,5 +1,7 @@
 import AdminEditDestinationPage from "@/src/components/admin/AdminEditDestinationPage";
 
+export const dynamic = "force-dynamic";
+
 interface AdminEditDestinationRouteProps {
   readonly params: Promise<{
     readonly slug: string;

@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 
-import { cartItems, type CartItem } from "@/src/data/mockData";
+import type { CartItem } from "@/src/types/travel";
 
 interface CartLine extends CartItem {
   readonly quantity: number;
@@ -19,41 +19,70 @@ interface CartContextValue {
 }
 
 const STORAGE_KEY = "curator-cart";
+const STORAGE_EVENT = "curator-cart-change";
 
-const initialItems: readonly CartLine[] = cartItems.map((item) => ({
-  ...item,
-  quantity: 1,
-}));
+const initialItems: readonly CartLine[] = [];
 
 const CartContext = createContext<CartContextValue | null>(null);
+let cachedItems: readonly CartLine[] = initialItems;
+let cachedSerializedItems: string | null = null;
+
+function readStoredItems(): readonly CartLine[] {
+  if (typeof window === "undefined") {
+    return initialItems;
+  }
+
+  const storedItems = window.localStorage.getItem(STORAGE_KEY);
+
+  if (storedItems === null) {
+    cachedSerializedItems = null;
+    cachedItems = initialItems;
+    return initialItems;
+  }
+
+  if (storedItems === cachedSerializedItems) {
+    return cachedItems;
+  }
+
+  try {
+    cachedItems = JSON.parse(storedItems) as CartLine[];
+    cachedSerializedItems = storedItems;
+    return cachedItems;
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY);
+    cachedSerializedItems = null;
+    cachedItems = initialItems;
+    return initialItems;
+  }
+}
+
+function writeStoredItems(items: readonly CartLine[]) {
+  cachedItems = items;
+  cachedSerializedItems = JSON.stringify(items);
+  window.localStorage.setItem(STORAGE_KEY, cachedSerializedItems);
+  window.dispatchEvent(new Event(STORAGE_EVENT));
+}
+
+function subscribeToCartStore(onStoreChange: () => void) {
+  const handleChange = () => {
+    onStoreChange();
+  };
+
+  window.addEventListener("storage", handleChange);
+  window.addEventListener(STORAGE_EVENT, handleChange);
+
+  return () => {
+    window.removeEventListener("storage", handleChange);
+    window.removeEventListener(STORAGE_EVENT, handleChange);
+  };
+}
 
 export function CartProvider({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [items, setItems] = useState<readonly CartLine[]>(() => {
-    if (typeof window === "undefined") {
-      return initialItems;
-    }
-
-    const storedItems = window.localStorage.getItem(STORAGE_KEY);
-
-    if (!storedItems) {
-      return initialItems;
-    }
-
-    try {
-      return JSON.parse(storedItems) as CartLine[];
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
-      return initialItems;
-    }
-  });
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  const items = useSyncExternalStore(subscribeToCartStore, readStoredItems, () => initialItems);
 
   const value = useMemo<CartContextValue>(() => {
     const subtotal = items.reduce((total, item) => {
@@ -65,23 +94,22 @@ export function CartProvider({
 
     return {
       addItem(item) {
-        setItems((currentItems) => {
-          const existingItem = currentItems.find(
-            (currentItem) =>
-              currentItem.title === item.title &&
-              currentItem.date === item.date &&
-              currentItem.meta === item.meta,
-          );
+        const currentItems = readStoredItems();
+        const existingItem = currentItems.find(
+          (currentItem) =>
+            currentItem.title === item.title &&
+            currentItem.date === item.date &&
+            currentItem.meta === item.meta,
+        );
 
-          if (existingItem) {
-            return currentItems;
-          }
+        if (existingItem) {
+          return;
+        }
 
-          return [...currentItems, { ...item, quantity: 1 }];
-        });
+        writeStoredItems([...currentItems, { ...item, quantity: 1 }]);
       },
       clearCart() {
-        setItems([]);
+        writeStoredItems([]);
       },
       isInCart(item) {
         return items.some(
@@ -93,9 +121,7 @@ export function CartProvider({
       },
       items,
       removeItem(id) {
-        setItems((currentItems) =>
-          currentItems.filter((currentItem) => currentItem.id !== id),
-        );
+        writeStoredItems(items.filter((currentItem) => currentItem.id !== id));
       },
       subtotal,
       totalItems,

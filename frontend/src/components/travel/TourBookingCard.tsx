@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { type CartItem, type TourDetail } from "@/src/data/mockData";
+import { type CartItem, type TourDetail } from "@/src/types/travel";
 
 const travelerOptions = [
   "1 Guest",
@@ -30,8 +30,11 @@ function createCartItem(tour: TourDetail, departureDate: string, travelers: stri
     alt: tour.heroAlt,
     date: departureDate,
     image: tour.heroImage,
+    itemType: "tour",
     meta: `${tour.duration} • ${travelers}`,
     price: tour.price,
+    quantity: 1,
+    slug: tour.slug,
     title: tour.title,
   };
 }
@@ -110,7 +113,7 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
             </label>
             <Select onValueChange={(value) => setTravelers(value as (typeof travelerOptions)[number])} value={travelers}>
               <SelectTrigger id="tour-travelers">
-                <SelectValue placeholder="Select travelers" />
+                <SelectValue placeholder="Select travelers">{travelers}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {travelerOptions.map((option) => (

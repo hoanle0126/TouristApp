@@ -3,16 +3,26 @@ import { ArrowLeft, SearchX } from "lucide-react";
 
 import { AdminDestinationForm } from "@/src/components/admin/AdminDestinationForm";
 import { AdminShell } from "@/src/components/admin/AdminShell";
-import { resolveAdminDestinationEditData } from "@/src/components/admin/adminDestinationFormData";
+import { valuesFromDestinationDetail } from "@/src/components/admin/adminDestinationFormData";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
+import { ApiError } from "@/src/lib/api/client";
+import { getDestination } from "@/src/lib/api/destinations";
 
 interface AdminEditDestinationPageProps {
   readonly slug: string;
 }
 
-export default function AdminEditDestinationPage({ slug }: AdminEditDestinationPageProps) {
-  const destination = resolveAdminDestinationEditData(slug);
+export default async function AdminEditDestinationPage({ slug }: AdminEditDestinationPageProps) {
+  const destination = await getDestination(slug)
+    .then(valuesFromDestinationDetail)
+    .catch((error: unknown) => {
+      if (error instanceof ApiError && error.status === 404) {
+        return null;
+      }
+
+      throw error;
+    });
 
   return (
     <AdminShell
@@ -28,7 +38,7 @@ export default function AdminEditDestinationPage({ slug }: AdminEditDestinationP
       dateLabel="Thursday, April 30, 2026"
       pageTitle={destination ? `Edit ${destination.destinationTitle}` : "Destination not found"}
       searchPlaceholder="Search destination content..."
-      sectionLabel="Update mock destination category content before review."
+      sectionLabel="Update destination category content before review."
       teamValue="content"
     >
       {destination ? (
@@ -38,9 +48,11 @@ export default function AdminEditDestinationPage({ slug }: AdminEditDestinationP
             submitLabel: "Save destination changes",
             savedSubmitLabel: "Saved changes",
             successTitle: "Destination changes ready for review",
-            successDescription: "This mock submit keeps the edited data on this page and does not publish it.",
+            successDescription: "The destination changes have been saved to the backend catalog.",
           }}
           initialValues={destination.initialValues}
+          mode="update"
+          originalSlug={slug}
         />
       ) : (
         <Card>
@@ -52,7 +64,7 @@ export default function AdminEditDestinationPage({ slug }: AdminEditDestinationP
               Destination not found
             </p>
             <h3 className="mt-3 text-3xl font-bold tracking-tight text-stone-950">
-              No mock destination matches this slug
+              No backend destination matches this slug
             </h3>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-stone-500">
               Return to the destination listing and choose an existing destination card.

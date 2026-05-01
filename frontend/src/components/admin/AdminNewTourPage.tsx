@@ -30,9 +30,10 @@ export default function AdminNewTourPage() {
           submitLabel: "Save tour draft",
           savedSubmitLabel: "Saved draft",
           successTitle: "Tour draft ready for review",
-          successDescription: "This mock submit keeps the data on this page and does not publish it.",
+          successDescription: "The tour has been saved to the backend catalog.",
         }}
         initialValues={createTourInitialValues}
+        mode="create"
       />
     </AdminShell>
   );

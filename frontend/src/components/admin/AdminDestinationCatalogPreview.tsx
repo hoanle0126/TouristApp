@@ -8,10 +8,12 @@ import { useEffect, useId, useRef, useState } from "react";
 import { slugifyDestinationTitle } from "@/src/components/admin/adminDestinationFormData";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { destinationDetails, type DestinationCard } from "@/src/data/mockData";
+import type { DestinationCard } from "@/src/types/travel";
+import type { ApiDestinationDetail } from "@/src/lib/api/types";
 
 interface AdminDestinationCatalogPreviewProps {
   readonly destinations: readonly DestinationCard[];
+  readonly destinationDetails: readonly ApiDestinationDetail[];
 }
 
 function getDestinationPositioning(destination: DestinationCard) {
@@ -22,22 +24,32 @@ function getDestinationCommercialSignal(destination: DestinationCard) {
   return destination.rating === "4.9" ? "High priority" : "Steady demand";
 }
 
-function getDestinationDetail(destination: DestinationCard) {
-  return Object.values(destinationDetails).find((detail) => detail.card.title === destination.title) ?? null;
+function getDestinationDetail(destination: DestinationCard, destinationDetails: readonly ApiDestinationDetail[]) {
+  return destinationDetails.find((detail) => detail.title === destination.title || detail.href === destination.href) ?? null;
+}
+
+function getDestinationSlug(destination: DestinationCard) {
+  return destination.href.split("/").filter(Boolean).at(-1) ?? slugifyDestinationTitle(destination.title);
+}
+
+function getDestinationEditHref(destination: DestinationCard) {
+  return `/admin/destinations/${getDestinationSlug(destination)}/edit`;
 }
 
 function AdminDestinationPreviewModal({
   destination,
+  destinationDetails,
   onClose,
 }: {
   readonly destination: DestinationCard;
+  readonly destinationDetails: readonly ApiDestinationDetail[];
   readonly onClose: () => void;
 }) {
   const titleId = useId();
   const descriptionId = useId();
   const dialogRef = useRef<HTMLElement>(null);
-  const detail = getDestinationDetail(destination);
-  const editHref = `/admin/destinations/${slugifyDestinationTitle(destination.title)}/edit`;
+  const detail = getDestinationDetail(destination, destinationDetails);
+  const editHref = getDestinationEditHref(destination);
 
   useEffect(() => {
     const previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -115,7 +127,7 @@ function AdminDestinationPreviewModal({
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/80 to-transparent p-6 text-white">
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-950">
-                {detail?.heroEyebrow ?? "Destination"}
+                {detail?.market ?? "Destination"}
               </span>
               <span className="rounded-full bg-stone-950/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em]">
                 {getDestinationCommercialSignal(destination)}
@@ -158,7 +170,7 @@ function AdminDestinationPreviewModal({
                 <MapPinned className="size-4" />
                 Market
               </div>
-              <p className="mt-2 text-sm font-semibold text-stone-950">{detail?.heroEyebrow ?? "Editorial destination"}</p>
+              <p className="mt-2 text-sm font-semibold text-stone-950">{detail?.market ?? "Editorial destination"}</p>
             </div>
             <div className="rounded-2xl border border-stone-200 bg-white p-4">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Positioning</p>
@@ -224,7 +236,7 @@ function AdminDestinationPreviewModal({
   );
 }
 
-export function AdminDestinationCatalogPreview({ destinations }: AdminDestinationCatalogPreviewProps) {
+export function AdminDestinationCatalogPreview({ destinationDetails, destinations }: AdminDestinationCatalogPreviewProps) {
   const [selectedDestination, setSelectedDestination] = useState<DestinationCard | null>(null);
 
   return (
@@ -285,7 +297,7 @@ export function AdminDestinationCatalogPreview({ destinations }: AdminDestinatio
                       Preview
                     </Button>
                     <Button asChild size="sm" variant="ghost">
-                      <Link href={`/admin/destinations/${slugifyDestinationTitle(destination.title)}/edit`}>Edit copy</Link>
+                      <Link href={getDestinationEditHref(destination)}>Edit copy</Link>
                     </Button>
                   </div>
                 </div>
@@ -295,7 +307,7 @@ export function AdminDestinationCatalogPreview({ destinations }: AdminDestinatio
         </CardContent>
       </Card>
 
-      {selectedDestination ? <AdminDestinationPreviewModal destination={selectedDestination} onClose={() => setSelectedDestination(null)} /> : null}
+      {selectedDestination ? <AdminDestinationPreviewModal destination={selectedDestination} destinationDetails={destinationDetails} onClose={() => setSelectedDestination(null)} /> : null}
     </>
   );
 }

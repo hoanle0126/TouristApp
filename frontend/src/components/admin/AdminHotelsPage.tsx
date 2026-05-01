@@ -1,25 +1,41 @@
-import { ArrowRight, BedDouble, Hotel, Plus, Sparkles, Star } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, BedDouble, Hotel, Pencil, Plus, Sparkles, Star } from "lucide-react";
 
 import { AdminShell } from "@/src/components/admin/AdminShell";
+import { slugifyHotelName } from "@/src/components/admin/adminHotelFormData";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { hotelCards } from "@/src/data/mockData";
+import { getHotels } from "@/src/lib/api/hotels";
+import type { HotelCard } from "@/src/types/travel";
 
-const hotelStats = [
-  { label: "Published stays", value: `${hotelCards.length}`, note: "Active in collection" },
-  { label: "Avg. nightly rate", value: "$742", note: "Across current partners" },
-  { label: "Premium properties", value: "02", note: "Flagged for editorial push" },
-  { label: "Renewals pending", value: "03", note: "Contract review this month" },
-] as const;
+function getHotelStats(hotels: readonly HotelCard[]) {
+  const premiumProperties = hotels.filter((hotel) => hotel.badge).length;
 
-export default function AdminHotelsPage() {
+  return [
+    { label: "Published stays", value: `${hotels.length}`, note: "Active in collection" },
+    { label: "Avg. nightly rate", value: hotels[0]?.price ?? "—", note: "Across current partners" },
+    { label: "Premium properties", value: premiumProperties.toString().padStart(2, "0"), note: "Flagged for editorial push" },
+    { label: "Renewals pending", value: "03", note: "Contract review this month" },
+  ] as const;
+}
+
+function getHotelEditHref(hotel: HotelCard) {
+  return `/admin/hotels/${hotel.slug ?? slugifyHotelName(hotel.name)}/edit`;
+}
+
+export default async function AdminHotelsPage() {
+  const hotels = await getHotels();
+  const hotelStats = getHotelStats(hotels);
+
   return (
     <AdminShell
       activePath="/admin/hotels"
       action={
-        <Button>
-          <Plus className="size-4" />
-          Add hotel
+        <Button asChild>
+          <Link href="/admin/hotels/new">
+            <Plus className="size-4" />
+            Add hotel
+          </Link>
         </Button>
       }
       dateLabel="Wednesday, April 29, 2026"
@@ -48,14 +64,14 @@ export default function AdminHotelsPage() {
                 <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Hotel portfolio</p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">Current stays and merchandising posture</h3>
               </div>
-              <Button size="sm" variant="ghost">
+              <Button disabled size="sm" variant="ghost">
                 Review inventory
                 <ArrowRight className="size-4" />
               </Button>
             </div>
 
             <div className="mt-6 grid gap-3">
-              {hotelCards.map((hotel) => (
+              {hotels.map((hotel) => (
                 <div className="rounded-2xl bg-stone-50 p-4" key={hotel.name}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -70,6 +86,14 @@ export default function AdminHotelsPage() {
                         {amenity}
                       </span>
                     ))}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={getHotelEditHref(hotel)}>
+                        <Pencil className="size-4" />
+                        Edit hotel
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ))}

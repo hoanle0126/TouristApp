@@ -5,14 +5,21 @@ import { AdminDestinationCatalogPreview } from "@/src/components/admin/AdminDest
 import { AdminShell } from "@/src/components/admin/AdminShell";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { destinationCards } from "@/src/data/mockData";
+import { getDestinationDetails, getDestinations } from "@/src/lib/api/destinations";
+import type { DestinationCard } from "@/src/types/travel";
 
-const destinationStats = [
-  { label: "Published destinations", note: "3 active editorial pages", value: `${destinationCards.length}` },
-  { label: "Average rating", note: "Across current collection", value: "4.8" },
-  { label: "Lead destination", note: "Highest inquiry volume", value: "Nordic Fjords" },
-  { label: "Launch candidates", note: "Ready for merchandising", value: "04" },
-] as const;
+function getDestinationStats(destinations: readonly DestinationCard[]) {
+  const ratings = destinations.map((destination) => Number(destination.rating)).filter((rating) => Number.isFinite(rating));
+  const averageRating = ratings.length > 0 ? (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1) : "—";
+  const leadDestination = destinations[0]?.title ?? "—";
+
+  return [
+    { label: "Published destinations", note: `${destinations.length} active editorial pages`, value: `${destinations.length}` },
+    { label: "Average rating", note: "Across current collection", value: averageRating },
+    { label: "Lead destination", note: "Highest inquiry volume", value: leadDestination },
+    { label: "Launch candidates", note: "Ready for merchandising", value: destinations.length.toString().padStart(2, "0") },
+  ] as const;
+}
 
 const regionRows = [
   {
@@ -62,7 +69,9 @@ const watchlistItems = [
   },
 ] as const;
 
-function DestinationStatGrid() {
+function DestinationStatGrid({ destinations }: { readonly destinations: readonly DestinationCard[] }) {
+  const destinationStats = getDestinationStats(destinations);
+
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
       {destinationStats.map((item) => (
@@ -168,7 +177,12 @@ function WatchlistPanel() {
   );
 }
 
-export default function AdminDestinationsPage() {
+export default async function AdminDestinationsPage() {
+  const [destinations, destinationDetails] = await Promise.all([
+    getDestinations(),
+    getDestinationDetails(),
+  ]);
+
   return (
     <AdminShell
       activePath="/admin/destinations"
@@ -186,10 +200,10 @@ export default function AdminDestinationsPage() {
       sectionLabel="Destination portfolio, merchandising priority, and market signal across the editorial catalog."
       teamValue="sales"
     >
-      <DestinationStatGrid />
+      <DestinationStatGrid destinations={destinations} />
 
       <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.6fr)_420px]">
-        <AdminDestinationCatalogPreview destinations={destinationCards} />
+        <AdminDestinationCatalogPreview destinationDetails={destinationDetails} destinations={destinations} />
         <WatchlistPanel />
       </section>
 

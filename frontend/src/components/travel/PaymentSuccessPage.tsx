@@ -11,6 +11,7 @@ import {
 
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
+import type { ApiBooking } from "@/src/lib/api/types";
 import { cn } from "@/src/lib/utils";
 
 const headlineFont = Plus_Jakarta_Sans({
@@ -72,7 +73,38 @@ function SummaryItem({
   );
 }
 
-export default function PaymentSuccessPage() {
+function formatBookingDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function formatMoney(amount: number, currency: string) {
+  return new Intl.NumberFormat("en-US", {
+    currency,
+    style: "currency",
+  }).format(amount);
+}
+
+export default function PaymentSuccessPage({
+  booking,
+}: Readonly<{
+  booking: ApiBooking | null;
+}>) {
+  const bookingSummary = booking
+    ? {
+        bookingDate: formatBookingDate(booking.createdAt),
+        paymentStatus: `${booking.paymentStatus} ${formatMoney(booking.totals.total, booking.totals.currency)}`,
+        referenceNumber: booking.bookingCode,
+      }
+    : {
+        bookingDate: successPageData.bookingDate,
+        paymentStatus: "Pending confirmation",
+        referenceNumber: "Booking not found",
+      };
+
   return (
     <div className={cn(bodyFont.className, "min-h-screen overflow-x-hidden bg-[#f9faf6] text-stone-950")}>
       <section
@@ -136,7 +168,7 @@ export default function PaymentSuccessPage() {
                         "text-lg font-bold text-stone-950",
                       )}
                     >
-                      {successPageData.referenceNumber}
+                      {bookingSummary.referenceNumber}
                     </span>
                   </SummaryItem>
 
@@ -151,7 +183,7 @@ export default function PaymentSuccessPage() {
                           "text-lg font-bold text-stone-950",
                         )}
                       >
-                        {successPageData.paymentStatus}
+                        {bookingSummary.paymentStatus}
                       </span>
                     </div>
                   </SummaryItem>
@@ -165,7 +197,7 @@ export default function PaymentSuccessPage() {
                         "text-lg font-bold text-stone-950",
                       )}
                     >
-                      {successPageData.bookingDate}
+                      {bookingSummary.bookingDate}
                     </span>
                   </SummaryItem>
                 </div>

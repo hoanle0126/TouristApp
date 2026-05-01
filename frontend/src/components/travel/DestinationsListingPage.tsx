@@ -12,11 +12,9 @@ import {
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { Button } from "@/src/components/ui/button";
 import {
-  destinationCards,
-  suggestionCards,
   type DestinationCard,
-  type SuggestionCard,
-} from "@/src/data/mockData";
+  type TourCard,
+} from "@/src/types/travel";
 
 const destinationFilters = [
   "Region",
@@ -122,7 +120,7 @@ function DestinationCardView({ destination }: Readonly<{ destination: Destinatio
   );
 }
 
-function DestinationsGrid() {
+function DestinationsGrid({ destinations }: Readonly<{ destinations: readonly DestinationCard[] }>) {
   return (
     <section className="mx-auto max-w-screen-2xl px-8 py-24 lg:px-24 lg:py-32">
       <div className="mb-12 flex flex-col justify-between gap-6 border-b border-stone-200 pb-8 md:flex-row md:items-end">
@@ -135,15 +133,15 @@ function DestinationsGrid() {
         </p>
       </div>
       <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
-        {destinationCards.map((destination) => (
-          <DestinationCardView destination={destination} key={destination.title} />
+        {destinations.map((destination) => (
+          <DestinationCardView destination={destination} key={destination.href} />
         ))}
       </div>
     </section>
   );
 }
 
-function SuggestionCardView({ suggestion }: Readonly<{ suggestion: SuggestionCard }>) {
+function SuggestionCardView({ suggestion }: Readonly<{ suggestion: TourCard }>) {
   return (
     <article className="group">
       <div className="relative mb-5 aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-stone-200">
@@ -158,7 +156,7 @@ function SuggestionCardView({ suggestion }: Readonly<{ suggestion: SuggestionCar
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-xl font-bold tracking-tight text-stone-950">{suggestion.title}</h3>
-          <p className="mt-1 text-sm text-stone-600">{suggestion.location}</p>
+          <p className="mt-1 text-sm text-stone-600">{suggestion.duration} · {suggestion.guests}</p>
         </div>
         <p className="whitespace-nowrap text-sm font-bold text-emerald-800">{suggestion.price}</p>
       </div>
@@ -166,7 +164,7 @@ function SuggestionCardView({ suggestion }: Readonly<{ suggestion: SuggestionCar
   );
 }
 
-function PremiumExtensions() {
+function PremiumExtensions({ suggestions }: Readonly<{ suggestions: readonly TourCard[] }>) {
   return (
     <section className="mx-auto max-w-screen-2xl px-8 pb-24 lg:px-24 lg:pb-32">
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -180,7 +178,7 @@ function PremiumExtensions() {
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
-        {suggestionCards.map((suggestion) => (
+        {suggestions.map((suggestion) => (
           <SuggestionCardView key={suggestion.title} suggestion={suggestion} />
         ))}
       </div>
@@ -188,14 +186,14 @@ function PremiumExtensions() {
   );
 }
 
-export default function DestinationsListingPage() {
+export default function DestinationsListingPage({ destinations, suggestions }: Readonly<{ destinations: readonly DestinationCard[]; suggestions: readonly TourCard[] }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Destinations" />
       <DestinationsHero />
       <DestinationsFilterBar />
-      <DestinationsGrid />
-      <PremiumExtensions />
+      <DestinationsGrid destinations={destinations} />
+      <PremiumExtensions suggestions={suggestions} />
       <TravelFooter />
     </main>
   );

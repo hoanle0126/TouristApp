@@ -4,7 +4,7 @@ import { ArrowRight, ChevronRight, Dumbbell, MapPin, Sparkles, Star, Utensils, W
 
 import { HotelBookingCard } from "@/src/components/travel/HotelBookingCard";
 import { Button } from "@/src/components/ui/button";
-import { shiningRiversideHotelDetail, type HotelDetail, type HotelDetailAmenity } from "@/src/data/mockData";
+import type { HotelDetail, HotelDetailAmenity } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
 function AmenityIcon({ icon }: Readonly<{ icon: HotelDetailAmenity["icon"] }>) {
@@ -208,19 +208,19 @@ function ReviewsSection({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   );
 }
 
-export default function HotelDetailPage() {
+export default function HotelDetailPage({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Hotels" />
-      <HotelHero hotel={shiningRiversideHotelDetail} />
+      <HotelHero hotel={hotel} />
       <div className="mx-auto grid max-w-screen-2xl grid-cols-1 items-start gap-16 px-8 pb-24 md:gap-24 lg:grid-cols-12 lg:px-24">
         <div className="space-y-24 lg:col-span-8">
-          <OverviewSection hotel={shiningRiversideHotelDetail} />
-          <AmenitiesSection hotel={shiningRiversideHotelDetail} />
-          <SuitesSection hotel={shiningRiversideHotelDetail} />
-          <ReviewsSection hotel={shiningRiversideHotelDetail} />
+          <OverviewSection hotel={hotel} />
+          <AmenitiesSection hotel={hotel} />
+          <SuitesSection hotel={hotel} />
+          <ReviewsSection hotel={hotel} />
         </div>
-        <HotelBookingCard hotel={shiningRiversideHotelDetail} />
+        <HotelBookingCard hotel={hotel} />
       </div>
       <TravelFooter />
     </main>

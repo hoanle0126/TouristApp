@@ -1,5 +1,11 @@
 import BlogListingPage from "@/src/components/travel/BlogListingPage";
+import { getJournalPosts } from "@/src/lib/api/blogs";
 
-export default function BlogPage() {
-  return <BlogListingPage />;
+export const dynamic = "force-dynamic";
+
+export default async function BlogPage() {
+  const posts = await getJournalPosts();
+  const [featuredPost, ...journalPosts] = posts;
+
+  return <BlogListingPage featuredPost={{ ...featuredPost, badge: "Featured Experience" }} posts={journalPosts} />;
 }

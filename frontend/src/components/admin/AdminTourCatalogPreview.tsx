@@ -8,7 +8,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { slugifyTourTitle } from "@/src/components/admin/adminTourFormData";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import type { TourCard } from "@/src/data/mockData";
+import type { TourCard } from "@/src/types/travel";
 
 interface AdminTourCatalogPreviewProps {
   readonly tours: readonly TourCard[];
@@ -22,10 +22,14 @@ function getTourMargin(tour: TourCard) {
   return tour.price === "$8,900" ? "Premium" : "Core tier";
 }
 
+function getTourEditHref(tour: TourCard) {
+  return `/admin/tours/${tour.slug ?? slugifyTourTitle(tour.title)}/edit`;
+}
+
 function AdminTourPreviewModal({ onClose, tour }: { readonly onClose: () => void; readonly tour: TourCard }) {
   const titleId = useId();
   const descriptionId = useId();
-  const editHref = `/admin/tours/${slugifyTourTitle(tour.title)}/edit`;
+  const editHref = getTourEditHref(tour);
   const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -240,7 +244,7 @@ export function AdminTourCatalogPreview({ tours }: AdminTourCatalogPreviewProps)
                     Preview
                   </Button>
                   <Button asChild size="sm" variant="ghost">
-                    <Link href={`/admin/tours/${slugifyTourTitle(tour.title)}/edit`}>Edit details</Link>
+                    <Link href={getTourEditHref(tour)}>Edit details</Link>
                   </Button>
                 </div>
               </article>

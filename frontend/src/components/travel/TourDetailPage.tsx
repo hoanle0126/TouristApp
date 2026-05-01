@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CheckCircle2, ChevronRight, CircleX, Fish, Leaf, Sailboat, Utensils } from "lucide-react";
 
 import { TourBookingCard } from "@/src/components/travel/TourBookingCard";
-import { bayMauTourDetail, type TourDetail, type TourDetailHighlight } from "@/src/data/mockData";
+import type { TourDetail, TourDetailHighlight } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
 function HighlightIcon({ icon }: Readonly<{ icon: TourDetailHighlight["icon"] }>) {
@@ -40,7 +40,7 @@ function DetailHero({ tour }: Readonly<{ tour: TourDetail }>) {
             ))}
           </div>
           <h1 className="mb-6 text-5xl font-extrabold leading-[0.95] tracking-tighter text-white md:text-8xl">
-            Traveling to Bay Mau <br />Coconut Forest
+            {tour.title}
           </h1>
           <p className="max-w-2xl text-xl font-light leading-relaxed text-white/90 md:text-2xl">{tour.subtitle}</p>
         </div>
@@ -172,22 +172,22 @@ function InclusionList({ items, title, variant }: Readonly<{ items: readonly str
   );
 }
 
-export default function TourDetailPage() {
+export default function TourDetailPage({ tour }: Readonly<{ tour: TourDetail }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Tours" />
-      <DetailHero tour={bayMauTourDetail} />
+      <DetailHero tour={tour} />
       <div className="mx-auto grid max-w-screen-2xl grid-cols-1 items-start gap-16 px-8 py-24 md:gap-24 md:py-40 lg:grid-cols-12 lg:px-24">
         <div className="space-y-24 md:space-y-40 lg:col-span-8">
-          <ExperienceSection tour={bayMauTourDetail} />
-          <ItinerarySection tour={bayMauTourDetail} />
-          <GallerySection tour={bayMauTourDetail} />
+          <ExperienceSection tour={tour} />
+          <ItinerarySection tour={tour} />
+          <GallerySection tour={tour} />
           <section className="grid grid-cols-1 gap-12 md:grid-cols-2">
-            <InclusionList items={bayMauTourDetail.inclusions} title="What's Included" variant="included" />
-            <InclusionList items={bayMauTourDetail.exclusions} title="Exclusions" variant="excluded" />
+            <InclusionList items={tour.inclusions} title="What's Included" variant="included" />
+            <InclusionList items={tour.exclusions} title="Exclusions" variant="excluded" />
           </section>
         </div>
-        <TourBookingCard tour={bayMauTourDetail} />
+        <TourBookingCard tour={tour} />
       </div>
       <TravelFooter />
     </main>

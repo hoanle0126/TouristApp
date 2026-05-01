@@ -4,7 +4,7 @@ import { ArrowRight, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
-import { featuredJournalPost, journalPosts, type FeaturedJournalPost, type JournalPost } from "@/src/data/mockData";
+import type { FeaturedJournalPost, JournalPost } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
 const categories = ["All Stories", "Destinations", "Lifestyle", "Guides", "Interviews"] as const;
@@ -87,7 +87,7 @@ function JournalCard({ post }: Readonly<{ post: JournalPost }>) {
         <h3 className="text-2xl font-black leading-tight text-stone-950 transition-colors group-hover:text-emerald-800">{post.title}</h3>
         <p className="leading-relaxed text-stone-600">{post.excerpt}</p>
         <Button asChild className="text-sm font-black text-stone-950 hover:bg-transparent hover:text-emerald-800" variant="ghost">
-          <Link href="/blog/kyotos-new-wave">
+          <Link href={`/blog/${post.slug}`}>
             Read Story
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
           </Link>
@@ -97,11 +97,11 @@ function JournalCard({ post }: Readonly<{ post: JournalPost }>) {
   );
 }
 
-function JournalGrid() {
+function JournalGrid({ posts }: Readonly<{ posts: readonly JournalPost[] }>) {
   return (
     <section className="mx-auto mb-32 grid max-w-screen-2xl grid-cols-1 gap-x-12 gap-y-24 px-8 md:grid-cols-2 lg:grid-cols-3 lg:px-24">
-      {journalPosts.map((post) => (
-        <JournalCard key={post.title} post={post} />
+      {posts.map((post) => (
+        <JournalCard key={post.slug ?? post.title} post={post} />
       ))}
     </section>
   );
@@ -129,14 +129,14 @@ function JournalNewsletter() {
   );
 }
 
-export default function BlogListingPage() {
+export default function BlogListingPage({ featuredPost, posts }: Readonly<{ featuredPost: FeaturedJournalPost; posts: readonly JournalPost[] }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Blog" />
       <BlogHero />
-      <FeaturedPost post={featuredJournalPost} />
+      <FeaturedPost post={featuredPost} />
       <CategoryBar />
-      <JournalGrid />
+      <JournalGrid posts={posts} />
       <JournalNewsletter />
       <TravelFooter />
     </main>

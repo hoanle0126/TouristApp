@@ -3,16 +3,23 @@ import { ArrowRight, BookOpenText, Eye, Plus, SquarePen, TrendingUp } from "luci
 import { AdminShell } from "@/src/components/admin/AdminShell";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { blogPosts, journalPosts } from "@/src/data/mockData";
+import { getJournalPosts } from "@/src/lib/api/blogs";
+import type { JournalPost } from "@/src/types/travel";
 
-const blogStats = [
-  { label: "Published stories", value: `${blogPosts.length}`, note: "Active on journal" },
-  { label: "Draft concepts", value: "05", note: "Awaiting editorial review" },
-  { label: "Avg. read depth", value: "4.6 min", note: "Trailing 30 days" },
-  { label: "Top category", value: "Destinations", note: "Highest engagement" },
-] as const;
+function getBlogStats(posts: readonly JournalPost[]) {
+  const topCategory = posts[0]?.category ?? "—";
 
-export default function AdminBlogsPage() {
+  return [
+    { label: "Published stories", value: `${posts.length}`, note: "Active on journal" },
+    { label: "Draft concepts", value: "05", note: "Awaiting editorial review" },
+    { label: "Avg. read depth", value: "4.6 min", note: "Trailing 30 days" },
+    { label: "Top category", value: topCategory, note: "Highest engagement" },
+  ] as const;
+}
+
+export default async function AdminBlogsPage() {
+  const journalPosts = await getJournalPosts();
+  const blogStats = getBlogStats(journalPosts);
   return (
     <AdminShell
       activePath="/admin/blogs"

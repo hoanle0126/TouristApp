@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
-import { useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useTransition } from "react";
 import {
   CalendarDays,
   CreditCard,
@@ -22,7 +22,7 @@ import { useCart } from "@/src/components/travel/CartProvider";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { cn } from "@/src/lib/utils";
-import { cartItems } from "@/src/data/mockData";
+import { createBooking } from "@/src/lib/api/bookings";
 
 const headlineFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -137,21 +137,23 @@ function SummaryRow({
 }
 
 export default function CheckoutPage() {
-  const { items, subtotal } = useCart();
+  const { clearCart, items, subtotal } = useCart();
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("credit-card");
+  const [isPending, startTransition] = useTransition();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const primaryItem = items[0];
 
   const journey = useMemo(() => {
     if (!primaryItem) {
-        return {
-          carbonContribution: "$0",
-          date: "No departure selected",
-          imageAlt: cartItems[0].alt,
-          imageSrc: cartItems[0].image,
-          title: "Your cart is empty",
-          totalPrice: "$0.00",
-          travelers: "0 Guests",
+      return {
+        carbonContribution: "$0",
+        date: "No departure selected",
+        imageAlt: "Empty travel cart",
+        imageSrc: "https://lh3.googleusercontent.com/aida-public/AB6AXuAo8noBnaTnSEeA4yEz0-rRKslv_QVN8t2mju5icPgeLY6q1BmMoShJ0UXUm6Vfqo-D0zU9klXK2kSX1sxKDZol5QhrB9BcgGAPUw20oMRbce9ZnOdxjsK8xHWtbx5IcBo614vxvjdT7wLQ1solZ6LOA2vVCYnkfse4EHKrApJkiNev4jN2RplpEW8QmBSkpOqZsxZn9ODmYJF-equyV8HGfUCkbfpxggUAQDfHs1S2YHYk9rIU0vSt3DmzsJneWbUcovmSNVt1GWza",
+        title: "Your cart is empty",
+        totalPrice: "$0.00",
+        travelers: "0 Guests",
       };
     }
 
@@ -170,6 +172,54 @@ export default function CheckoutPage() {
   const securePaymentLabel = useMemo(() => {
     return `Secure Payment - ${journey.totalPrice}`;
   }, [journey.totalPrice]);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrorMessage(null);
+
+    if (items.length === 0) {
+      setErrorMessage("Please add at least one tour or hotel before checkout.");
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const fullName = String(formData.get("fullName") ?? "").trim();
+    const phone = String(formData.get("phone") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const country = String(formData.get("country") ?? "").trim();
+
+    if (!fullName || !phone || !email || !country) {
+      setErrorMessage("Please complete full name, phone, email, and country before payment.");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const booking = await createBooking({
+          country,
+          email,
+          fullName,
+          items: items.map((item) => ({
+            itemType: item.itemType ?? "tour",
+            meta: item.meta,
+            nights: item.nights,
+            quantity: item.quantity ?? 1,
+            roomType: item.roomType,
+            slug: item.slug ?? item.id,
+            unitPrice: Number(item.price.replace(/[^0-9.]/g, "")),
+          })),
+          paymentMethod,
+          phone,
+          travelers: Math.max(items.reduce((total, item) => total + (item.quantity ?? 1), 0), 1),
+        });
+
+        clearCart();
+        window.location.href = `/checkout/success?bookingCode=${booking.bookingCode}`;
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Unable to create booking.");
+      }
+    });
+  }
 
   return (
     <div className={cn(bodyFont.className, "min-h-screen bg-[#f9faf6] text-stone-950")}>
@@ -208,7 +258,7 @@ export default function CheckoutPage() {
           <div className="mt-5 h-1 w-24 rounded-full bg-emerald-800" />
         </section>
 
-        <div className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-20 xl:gap-24">
+        <form className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-20 xl:gap-24" onSubmit={handleSubmit}>
           <div className="space-y-16 lg:col-span-7 lg:space-y-20">
             <section>
               <SectionHeading index="01" title="Traveler Details" />
@@ -221,6 +271,7 @@ export default function CheckoutPage() {
                     <Input
                       className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
                       id="full-name"
+                      name="fullName"
                       placeholder="Johnathan Doe"
                     />
                   </div>
@@ -231,6 +282,7 @@ export default function CheckoutPage() {
                     <Input
                       className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
                       id="phone-number"
+                      name="phone"
                       placeholder="+1 (555) 000-0000"
                       type="tel"
                     />
@@ -243,8 +295,20 @@ export default function CheckoutPage() {
                   <Input
                     className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
                     id="email-address"
+                    name="email"
                     placeholder="curator@travel.com"
                     type="email"
+                  />
+                </div>
+                <div>
+                  <Label className="text-stone-500" htmlFor="country">
+                    Country
+                  </Label>
+                  <Input
+                    className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
+                    id="country"
+                    name="country"
+                    placeholder="Vietnam"
                   />
                 </div>
               </div>
@@ -314,11 +378,14 @@ export default function CheckoutPage() {
             </section>
 
             <section className="pt-2">
-              <Button asChild className="h-auto w-full rounded-xl py-6 text-lg font-bold shadow-[0_24px_50px_-28px_rgba(6,78,59,0.6)]" size={null}>
-                <Link href="/checkout/success">
-                  <ShieldCheck className="size-5" />
-                  {securePaymentLabel}
-                </Link>
+              {errorMessage ? (
+                <p className="mb-4 rounded-xl bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700">
+                  {errorMessage}
+                </p>
+              ) : null}
+              <Button className="h-auto w-full rounded-xl py-6 text-lg font-bold shadow-[0_24px_50px_-28px_rgba(6,78,59,0.6)]" disabled={isPending || items.length === 0} size={null} type="submit">
+                <ShieldCheck className="size-5" />
+                {isPending ? "Creating Booking..." : securePaymentLabel}
               </Button>
               <p className="mt-6 text-center text-xs leading-6 tracking-[0.04em] text-stone-500">
                 By completing this booking, you agree to the Curator{" "}
@@ -402,7 +469,7 @@ export default function CheckoutPage() {
               </Card>
             </div>
           </aside>
-        </div>
+        </form>
       </main>
 
       <footer className="border-t border-stone-200/70 bg-stone-50">

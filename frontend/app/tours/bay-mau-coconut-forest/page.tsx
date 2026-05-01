@@ -1,5 +1,10 @@
 import TourDetailPage from "@/src/components/travel/TourDetailPage";
+import { getTour } from "@/src/lib/api/tours";
 
-export default function BayMauCoconutForestPage() {
-  return <TourDetailPage />;
+export const dynamic = "force-dynamic";
+
+export default async function BayMauCoconutForestPage() {
+  const tour = await getTour("bay-mau-coconut-forest");
+
+  return <TourDetailPage tour={tour} />;
 }

@@ -6,44 +6,16 @@ import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell"
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 
-const searchResults = [
-  {
-    alt: "Serene bamboo forest in Arashiyama, Kyoto with soft dappled sunlight filtering through tall green stalks, peaceful atmosphere",
-    category: "Journey",
-    cta: "View Journey",
-    description:
-      "Immerse yourself in ancient traditions, secluded temple gardens, and meditative tea ceremonies.",
-    href: "/tours",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBDTzk4vpTlUKWAZ6dljrtas59bJ02DlxwcO3ZXzCTO7ioJyY_ZyNmo3_5r6PW5gSr1OH55ZmLWorfrjEAo8b61XuUlkd7NIE5eXIyLlyptOuk_zBf8Gxo9gsTMHrK4j48A3XKfVKNoWK7z3TE6jwMX7uyUKXrmQ06u6zzWc-rnDJpJeRRCsPhLFQeTTAc341u4aPWyIQWyChvzsgTHjUzvwpHOaK7jwbqXxcihcrWq20Ypp5VzeYzgtCCk3V3lRbdVPzUDl52Ctb2J",
-    price: "$4,200",
-    title: "Kyoto Zen Retreat",
-  },
-  {
-    alt: "Neon-lit bustling street street in Shibuya, Tokyo at night, cinematic lighting, moody cyberpunk aesthetic",
-    category: "Experience",
-    cta: "View Journey",
-    description:
-      "Navigate the neon labyrinth, hidden culinary gems, and cutting-edge art scenes.",
-    href: "/tours",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDPg19wsPXHSalIuo2lkJ_mDbSBhhT-t3GsZGE9il5vD81S_XdFEM5bEktEYMEbxfek120KzeJjtuIENAz2pRQnLigGppUFFiHYF7lHbaMU1etxaMYJxIgJ29yGSedF7GVhnmRX2rzsdIWFzu-Q9yYP5WJHRTnfXqRG1-GG85u6IxL3QcAHLq2Xd1HFvYgJSjgn9UMciUBwItwf6SPThNY4Hr-ZD4spkax3SkQm7V-h67sc1krts2HTK3jAcn1ir8I9d9hhf5XfrYF_",
-    price: "$1,850",
-    title: "Tokyo Urban Pulse",
-  },
-  {
-    alt: "Traditional Japanese ryokan with wooden sliding doors opening to a tranquil rock garden, soft warm indoor lighting",
-    category: "Hotel",
-    cta: "View Journey",
-    description:
-      "Pristine powder skiing followed by exclusive onsen soaking in a luxury ryokan.",
-    href: "/hotels",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBeexmu2i93Uxzsfl-f9s9d6Td_tudNBnq-nBIHgWd1H6FwMzGMnBQH5ZFno-R-5ul-P0v0VXieNaHEXUh-4fiSIHAs8_0lwqCrwTGH-jMTKVNeG5LUxrdo0NbD74p2Xs7xy_NZ253w9pApbWSAZBLfsTLjmnoztsCAQJyWMR3CGtpFWutF7yzFwh3zoqdlqn27f-wP9byfyT0QA1cOEWy5Ow6NvkHiD4TG_ERkxSgy-pXRlZbO1614M176iijZxBDRdQRq6AJGbsVM",
-    price: "$5,600",
-    title: "Hokkaido Winter Escape",
-  },
-] as const;
+export interface SearchResult {
+  readonly alt: string;
+  readonly category: string;
+  readonly cta: string;
+  readonly description: string;
+  readonly href: string;
+  readonly image: string;
+  readonly price: string;
+  readonly title: string;
+}
 
 const sortOptions = [
   "Recommended",
@@ -63,7 +35,7 @@ const durationFilters = ["1-3 Days", "4-7 Days", "8-14 Days", "14+ Days"] as con
 function SearchResultCard({
   result,
 }: Readonly<{
-  result: (typeof searchResults)[number];
+  result: SearchResult;
 }>) {
   return (
     <article className="group">
@@ -110,9 +82,10 @@ function SearchResultCard({
 
 interface SearchResultsPageProps {
   readonly query: string;
+  readonly results: readonly SearchResult[];
 }
 
-export default function SearchResultsPage({ query }: Readonly<SearchResultsPageProps>) {
+export default function SearchResultsPage({ query, results }: Readonly<SearchResultsPageProps>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Tours" />
@@ -228,7 +201,7 @@ export default function SearchResultsPage({ query }: Readonly<SearchResultsPageP
             </div>
 
             <div className="grid grid-cols-1 gap-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-              {searchResults.map((result) => (
+              {results.map((result) => (
                 <SearchResultCard key={result.title} result={result} />
               ))}
             </div>

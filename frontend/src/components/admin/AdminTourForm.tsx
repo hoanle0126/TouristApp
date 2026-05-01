@@ -36,6 +36,7 @@ import {
   type TourBadge,
   type TourFormState,
 } from "@/src/components/admin/adminTourFormData";
+import { createTour, updateTour, type SaveTourInput } from "@/src/lib/api/tours";
 
 interface AdminTourFormCopy {
   readonly readinessEyebrow: string;
@@ -49,6 +50,8 @@ interface AdminTourFormCopy {
 interface AdminTourFormProps {
   readonly initialValues: AdminTourFormInitialValues;
   readonly copy: AdminTourFormCopy;
+  readonly mode?: "create" | "update";
+  readonly originalSlug?: string;
 }
 
 interface FormErrors {
@@ -84,13 +87,47 @@ function hasValue(value: string) {
   return value.trim().length > 0;
 }
 
-export function AdminTourForm({ copy, initialValues }: AdminTourFormProps) {
+function toTourPayload(
+  form: TourFormState,
+  highlights: readonly HighlightItem[],
+  itinerary: readonly ItineraryItem[],
+  gallery: readonly GalleryItem[],
+): SaveTourInput {
+  return {
+    slug: form.slug,
+    title: form.title,
+    ...(form.badge === "none" ? {} : { badge: form.badge }),
+    type: form.type,
+    duration: form.duration,
+    guests: form.guests,
+    price: form.price,
+    availability: form.availability,
+    description: splitLines(form.descriptionParagraphs),
+    shortDescription: form.shortDescription,
+    image: form.cardImage,
+    alt: form.cardAlt,
+    heroImage: form.heroImage,
+    heroAlt: form.heroAlt,
+    curatorImage: form.curatorImage,
+    curatorImageAlt: form.curatorAlt,
+    subtitle: form.subtitle,
+    highlights: highlights.map(({ description, icon, title }) => ({ description, icon, title })),
+    itinerary: itinerary.map(({ description, title }) => ({ description, title })),
+    gallery: gallery.map(({ alt, image, layout }) => ({ alt, image, layout })),
+    inclusions: splitLines(form.inclusions),
+    exclusions: splitLines(form.exclusions),
+  };
+}
+
+export function AdminTourForm({ copy, initialValues, mode = "create", originalSlug }: AdminTourFormProps) {
   const [form, setForm] = useState<TourFormState>(initialValues.form);
   const [highlights, setHighlights] = useState<readonly HighlightItem[]>(initialValues.highlights);
   const [itinerary, setItinerary] = useState<readonly ItineraryItem[]>(initialValues.itinerary);
   const [gallery, setGallery] = useState<readonly GalleryItem[]>(initialValues.gallery);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saved, setSaved] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const readiness = useMemo(
     () => [
@@ -157,15 +194,29 @@ export function AdminTourForm({ copy, initialValues }: AdminTourFormProps) {
     return Object.keys(nextErrors).length === 0;
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaved(false);
+    setSubmitError(null);
 
     if (!validateForm()) {
       return;
     }
 
-    setSaved(true);
+    setIsSubmitting(true);
+    try {
+      const payload = toTourPayload(form, highlights, itinerary, gallery);
+      if (mode === "update") {
+        await updateTour(originalSlug ?? form.slug, payload);
+      } else {
+        await createTour(payload);
+      }
+      setSaved(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Unable to save tour.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function updateHighlights(items: readonly HighlightItem[]) {
@@ -199,7 +250,7 @@ export function AdminTourForm({ copy, initialValues }: AdminTourFormProps) {
         <OperationsSection form={form} updateField={updateField} />
       </div>
 
-      <TourDraftSidebar copy={copy} form={form} readiness={readiness} saved={saved} />
+      <TourDraftSidebar copy={copy} form={form} isSubmitting={isSubmitting} readiness={readiness} saved={saved} submitError={submitError} />
     </form>
   );
 }
@@ -207,13 +258,17 @@ export function AdminTourForm({ copy, initialValues }: AdminTourFormProps) {
 function TourDraftSidebar({
   copy,
   form,
+  isSubmitting,
   readiness,
   saved,
+  submitError,
 }: Readonly<{
   copy: AdminTourFormCopy;
   form: TourFormState;
+  isSubmitting: boolean;
   readiness: readonly { readonly label: string; readonly ready: boolean }[];
   saved: boolean;
+  submitError: string | null;
 }>) {
   const completed = readiness.filter((item) => item.ready).length;
 
@@ -290,9 +345,15 @@ function TourDraftSidebar({
         </Card>
       ) : null}
 
-      <Button className="w-full" size="lg" type="submit">
+      {submitError ? (
+        <Card aria-live="polite" className="border-none bg-rose-100 text-rose-950" role="alert">
+          <CardContent className="p-5 text-sm font-semibold">{submitError}</CardContent>
+        </Card>
+      ) : null}
+
+      <Button className="w-full" disabled={isSubmitting} size="lg" type="submit">
         <Save className="size-4" />
-        {saved ? copy.savedSubmitLabel : copy.submitLabel}
+        {isSubmitting ? "Saving..." : saved ? copy.savedSubmitLabel : copy.submitLabel}
       </Button>
     </aside>
   );

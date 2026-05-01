@@ -1,7 +1,5 @@
-import Image from "next/image";
 import {
   AlertTriangle,
-  ArrowRight,
   CalendarCheck2,
   CreditCard,
   Plus,
@@ -10,58 +8,35 @@ import {
   Users,
 } from "lucide-react";
 
+import { AdminBookingQueuePanel } from "@/src/components/admin/AdminBookingQueuePanel";
 import { AdminShell } from "@/src/components/admin/AdminShell";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { cartItems } from "@/src/data/mockData";
+import { getBookings } from "@/src/lib/api/bookings";
+import type { ApiBooking } from "@/src/lib/api/types";
 
-const bookingStats = [
-  { label: "Confirmed bookings", note: "12 check-ins this week", value: "48" },
-  { label: "Pending payment", note: "Need follow-up today", value: "09" },
-  { label: "Average booking value", note: "+14% vs last month", value: "$2,670" },
-  { label: "Refund cases", note: "Within policy window", value: "03" },
-] as const;
+function formatCurrency(value: number, currency = "USD") {
+  return new Intl.NumberFormat("en-US", {
+    currency,
+    maximumFractionDigits: 0,
+    style: "currency",
+  }).format(value);
+}
 
-const bookingRows = [
-  {
-    checkIn: "May 03, 2026",
-    guest: "Mai Anh",
-    product: "Bay Mau Coconut Forest",
-    source: "Direct",
-    status: "Confirmed",
-    total: "$1,240",
-  },
-  {
-    checkIn: "May 05, 2026",
-    guest: "Daniel Foster",
-    product: "The Soul of Kyoto",
-    source: "Concierge",
-    status: "Awaiting payment",
-    total: "$8,900",
-  },
-  {
-    checkIn: "May 07, 2026",
-    guest: "Hana Lee",
-    product: "Shining Riverside Suite",
-    source: "Partner",
-    status: "Review",
-    total: "$3,760",
-  },
-  {
-    checkIn: "May 11, 2026",
-    guest: "Noah Bennett",
-    product: "Cyclades Silk Sails",
-    source: "Direct",
-    status: "Confirmed",
-    total: "$7,120",
-  },
-] as const;
+function getBookingStats(bookings: readonly ApiBooking[]) {
+  const confirmedBookings = bookings.filter((booking) => booking.status === "confirmed").length;
+  const pendingPayment = bookings.filter((booking) => booking.paymentStatus === "pending").length;
+  const averageValue = bookings.length > 0 ? bookings.reduce((sum, booking) => sum + booking.totals.total, 0) / bookings.length : 0;
+  const currency = bookings[0]?.totals.currency ?? "USD";
+  const refundCases = bookings.filter((booking) => booking.paymentStatus === "refunded").length;
 
-const statusStyles: Record<(typeof bookingRows)[number]["status"], string> = {
-  Confirmed: "bg-emerald-100 text-emerald-900",
-  "Awaiting payment": "bg-amber-100 text-amber-900",
-  Review: "bg-stone-200 text-stone-700",
-};
+  return [
+    { label: "Confirmed bookings", note: "Live booking API", value: `${confirmedBookings}` },
+    { label: "Pending payment", note: "Need follow-up today", value: pendingPayment.toString().padStart(2, "0") },
+    { label: "Average booking value", note: "Across current queue", value: formatCurrency(averageValue, currency) },
+    { label: "Refund cases", note: "Within policy window", value: refundCases.toString().padStart(2, "0") },
+  ] as const;
+}
 
 const riskItems = [
   {
@@ -81,7 +56,9 @@ const riskItems = [
   },
 ] as const;
 
-function BookingStatGrid() {
+function BookingStatGrid({ bookings }: { readonly bookings: readonly ApiBooking[] }) {
+  const bookingStats = getBookingStats(bookings);
+
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
       {bookingStats.map((item) => (
@@ -101,65 +78,7 @@ function BookingStatGrid() {
   );
 }
 
-function BookingQueuePanel() {
-  return (
-    <Card>
-      <CardContent className="p-6 sm:p-7">
-        <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
-              Booking queue
-            </p>
-            <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
-              Reservations requiring active handling
-            </h3>
-          </div>
-          <Button size="sm" variant="ghost">
-            Export queue
-            <ArrowRight className="size-4" />
-          </Button>
-        </div>
-
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-y-3">
-            <thead>
-              <tr className="text-left text-[11px] font-bold uppercase tracking-[0.22em] text-stone-400">
-                <th className="pb-1 pr-4">Guest</th>
-                <th className="pb-1 pr-4">Product</th>
-                <th className="pb-1 pr-4">Check-in</th>
-                <th className="pb-1 pr-4">Source</th>
-                <th className="pb-1 pr-4">Status</th>
-                <th className="pb-1 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookingRows.map((row) => (
-                <tr className="bg-stone-50 text-sm text-stone-600" key={`${row.guest}-${row.product}`}>
-                  <td className="rounded-l-2xl px-4 py-4 font-semibold text-stone-950">
-                    {row.guest}
-                  </td>
-                  <td className="px-4 py-4">{row.product}</td>
-                  <td className="px-4 py-4">{row.checkIn}</td>
-                  <td className="px-4 py-4">{row.source}</td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${statusStyles[row.status]}`}>
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="rounded-r-2xl px-4 py-4 text-right font-semibold text-stone-950">
-                    {row.total}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function UpcomingCheckinsPanel() {
+function UpcomingCheckinsPanel({ bookings }: { readonly bookings: readonly ApiBooking[] }) {
   return (
     <Card>
       <CardContent className="p-6 sm:p-7">
@@ -176,43 +95,36 @@ function UpcomingCheckinsPanel() {
         </div>
 
         <div className="mt-6 space-y-4">
-          {cartItems.map((item) => (
-            <article
-              className="grid grid-cols-[88px_minmax(0,1fr)] gap-4 rounded-[1.5rem] border border-stone-200/80 bg-stone-50 p-4"
-              key={item.title}
-            >
-              <div className="relative aspect-square overflow-hidden rounded-2xl bg-stone-200">
-                <Image
-                  alt={item.alt}
-                  className="object-cover"
-                  fill
-                  sizes="88px"
-                  src={item.image}
-                />
-              </div>
-              <div className="min-w-0">
+          {bookings.slice(0, 4).map((booking) => {
+            const item = booking.items[0];
+
+            return (
+              <article
+                className="rounded-[1.5rem] border border-stone-200/80 bg-stone-50 p-4"
+                key={booking.bookingCode}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h4 className="text-lg font-bold tracking-tight text-stone-950">
-                      {item.title}
+                      {item?.title ?? booking.bookingCode}
                     </h4>
-                    <p className="mt-1 text-sm text-stone-500">{item.meta}</p>
+                    <p className="mt-1 text-sm text-stone-500">{booking.customer.fullName}</p>
                   </div>
                   <span className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-stone-950">
-                    {item.price}
+                    {formatCurrency(booking.totals.total, booking.totals.currency)}
                   </span>
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-900">
-                    {item.date}
+                    {booking.bookingCode}
                   </span>
                   <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                    Arrival ready
+                    {booking.status}
                   </span>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
@@ -295,7 +207,9 @@ function BookingSummaryPanel() {
   );
 }
 
-export default function AdminBookingsPage() {
+export default async function AdminBookingsPage() {
+  const bookings = await getBookings();
+
   return (
     <AdminShell
       activePath="/admin/bookings"
@@ -311,15 +225,15 @@ export default function AdminBookingsPage() {
       sectionLabel="Reservation queue, arrivals, and payment exceptions across the travel operation."
       teamValue="operations"
     >
-      <BookingStatGrid />
+      <BookingStatGrid bookings={bookings} />
 
       <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.6fr)_420px]">
-        <BookingQueuePanel />
+        <AdminBookingQueuePanel bookings={bookings} />
         <PaymentsPanel />
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.8fr)]">
-        <UpcomingCheckinsPanel />
+        <UpcomingCheckinsPanel bookings={bookings} />
         <BookingSummaryPanel />
       </section>
     </AdminShell>

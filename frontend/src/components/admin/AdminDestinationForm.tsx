@@ -19,10 +19,13 @@ import {
   destinationStatusOptions,
   slugifyDestinationTitle,
   type DestinationCommercialStatus,
+  type DestinationFactRow,
   type DestinationFormInitialValues,
   type DestinationFormState,
+  type DestinationLinkRow,
   type DestinationTextRow,
 } from "@/src/components/admin/adminDestinationFormData";
+import { createDestination, updateDestination, type SaveDestinationInput } from "@/src/lib/api/destinations";
 
 interface AdminDestinationFormCopy {
   readonly readinessEyebrow: string;
@@ -35,6 +38,8 @@ interface AdminDestinationFormCopy {
 interface AdminDestinationFormProps {
   readonly copy: AdminDestinationFormCopy;
   readonly initialValues: DestinationFormInitialValues;
+  readonly mode?: "create" | "update";
+  readonly originalSlug?: string;
 }
 
 interface FormErrors {
@@ -54,7 +59,15 @@ function updateRow(items: readonly DestinationTextRow[], id: string, value: stri
   return items.map((item) => (item.id === id ? { ...item, value } : item));
 }
 
-function removeRow(items: readonly DestinationTextRow[], id: string) {
+function updateFactRow<K extends keyof DestinationFactRow>(items: readonly DestinationFactRow[], id: string, field: K, value: DestinationFactRow[K]) {
+  return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
+}
+
+function updateLinkRow<K extends keyof DestinationLinkRow>(items: readonly DestinationLinkRow[], id: string, field: K, value: DestinationLinkRow[K]) {
+  return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
+}
+
+function removeRow<T extends { readonly id: string }>(items: readonly T[], id: string) {
   return items.length > 1 ? items.filter((item) => item.id !== id) : items;
 }
 
@@ -62,14 +75,73 @@ function createRow(prefix: string): DestinationTextRow {
   return { id: `${prefix}-${crypto.randomUUID()}`, value: "" };
 }
 
-export function AdminDestinationForm({ copy, initialValues }: AdminDestinationFormProps) {
+function createFactRow(): DestinationFactRow {
+  return { id: `fact-${crypto.randomUUID()}`, label: "", value: "" };
+}
+
+function createLinkRow(prefix: string): DestinationLinkRow {
+  return { id: `${prefix}-${crypto.randomUUID()}`, href: "", label: "", meta: "", title: "" };
+}
+
+function toApiStatus(status: DestinationCommercialStatus): SaveDestinationInput["status"] {
+  return status === "Published" ? "published" : status === "Ready for review" ? "draft" : "draft";
+}
+
+function splitSpotlight(value: string) {
+  const [title, ...descriptionParts] = value.split(":");
+  return {
+    title: title.trim(),
+    description: descriptionParts.join(":").trim() || title.trim(),
+  };
+}
+
+function toDestinationPayload(
+  form: DestinationFormState,
+  intro: readonly DestinationTextRow[],
+  facts: readonly DestinationFactRow[],
+  spotlight: readonly DestinationTextRow[],
+  relatedTours: readonly DestinationLinkRow[],
+  relatedHotels: readonly DestinationLinkRow[],
+): SaveDestinationInput {
+  return {
+    slug: form.slug,
+    title: form.title,
+    description: form.shortDescription,
+    href: form.href,
+    image: form.cardImage,
+    alt: form.cardAlt,
+    price: form.price,
+    rating: Number(form.rating),
+    market: form.market,
+    status: toApiStatus(form.status),
+    heroImage: form.heroImage,
+    heroAlt: form.heroAlt,
+    summary: form.summary,
+    intro: intro.map((item) => item.value.trim()).filter(Boolean),
+    facts: facts
+      .filter((item) => hasValue(item.label) && hasValue(item.value))
+      .map(({ label, value }) => ({ label, value })),
+    spotlight: spotlight.map((item) => splitSpotlight(item.value)).filter((item) => hasValue(item.title)),
+    relatedTours: relatedTours
+      .filter((item) => [item.href, item.label, item.meta, item.title].every(hasValue))
+      .map(({ href, label, meta, title }) => ({ href, label, meta, title })),
+    relatedHotels: relatedHotels
+      .filter((item) => [item.href, item.label, item.meta, item.title].every(hasValue))
+      .map(({ href, label, meta, title }) => ({ href, label, meta, title })),
+  };
+}
+
+export function AdminDestinationForm({ copy, initialValues, mode = "create", originalSlug }: AdminDestinationFormProps) {
   const [form, setForm] = useState<DestinationFormState>(initialValues.form);
   const [intro, setIntro] = useState<readonly DestinationTextRow[]>(initialValues.intro);
+  const [facts, setFacts] = useState<readonly DestinationFactRow[]>(initialValues.facts);
   const [spotlight, setSpotlight] = useState<readonly DestinationTextRow[]>(initialValues.spotlight);
-  const [relatedTours, setRelatedTours] = useState<readonly DestinationTextRow[]>(initialValues.relatedTours);
-  const [relatedHotels, setRelatedHotels] = useState<readonly DestinationTextRow[]>(initialValues.relatedHotels);
+  const [relatedTours, setRelatedTours] = useState<readonly DestinationLinkRow[]>(initialValues.relatedTours);
+  const [relatedHotels, setRelatedHotels] = useState<readonly DestinationLinkRow[]>(initialValues.relatedHotels);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saved, setSaved] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const readiness = useMemo(
     () => [
@@ -83,20 +155,27 @@ export function AdminDestinationForm({ copy, initialValues }: AdminDestinationFo
       },
       {
         label: "Story",
-        ready: hasValue(form.summary) && intro.some((item) => hasValue(item.value)) && spotlight.some((item) => hasValue(item.value)),
+        ready:
+          hasValue(form.summary) &&
+          intro.some((item) => hasValue(item.value)) &&
+          facts.some((item) => hasValue(item.label) && hasValue(item.value)) &&
+          spotlight.some((item) => hasValue(item.value)),
       },
       {
         label: "Connections",
-        ready: relatedTours.some((item) => hasValue(item.value)) || relatedHotels.some((item) => hasValue(item.value)),
+        ready:
+          relatedTours.some((item) => [item.href, item.label, item.meta, item.title].every(hasValue)) ||
+          relatedHotels.some((item) => [item.href, item.label, item.meta, item.title].every(hasValue)),
       },
     ],
-    [form, intro, relatedHotels, relatedTours, spotlight],
+    [facts, form, intro, relatedHotels, relatedTours, spotlight],
   );
 
   function updateField<K extends keyof DestinationFormState>(field: K, value: DestinationFormState[K]) {
     setForm((current) => {
       if (field === "title") {
-        return { ...current, title: value, slug: current.slug || slugifyDestinationTitle(String(value)) };
+        const slug = current.slug || slugifyDestinationTitle(String(value));
+        return { ...current, title: value, slug, href: current.href || `/destinations/${slug}` };
       }
 
       return { ...current, [field]: value };
@@ -133,18 +212,32 @@ export function AdminDestinationForm({ copy, initialValues }: AdminDestinationFo
     return Object.keys(nextErrors).length === 0;
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaved(false);
+    setSubmitError(null);
 
     if (!validateForm()) {
       return;
     }
 
-    setSaved(true);
+    setIsSubmitting(true);
+    try {
+      const payload = toDestinationPayload(form, intro, facts, spotlight, relatedTours, relatedHotels);
+      if (mode === "update") {
+        await updateDestination(originalSlug ?? form.slug, payload);
+      } else {
+        await createDestination(payload);
+      }
+      setSaved(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Unable to save destination.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function updateRows(setRows: (items: readonly DestinationTextRow[]) => void, items: readonly DestinationTextRow[]) {
+  function updateRows<T>(setRows: (items: readonly T[]) => void, items: readonly T[]) {
     setRows(items);
     setSaved(false);
   }
@@ -155,8 +248,10 @@ export function AdminDestinationForm({ copy, initialValues }: AdminDestinationFo
         <DestinationEssentialsSection errors={errors} form={form} updateField={updateField} />
         <DestinationMediaSection errors={errors} form={form} updateField={updateField} />
         <DestinationStorySection
+          facts={facts}
           form={form}
           intro={intro}
+          setFacts={(items) => updateRows(setFacts, items)}
           setIntro={(items) => updateRows(setIntro, items)}
           setSpotlight={(items) => updateRows(setSpotlight, items)}
           spotlight={spotlight}
@@ -170,7 +265,7 @@ export function AdminDestinationForm({ copy, initialValues }: AdminDestinationFo
         />
       </div>
 
-      <DestinationDraftSidebar copy={copy} form={form} readiness={readiness} saved={saved} />
+      <DestinationDraftSidebar copy={copy} form={form} isSubmitting={isSubmitting} readiness={readiness} saved={saved} submitError={submitError} />
     </form>
   );
 }
@@ -178,13 +273,17 @@ export function AdminDestinationForm({ copy, initialValues }: AdminDestinationFo
 function DestinationDraftSidebar({
   copy,
   form,
+  isSubmitting,
   readiness,
   saved,
+  submitError,
 }: Readonly<{
   copy: AdminDestinationFormCopy;
   form: DestinationFormState;
+  isSubmitting: boolean;
   readiness: readonly { readonly label: string; readonly ready: boolean }[];
   saved: boolean;
+  submitError: string | null;
 }>) {
   const completed = readiness.filter((item) => item.ready).length;
 
@@ -254,9 +353,15 @@ function DestinationDraftSidebar({
         </Card>
       ) : null}
 
-      <Button className="w-full" size="lg" type="submit">
+      {submitError ? (
+        <Card aria-live="polite" className="border-none bg-rose-100 text-rose-950" role="alert">
+          <CardContent className="p-5 text-sm font-semibold">{submitError}</CardContent>
+        </Card>
+      ) : null}
+
+      <Button className="w-full" disabled={isSubmitting} size="lg" type="submit">
         <Save className="size-4" />
-        {saved ? copy.savedSubmitLabel : copy.submitLabel}
+        {isSubmitting ? "Saving..." : saved ? copy.savedSubmitLabel : copy.submitLabel}
       </Button>
     </aside>
   );
@@ -342,6 +447,7 @@ function DestinationEssentialsSection({
         <div className="grid gap-4 md:grid-cols-2">
           <TextField error={errors.title} id="destination-title" label="Title" onChange={(value) => updateField("title", value)} value={form.title} />
           <TextField id="destination-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
+          <TextField id="destination-href" label="Public href" onChange={(value) => updateField("href", value)} value={form.href} />
           <TextField id="destination-market" label="Market / region" onChange={(value) => updateField("market", value)} value={form.market} />
           <TextField error={errors.price} id="destination-price" label="Price" onChange={(value) => updateField("price", value)} value={form.price} />
           <TextField error={errors.rating} id="destination-rating" label="Rating" onChange={(value) => updateField("rating", value)} value={form.rating} />
@@ -404,15 +510,19 @@ function DestinationMediaSection({
 }
 
 function DestinationStorySection({
+  facts,
   form,
   intro,
+  setFacts,
   setIntro,
   setSpotlight,
   spotlight,
   updateField,
 }: Readonly<{
+  facts: readonly DestinationFactRow[];
   form: DestinationFormState;
   intro: readonly DestinationTextRow[];
+  setFacts: (items: readonly DestinationFactRow[]) => void;
   setIntro: (items: readonly DestinationTextRow[]) => void;
   setSpotlight: (items: readonly DestinationTextRow[]) => void;
   spotlight: readonly DestinationTextRow[];
@@ -443,6 +553,13 @@ function DestinationStorySection({
           textareaLabel="Paragraph"
         />
 
+        <FactsEditor
+          facts={facts}
+          onAdd={() => setFacts([...facts, createFactRow()])}
+          onRemove={(id) => setFacts(removeRow(facts, id))}
+          onUpdate={(id, field, value) => setFacts(updateFactRow(facts, id, field, value))}
+        />
+
         <TextRowsEditor
           addLabel="Add spotlight point"
           icon={<Sparkles className="size-4" />}
@@ -465,10 +582,10 @@ function DestinationRelatedSection({
   setRelatedHotels,
   setRelatedTours,
 }: Readonly<{
-  relatedHotels: readonly DestinationTextRow[];
-  relatedTours: readonly DestinationTextRow[];
-  setRelatedHotels: (items: readonly DestinationTextRow[]) => void;
-  setRelatedTours: (items: readonly DestinationTextRow[]) => void;
+  relatedHotels: readonly DestinationLinkRow[];
+  relatedTours: readonly DestinationLinkRow[];
+  setRelatedHotels: (items: readonly DestinationLinkRow[]) => void;
+  setRelatedTours: (items: readonly DestinationLinkRow[]) => void;
 }>) {
   return (
     <Card>
@@ -478,30 +595,128 @@ function DestinationRelatedSection({
           eyebrow="Related inventory"
           title="Tours and hotels"
         />
-        <TextRowsEditor
+        <LinkRowsEditor
           addLabel="Add related tour"
           icon={<ImageIcon className="size-4" />}
           label="Related tours"
-          onAdd={() => setRelatedTours([...relatedTours, createRow("related-tour")])}
+          onAdd={() => setRelatedTours([...relatedTours, createLinkRow("related-tour")])}
           onRemove={(id) => setRelatedTours(removeRow(relatedTours, id))}
-          onUpdate={(id, value) => setRelatedTours(updateRow(relatedTours, id, value))}
+          onUpdate={(id, field, value) => setRelatedTours(updateLinkRow(relatedTours, id, field, value))}
           removeLabel="Remove related tour"
           rows={relatedTours}
-          textareaLabel="Tour title"
         />
-        <TextRowsEditor
+        <LinkRowsEditor
           addLabel="Add related hotel"
           icon={<Hotel className="size-4" />}
           label="Related hotels"
-          onAdd={() => setRelatedHotels([...relatedHotels, createRow("related-hotel")])}
+          onAdd={() => setRelatedHotels([...relatedHotels, createLinkRow("related-hotel")])}
           onRemove={(id) => setRelatedHotels(removeRow(relatedHotels, id))}
-          onUpdate={(id, value) => setRelatedHotels(updateRow(relatedHotels, id, value))}
+          onUpdate={(id, field, value) => setRelatedHotels(updateLinkRow(relatedHotels, id, field, value))}
           removeLabel="Remove related hotel"
           rows={relatedHotels}
-          textareaLabel="Hotel title"
         />
       </CardContent>
     </Card>
+  );
+}
+
+function FactsEditor({
+  facts,
+  onAdd,
+  onRemove,
+  onUpdate,
+}: Readonly<{
+  facts: readonly DestinationFactRow[];
+  onAdd: () => void;
+  onRemove: (id: string) => void;
+  onUpdate: <K extends keyof DestinationFactRow>(id: string, field: K, value: DestinationFactRow[K]) => void;
+}>) {
+  return (
+    <div className="space-y-4 border-t border-stone-200 pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
+          <span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900">
+            <BadgeCheck className="size-4" />
+          </span>
+          Facts
+        </div>
+        <Button aria-label="Add fact" onClick={onAdd} size="sm" type="button" variant="outline">
+          <Plus className="size-4" />
+          Add fact
+        </Button>
+      </div>
+      <div className="space-y-4">
+        {facts.map((fact, index) => (
+          <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={fact.id}>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <p className="text-sm font-bold text-stone-950">Fact {index + 1}</p>
+              <Button aria-label={`Remove fact ${index + 1}`} disabled={facts.length <= 1} onClick={() => onRemove(fact.id)} size="icon" type="button" variant="ghost">
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField id={`${fact.id}-label`} label="Label" onChange={(value) => onUpdate(fact.id, "label", value)} value={fact.label} />
+              <TextField id={`${fact.id}-value`} label="Value" onChange={(value) => onUpdate(fact.id, "value", value)} value={fact.value} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LinkRowsEditor({
+  addLabel,
+  icon,
+  label,
+  onAdd,
+  onRemove,
+  onUpdate,
+  removeLabel,
+  rows,
+}: Readonly<{
+  addLabel: string;
+  icon: ReactNode;
+  label: string;
+  onAdd: () => void;
+  onRemove: (id: string) => void;
+  onUpdate: <K extends keyof DestinationLinkRow>(id: string, field: K, value: DestinationLinkRow[K]) => void;
+  removeLabel: string;
+  rows: readonly DestinationLinkRow[];
+}>) {
+  return (
+    <div className="space-y-4 border-t border-stone-200 pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
+          <span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900">
+            {icon}
+          </span>
+          {label}
+        </div>
+        <Button aria-label={addLabel} onClick={onAdd} size="sm" type="button" variant="outline">
+          <Plus className="size-4" />
+          {addLabel}
+        </Button>
+      </div>
+      <div className="space-y-4">
+        {rows.map((row, index) => (
+          <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={row.id}>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <p className="text-sm font-bold text-stone-950">{label} {index + 1}</p>
+              <Button aria-label={`${removeLabel} ${index + 1}`} disabled={rows.length <= 1} onClick={() => onRemove(row.id)} size="icon" type="button" variant="ghost">
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField id={`${row.id}-title`} label="Title" onChange={(value) => onUpdate(row.id, "title", value)} value={row.title} />
+              <TextField id={`${row.id}-label`} label="Label" onChange={(value) => onUpdate(row.id, "label", value)} value={row.label} />
+              <TextField id={`${row.id}-href`} label="Href" onChange={(value) => onUpdate(row.id, "href", value)} value={row.href} />
+              <TextField id={`${row.id}-meta`} label="Meta" onChange={(value) => onUpdate(row.id, "meta", value)} value={row.meta} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

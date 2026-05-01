@@ -5,14 +5,17 @@ import { AdminShell } from "@/src/components/admin/AdminShell";
 import { AdminTourCatalogPreview } from "@/src/components/admin/AdminTourCatalogPreview";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { tourCards } from "@/src/data/mockData";
+import { getTours } from "@/src/lib/api/tours";
+import type { TourCard } from "@/src/types/travel";
 
-const catalogStats = [
-  { label: "Published tours", value: `${tourCards.length}`, note: "2 featured programs" },
-  { label: "Open departures", value: "19", note: "Next 45 days" },
-  { label: "Avg. occupancy", value: "74%", note: "+6% vs target" },
-  { label: "Private charter leads", value: "11", note: "Awaiting follow-up" },
-] as const;
+function getCatalogStats(tours: readonly TourCard[]) {
+  return [
+    { label: "Published tours", value: `${tours.length}`, note: `${tours.filter((tour) => tour.badge === "Featured").length} featured programs` },
+    { label: "Open departures", value: "19", note: "Next 45 days" },
+    { label: "Avg. occupancy", value: "74%", note: "+6% vs target" },
+    { label: "Private charter leads", value: "11", note: "Awaiting follow-up" },
+  ] as const;
+}
 
 const departureRows = [
   {
@@ -51,7 +54,9 @@ const statusStyles: Record<(typeof departureRows)[number]["status"], string> = {
   "Almost full": "bg-stone-900 text-white",
 };
 
-function ToursStatGrid() {
+function ToursStatGrid({ tours }: { readonly tours: readonly TourCard[] }) {
+  const catalogStats = getCatalogStats(tours);
+
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
       {catalogStats.map((item) => (
@@ -180,7 +185,9 @@ function InsightsPanel() {
   );
 }
 
-export default function AdminToursPage() {
+export default async function AdminToursPage() {
+  const tours = await getTours();
+
   return (
     <AdminShell
       activePath="/admin/tours"
@@ -198,10 +205,10 @@ export default function AdminToursPage() {
       sectionLabel="Catalog, departures, and sales posture for active tour products."
       teamValue="sales"
     >
-      <ToursStatGrid />
+      <ToursStatGrid tours={tours} />
 
       <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.6fr)_420px]">
-        <AdminTourCatalogPreview tours={tourCards} />
+        <AdminTourCatalogPreview tours={tours} />
         <InsightsPanel />
       </section>
 

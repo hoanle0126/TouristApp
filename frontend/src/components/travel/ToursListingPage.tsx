@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, ChevronDown, Filter } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
-import { tourCards, type TourCard } from "@/src/data/mockData";
+import type { TourCard } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
 const filters = ["Destination", "Duration", "Travel Style", "Price Range"] as const;
@@ -66,7 +66,7 @@ function TourCardView({ tour }: Readonly<{ tour: TourCard }>) {
         <div className="flex items-center justify-between border-t border-stone-200 pt-4">
           <span className="text-lg font-extrabold text-stone-950">From {tour.price}</span>
           <Button asChild className="text-xs uppercase tracking-widest" size="sm" variant="ghost">
-            <Link href="/tours/bay-mau-coconut-forest">
+            <Link href={`/tours/${tour.slug}`}>
               View Details
               <ArrowRight className="size-4" />
             </Link>
@@ -95,12 +95,12 @@ function ToursHero() {
   );
 }
 
-function ToursGrid() {
+function ToursGrid({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
   return (
     <section className="mx-auto mb-24 max-w-screen-2xl px-8 lg:px-24">
       <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-        {tourCards.map((tour) => (
-          <TourCardView key={tour.title} tour={tour} />
+        {tours.map((tour) => (
+          <TourCardView key={tour.slug ?? tour.title} tour={tour} />
         ))}
       </div>
       <div className="mt-24 flex flex-col items-center gap-8">
@@ -125,13 +125,13 @@ function ToursGrid() {
   );
 }
 
-export default function ToursListingPage() {
+export default function ToursListingPage({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Tours" />
       <ToursHero />
       <FilterBar />
-      <ToursGrid />
+      <ToursGrid tours={tours} />
       <TravelFooter />
     </main>
   );

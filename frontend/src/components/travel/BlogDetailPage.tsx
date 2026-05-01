@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
-import { kyotoNewWaveJournalDetail, type JournalDetail, type JournalDetailRelatedPost } from "@/src/data/mockData";
+import type { JournalDetail, JournalDetailRelatedPost } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
 function ArticleHero({ article }: Readonly<{ article: JournalDetail }>) {
@@ -120,15 +120,15 @@ function RelatedStories({ article }: Readonly<{ article: JournalDetail }>) {
   );
 }
 
-export default function BlogDetailPage() {
+export default function BlogDetailPage({ article }: Readonly<{ article: JournalDetail }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Blog" />
       <div className="pt-20">
-        <ArticleHero article={kyotoNewWaveJournalDetail} />
-        <ArticleBody article={kyotoNewWaveJournalDetail} />
+        <ArticleHero article={article} />
+        <ArticleBody article={article} />
         <BackToJournal />
-        <RelatedStories article={kyotoNewWaveJournalDetail} />
+        <RelatedStories article={article} />
       </div>
       <TravelFooter />
     </main>

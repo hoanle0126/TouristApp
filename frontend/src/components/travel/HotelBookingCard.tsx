@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { type CartItem, type HotelDetail, type HotelDetailSuite } from "@/src/data/mockData";
+import { type CartItem, type HotelDetail, type HotelDetailSuite } from "@/src/types/travel";
 
 const travelerOptions = [
   "2 Adults, 1 Room",
@@ -124,14 +124,20 @@ function createCartItem(
   stayLabel: string,
   travelers: string,
   total: string,
+  nights: number,
 ): CartItem {
   return {
     id: `${hotel.title}-${suite.name}-${stayLabel}-${travelers}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     alt: hotel.heroAlt,
     date: stayLabel,
     image: hotel.heroImage,
+    itemType: "hotel",
     meta: `${suite.name} • ${travelers}`,
+    nights,
     price: total,
+    quantity: 1,
+    roomType: suite.name,
+    slug: hotel.slug,
     title: hotel.title,
   };
 }
@@ -154,7 +160,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
     (option) => option.suite.name === selectedSuiteName,
   );
   const cartItem = selectedOption
-    ? createCartItem(hotel, selectedOption.suite, stayLabel, travelers, selectedOption.total)
+    ? createCartItem(hotel, selectedOption.suite, stayLabel, travelers, selectedOption.total, nights)
     : null;
   const inCart = cartItem ? isInCart(cartItem) : false;
 
@@ -179,7 +185,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                 Check-in
               </label>
               <Input
-                className="h-auto border-none bg-transparent p-0 text-sm font-bold shadow-none focus-visible:ring-0"
+                className="mt-2 h-11 rounded-xl border border-stone-200 bg-white px-4 text-sm font-bold shadow-none focus-visible:ring-0"
                 id="hotel-check-in"
                 min={new Date().toISOString().split("T")[0]}
                 onChange={(event) => {
@@ -196,7 +202,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                 Check-out
               </label>
               <Input
-                className="h-auto border-none bg-transparent p-0 text-sm font-bold shadow-none focus-visible:ring-0"
+                className="mt-2 h-11 rounded-xl border border-stone-200 bg-white px-4 text-sm font-bold shadow-none focus-visible:ring-0"
                 id="hotel-check-out"
                 min={checkIn}
                 onChange={(event) => {
@@ -222,8 +228,11 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
               }}
               value={travelers}
             >
-              <SelectTrigger className="h-auto border-none bg-transparent p-0 shadow-none focus-visible:ring-0" id="hotel-travelers">
-                <SelectValue placeholder="Select travelers" />
+              <SelectTrigger
+                className="mt-2 h-11 rounded-xl border border-stone-200 bg-white pl-4 pr-3 shadow-none focus-visible:ring-0 [&>span]:pl-0.5"
+                id="hotel-travelers"
+              >
+                <SelectValue placeholder="Select travelers">{travelers}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {travelerOptions.map((option) => (

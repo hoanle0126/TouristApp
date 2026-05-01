@@ -15,7 +15,11 @@ import Link from "next/link";
 import { AdminShell } from "@/src/components/admin/AdminShell";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { destinationCards, hotelCards, journalPosts, tourCards } from "@/src/data/mockData";
+import { getBookings } from "@/src/lib/api/bookings";
+import { getBlogPosts } from "@/src/lib/api/blogs";
+import { getDestinations } from "@/src/lib/api/destinations";
+import { getHotels } from "@/src/lib/api/hotels";
+import { getTours } from "@/src/lib/api/tours";
 
 const statCards = [
   {
@@ -273,27 +277,35 @@ function BookingsPanel() {
   );
 }
 
-function PortfolioPanel() {
+interface PortfolioCounts {
+  readonly bookings: number;
+  readonly blogs: number;
+  readonly destinations: number;
+  readonly hotels: number;
+  readonly tours: number;
+}
+
+function PortfolioPanel({ counts }: Readonly<{ counts: PortfolioCounts }>) {
   const featuredPortfolio = [
     {
-      count: `${tourCards.length} active tours`,
+      count: `${counts.tours} active tours`,
       label: "Signature journeys",
       value: "86% occupancy",
     },
     {
-      count: `${hotelCards.length} hotel partners`,
+      count: `${counts.hotels} hotel partners`,
       label: "Stay collection",
       value: "12 contract renewals",
     },
     {
-      count: `${destinationCards.length} destinations`,
+      count: `${counts.destinations} destinations`,
       label: "Destination index",
       value: "4 launch candidates",
     },
     {
-      count: `${journalPosts.length} journal stories`,
+      count: `${counts.blogs} journal stories`,
       label: "Editorial pipeline",
-      value: "3 drafts pending",
+      value: `${counts.bookings} live bookings`,
     },
   ] as const;
 
@@ -376,7 +388,15 @@ function OperationsPanel() {
   );
 }
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const [tours, hotels, destinations, blogs, bookings] = await Promise.all([
+    getTours(),
+    getHotels(),
+    getDestinations(),
+    getBlogPosts(),
+    getBookings(),
+  ]);
+
   return (
     <AdminShell
       activePath="/admin"
@@ -400,7 +420,7 @@ export default function AdminDashboardPage() {
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
         <BookingsPanel />
-        <PortfolioPanel />
+        <PortfolioPanel counts={{ bookings: bookings.length, blogs: blogs.length, destinations: destinations.length, hotels: hotels.length, tours: tours.length }} />
       </section>
     </AdminShell>
   );

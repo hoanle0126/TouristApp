@@ -28,16 +28,13 @@ import {
 } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 import {
-  blogPosts,
-  destinationCards,
   heroImage,
   suggestionCards,
   visualDiaryItems,
-  type BlogPost,
-  type DestinationCard,
   type SuggestionCard,
   type VisualDiaryItem,
 } from "@/src/data/mockData";
+import type { BlogPost, DestinationCard } from "@/src/types/travel";
 
 interface SectionHeadingProps {
   readonly align?: "left" | "center";
@@ -406,7 +403,12 @@ function ContactSection() {
   );
 }
 
-export default function TravelLandingPage() {
+interface TravelLandingPageProps {
+  readonly blogPosts: readonly BlogPost[];
+  readonly destinationCards: readonly DestinationCard[];
+}
+
+export default function TravelLandingPage({ blogPosts, destinationCards }: Readonly<TravelLandingPageProps>) {
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <TravelHeader activeItem="Home" />

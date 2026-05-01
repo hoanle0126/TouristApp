@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, MapPin, Search, SlidersHorizontal, Users } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
-import { hotelCards, type HotelCard } from "@/src/data/mockData";
+import type { HotelCard } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
 const hotelFilters = [
@@ -106,7 +106,7 @@ function HotelCardView({ hotel, index }: Readonly<{ hotel: HotelCard; index: num
             From <strong className="text-lg text-stone-950">{hotel.price}</strong> / night
           </span>
           <Button asChild className="text-xs uppercase tracking-widest" size="sm" variant="ghost">
-            <Link href="/hotels/shining-riverside-hoi-an">
+            <Link href={`/hotels/${hotel.slug}`}>
               View Stay
               <ArrowRight className="size-4" />
             </Link>
@@ -117,7 +117,7 @@ function HotelCardView({ hotel, index }: Readonly<{ hotel: HotelCard; index: num
   );
 }
 
-function HotelsGrid() {
+function HotelsGrid({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
   return (
     <section className="mx-auto max-w-screen-2xl px-8 py-24 lg:px-24 lg:py-32">
       <div className="mb-12 flex flex-col justify-between gap-6 border-b border-stone-200 pb-8 md:flex-row md:items-end">
@@ -130,8 +130,8 @@ function HotelsGrid() {
         </p>
       </div>
       <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
-        {hotelCards.map((hotel, index) => (
-          <HotelCardView hotel={hotel} index={index} key={hotel.name} />
+        {hotels.map((hotel, index) => (
+          <HotelCardView hotel={hotel} index={index} key={hotel.slug ?? hotel.name} />
         ))}
       </div>
     </section>
@@ -168,13 +168,13 @@ function PrivateCurationCta() {
   );
 }
 
-export default function HotelsListingPage() {
+export default function HotelsListingPage({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Hotels" />
       <HotelsHero />
       <HotelsFilterBar />
-      <HotelsGrid />
+      <HotelsGrid hotels={hotels} />
       <PrivateCurationCta />
       <TravelFooter />
     </main>

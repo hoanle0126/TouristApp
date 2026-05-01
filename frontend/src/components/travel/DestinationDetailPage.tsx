@@ -4,7 +4,7 @@ import { ArrowRight, ChevronRight, Star } from "lucide-react";
 
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { Button } from "@/src/components/ui/button";
-import { type DestinationDetail } from "@/src/data/mockData";
+import { type DestinationDetail } from "@/src/types/travel";
 
 function Breadcrumb({ title }: Readonly<{ title: string }>) {
   return (

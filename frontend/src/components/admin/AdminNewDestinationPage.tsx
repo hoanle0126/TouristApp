@@ -30,9 +30,10 @@ export default function AdminNewDestinationPage() {
           submitLabel: "Save destination draft",
           savedSubmitLabel: "Saved draft",
           successTitle: "Destination draft ready for review",
-          successDescription: "This mock submit keeps the data on this page and does not publish it.",
+          successDescription: "The destination has been saved to the backend catalog.",
         }}
         initialValues={createDestinationInitialValues}
+        mode="create"
       />
     </AdminShell>
   );

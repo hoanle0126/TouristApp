@@ -97,38 +97,58 @@ export class HotelsService {
   }
 
   async upsertInventory(slug: string, dto: UpsertHotelInventoryDto) {
-    const hotel = await this.findEditableHotel(slug);
+    await this.prisma.$transaction(async (tx) => {
+      const hotel = await tx.hotel.findUnique({ where: { slug } });
 
-    for (const inventoryDay of dto.inventory) {
-      const date = this.toInventoryDate(inventoryDay.date);
-      const existing = inventoryDay.id
-        ? await this.prisma.hotelInventoryDay.findUnique({
-            where: { id: inventoryDay.id },
-          })
-        : null;
-
-      if (existing && inventoryDay.totalRooms < existing.bookedRooms) {
-        throw new BadRequestException(CAPACITY_ERROR);
+      if (!hotel) {
+        throw new NotFoundException(`Hotel ${slug} was not found.`);
       }
 
-      await this.prisma.hotelInventoryDay.upsert({
-        where: inventoryDay.id
-          ? { id: inventoryDay.id }
-          : { hotelId_date: { hotelId: hotel.id, date } },
-        create: {
-          hotelId: hotel.id,
-          date,
-          totalRooms: inventoryDay.totalRooms,
-          status: inventoryDay.status,
-          bookedRooms: 0,
-        },
-        update: {
-          date,
-          totalRooms: inventoryDay.totalRooms,
-          status: inventoryDay.status,
-        },
-      });
-    }
+      for (const inventoryDay of dto.inventory) {
+        const date = this.toInventoryDate(inventoryDay.date);
+
+        if (inventoryDay.id) {
+          const existing = await tx.hotelInventoryDay.findUnique({
+            where: { id: inventoryDay.id },
+          });
+
+          if (!existing || existing.hotelId !== hotel.id) {
+            throw new NotFoundException(
+              `Hotel inventory day ${inventoryDay.id} was not found.`,
+            );
+          }
+
+          if (inventoryDay.totalRooms < existing.bookedRooms) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
+
+          await tx.hotelInventoryDay.update({
+            where: { id: inventoryDay.id },
+            data: {
+              date,
+              totalRooms: inventoryDay.totalRooms,
+              status: inventoryDay.status,
+            },
+          });
+          continue;
+        }
+
+        await tx.hotelInventoryDay.upsert({
+          where: { hotelId_date: { hotelId: hotel.id, date } },
+          create: {
+            hotelId: hotel.id,
+            date,
+            totalRooms: inventoryDay.totalRooms,
+            status: inventoryDay.status,
+            bookedRooms: 0,
+          },
+          update: {
+            totalRooms: inventoryDay.totalRooms,
+            status: inventoryDay.status,
+          },
+        });
+      }
+    });
 
     return this.findOne(slug);
   }

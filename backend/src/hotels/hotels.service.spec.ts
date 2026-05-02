@@ -121,7 +121,7 @@ const hotelRecord = {
 };
 
 function createPrismaMock() {
-  return {
+  const prisma = {
     hotel: {
       findMany: jest.fn(),
       findFirst: jest.fn(),
@@ -132,9 +132,13 @@ function createPrismaMock() {
     },
     hotelInventoryDay: {
       findUnique: jest.fn(),
+      update: jest.fn(),
       upsert: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
+  prisma.$transaction.mockImplementation((callback) => callback(prisma));
+  return prisma;
 }
 
 describe('HotelsService', () => {
@@ -192,7 +196,94 @@ describe('HotelsService', () => {
     ).rejects.toThrow(
       new BadRequestException('Capacity cannot be lower than current bookings.'),
     );
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
     expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects an inventory day id that belongs to another hotel without writing', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique.mockResolvedValueOnce({
+      id: 'inventory_other',
+      hotelId: 'hotel_other',
+      date: new Date('2026-06-13T00:00:00.000Z'),
+      totalRooms: 10,
+      bookedRooms: 0,
+      status: 'open',
+    });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          {
+            id: 'inventory_other',
+            date: '2026-06-13',
+            totalRooms: 10,
+            status: 'open',
+          },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rolls back batch inventory updates when a later row is invalid', async () => {
+    const prisma = createPrismaMock();
+    const writes: unknown[] = [];
+    const tx = {
+      hotel: { findUnique: jest.fn().mockResolvedValue(hotelRecord) },
+      hotelInventoryDay: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValueOnce({
+            id: 'inventory_1',
+            hotelId: 'hotel_1',
+            date: new Date('2026-06-12T00:00:00.000Z'),
+            totalRooms: 10,
+            bookedRooms: 3,
+            status: 'open',
+          })
+          .mockResolvedValueOnce({
+            id: 'inventory_2',
+            hotelId: 'hotel_1',
+            date: new Date('2026-06-13T00:00:00.000Z'),
+            totalRooms: 10,
+            bookedRooms: 6,
+            status: 'open',
+          }),
+        update: jest.fn().mockImplementation((args) => {
+          writes.push(args);
+          return Promise.resolve({});
+        }),
+        upsert: jest.fn(),
+      },
+    };
+    prisma.$transaction.mockImplementationOnce(async (callback) => {
+      writes.length = 0;
+      try {
+        return await callback(tx);
+      } catch (error) {
+        writes.length = 0;
+        throw error;
+      }
+    });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          { id: 'inventory_1', date: '2026-06-12', totalRooms: 12, status: 'open' },
+          { id: 'inventory_2', date: '2026-06-13', totalRooms: 5, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('Capacity cannot be lower than current bookings.'),
+    );
+    expect(tx.hotelInventoryDay.update).toHaveBeenCalledTimes(1);
+    expect(writes).toEqual([]);
+    expect(prisma.hotel.findFirst).not.toHaveBeenCalled();
   });
 
   it('upserts inventory and returns detail with remaining rooms', async () => {
@@ -206,7 +297,7 @@ describe('HotelsService', () => {
       bookedRooms: 3,
       status: 'open',
     });
-    prisma.hotelInventoryDay.upsert.mockResolvedValueOnce({});
+    prisma.hotelInventoryDay.update.mockResolvedValueOnce({});
     prisma.hotel.findFirst.mockResolvedValueOnce({
       ...hotelRecord,
       inventoryDays: [

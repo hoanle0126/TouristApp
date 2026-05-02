@@ -71,42 +71,56 @@ export class ToursService {
   }
 
   async upsertDepartures(slug: string, dto: UpsertTourDeparturesDto) {
-    const tour = await this.prisma.tour.findUnique({ where: { slug } });
+    await this.prisma.$transaction(async (tx) => {
+      const tour = await tx.tour.findUnique({ where: { slug } });
 
-    if (!tour) {
-      throw new NotFoundException(`Tour ${slug} was not found.`);
-    }
-
-    for (const departure of dto.departures) {
-      const date = this.toInventoryDate(departure.date);
-      const existing = departure.id
-        ? await this.prisma.tourDeparture.findUnique({
-            where: { id: departure.id },
-          })
-        : null;
-
-      if (existing && departure.capacity < existing.booked) {
-        throw new BadRequestException(CAPACITY_ERROR);
+      if (!tour) {
+        throw new NotFoundException(`Tour ${slug} was not found.`);
       }
 
-      await this.prisma.tourDeparture.upsert({
-        where: departure.id
-          ? { id: departure.id }
-          : { tourId_date: { tourId: tour.id, date } },
-        create: {
-          tourId: tour.id,
-          date,
-          capacity: departure.capacity,
-          status: departure.status,
-          booked: 0,
-        },
-        update: {
-          date,
-          capacity: departure.capacity,
-          status: departure.status,
-        },
-      });
-    }
+      for (const departure of dto.departures) {
+        const date = this.toInventoryDate(departure.date);
+
+        if (departure.id) {
+          const existing = await tx.tourDeparture.findUnique({
+            where: { id: departure.id },
+          });
+
+          if (!existing || existing.tourId !== tour.id) {
+            throw new NotFoundException(`Tour departure ${departure.id} was not found.`);
+          }
+
+          if (departure.capacity < existing.booked) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
+
+          await tx.tourDeparture.update({
+            where: { id: departure.id },
+            data: {
+              date,
+              capacity: departure.capacity,
+              status: departure.status,
+            },
+          });
+          continue;
+        }
+
+        await tx.tourDeparture.upsert({
+          where: { tourId_date: { tourId: tour.id, date } },
+          create: {
+            tourId: tour.id,
+            date,
+            capacity: departure.capacity,
+            status: departure.status,
+            booked: 0,
+          },
+          update: {
+            capacity: departure.capacity,
+            status: departure.status,
+          },
+        });
+      }
+    });
 
     return this.findOne(slug);
   }

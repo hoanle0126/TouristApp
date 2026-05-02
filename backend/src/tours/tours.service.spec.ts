@@ -109,7 +109,7 @@ const tourRecord = {
 };
 
 function createPrismaMock() {
-  return {
+  const prisma = {
     tour: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
@@ -119,9 +119,13 @@ function createPrismaMock() {
     },
     tourDeparture: {
       findUnique: jest.fn(),
+      update: jest.fn(),
       upsert: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
+  prisma.$transaction.mockImplementation((callback) => callback(prisma));
+  return prisma;
 }
 
 describe('ToursService', () => {
@@ -184,7 +188,94 @@ describe('ToursService', () => {
     ).rejects.toThrow(
       new BadRequestException('Capacity cannot be lower than current bookings.'),
     );
+    expect(prisma.tourDeparture.update).not.toHaveBeenCalled();
     expect(prisma.tourDeparture.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects a departure id that belongs to another tour without writing', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValueOnce(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValueOnce({
+      id: 'departure_other',
+      tourId: 'tour_other',
+      date: new Date('2026-06-13T00:00:00.000Z'),
+      capacity: 12,
+      booked: 0,
+      status: 'open',
+    });
+    const service = new ToursService(prisma as never);
+
+    await expect(
+      service.upsertDepartures('bay-mau-coconut-forest', {
+        departures: [
+          {
+            id: 'departure_other',
+            date: '2026-06-13',
+            capacity: 12,
+            status: 'open',
+          },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.tourDeparture.update).not.toHaveBeenCalled();
+    expect(prisma.tourDeparture.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rolls back batch departure updates when a later row is invalid', async () => {
+    const prisma = createPrismaMock();
+    const writes: unknown[] = [];
+    const tx = {
+      tour: { findUnique: jest.fn().mockResolvedValue(tourRecord) },
+      tourDeparture: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValueOnce({
+            id: 'departure_1',
+            tourId: 'tour_1',
+            date: new Date('2026-06-12T00:00:00.000Z'),
+            capacity: 12,
+            booked: 4,
+            status: 'open',
+          })
+          .mockResolvedValueOnce({
+            id: 'departure_2',
+            tourId: 'tour_1',
+            date: new Date('2026-06-13T00:00:00.000Z'),
+            capacity: 12,
+            booked: 6,
+            status: 'open',
+          }),
+        update: jest.fn().mockImplementation((args) => {
+          writes.push(args);
+          return Promise.resolve({});
+        }),
+        upsert: jest.fn(),
+      },
+    };
+    prisma.$transaction.mockImplementationOnce(async (callback) => {
+      writes.length = 0;
+      try {
+        return await callback(tx);
+      } catch (error) {
+        writes.length = 0;
+        throw error;
+      }
+    });
+    const service = new ToursService(prisma as never);
+
+    await expect(
+      service.upsertDepartures('bay-mau-coconut-forest', {
+        departures: [
+          { id: 'departure_1', date: '2026-06-12', capacity: 16, status: 'open' },
+          { id: 'departure_2', date: '2026-06-13', capacity: 5, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('Capacity cannot be lower than current bookings.'),
+    );
+    expect(tx.tourDeparture.update).toHaveBeenCalledTimes(1);
+    expect(writes).toEqual([]);
+    expect(prisma.tour.findUnique).not.toHaveBeenCalledTimes(2);
   });
 
   it('upserts departures and returns detail with remaining seats', async () => {
@@ -214,7 +305,7 @@ describe('ToursService', () => {
       booked: 4,
       status: 'open',
     });
-    prisma.tourDeparture.upsert.mockResolvedValueOnce({});
+    prisma.tourDeparture.update.mockResolvedValueOnce({});
     const service = new ToursService(prisma as never);
 
     await expect(

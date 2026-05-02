@@ -1,4 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { validate } from 'class-validator';
+import { HotelInventoryInputDto } from './dto/upsert-hotel-inventory.dto';
 import { HotelsService } from './hotels.service';
 
 const destinationRecord = {
@@ -143,6 +145,20 @@ function createPrismaMock() {
 }
 
 describe('HotelsService', () => {
+  it('rejects invalid calendar inventory dates at DTO validation', async () => {
+    const dto = Object.assign(new HotelInventoryInputDto(), {
+      date: '2026-02-31',
+      totalRooms: 10,
+      status: 'open',
+    });
+
+    await expect(validate(dto)).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ property: 'date' }),
+      ]),
+    );
+  });
+
   it('returns published hotel cards with relation summaries', async () => {
     const prisma = createPrismaMock();
     prisma.hotel.findMany.mockResolvedValue([hotelRecord]);
@@ -310,6 +326,59 @@ describe('HotelsService', () => {
     expect(tx.hotelInventoryDay.update).toHaveBeenCalledTimes(1);
     expect(writes).toEqual([]);
     expect(prisma.hotel.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('rejects invalid calendar inventory dates before writing', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [{ date: '2026-02-31', totalRooms: 10, status: 'open' }],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('date must be a valid date in YYYY-MM-DD format'),
+    );
+    expect(prisma.hotelInventoryDay.findUnique).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.create).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+  });
+
+  it('does not allow payload booked rooms to affect inventory writes', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique.mockResolvedValueOnce(null);
+    prisma.hotelInventoryDay.create.mockResolvedValueOnce({});
+    prisma.hotel.findFirst.mockResolvedValueOnce({
+      ...hotelRecord,
+      inventoryDays: [
+        {
+          id: 'inventory_2',
+          hotelId: 'hotel_1',
+          date: new Date('2026-06-13T00:00:00.000Z'),
+          totalRooms: 10,
+          bookedRooms: 0,
+          status: 'open',
+          createdAt: new Date('2026-05-01T00:00:00.000Z'),
+          updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+        },
+      ],
+    });
+    const service = new HotelsService(prisma as never);
+
+    await service.upsertInventory('shining-riverside-hoi-an', {
+      inventory: [
+        { date: '2026-06-13', totalRooms: 10, status: 'open', bookedRooms: 8 } as never,
+      ],
+    });
+
+    expect(prisma.hotelInventoryDay.create).toHaveBeenCalledWith({
+      data: expect.not.objectContaining({ bookedRooms: 8 }),
+    });
+    expect(prisma.hotelInventoryDay.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ bookedRooms: 0 }),
+    });
   });
 
   it('upserts inventory and returns detail with remaining rooms', async () => {

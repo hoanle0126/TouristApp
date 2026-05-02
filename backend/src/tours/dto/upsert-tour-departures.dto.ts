@@ -1,14 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsIn, IsInt, IsOptional, IsString, Matches, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { IsValidDateOnly } from './is-valid-date-only.validator';
 
 export class TourDepartureInputDto {
   @IsOptional()
   @IsString()
   id?: string;
 
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'date must be in YYYY-MM-DD format',
-  })
+  @IsValidDateOnly()
   date: string;
 
   @IsInt()

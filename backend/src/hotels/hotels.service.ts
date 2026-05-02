@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 import { UpdateHotelDto } from './dto/update-hotel.dto';
+import { isValidDateOnly } from '../tours/dto/is-valid-date-only.validator';
 import { UpsertHotelInventoryDto } from './dto/upsert-hotel-inventory.dto';
 
 const CAPACITY_ERROR = 'Capacity cannot be lower than current bookings.';
@@ -98,11 +99,7 @@ export class HotelsService {
 
   async upsertInventory(slug: string, dto: UpsertHotelInventoryDto) {
     await this.prisma.$transaction(async (tx) => {
-      const hotel = await tx.hotel.findUnique({ where: { slug } });
-
-      if (!hotel) {
-        throw new NotFoundException(`Hotel ${slug} was not found.`);
-      }
+      const hotel = await this.findEditableHotelInTransaction(tx, slug);
 
       for (const inventoryDay of dto.inventory) {
         const date = this.toInventoryDate(inventoryDay.date);
@@ -215,7 +212,14 @@ export class HotelsService {
   }
 
   private async findEditableHotel(slug: string) {
-    const hotel = await this.prisma.hotel.findUnique({ where: { slug } });
+    return this.findEditableHotelInTransaction(this.prisma, slug);
+  }
+
+  private async findEditableHotelInTransaction(
+    tx: Pick<PrismaService, 'hotel'>,
+    slug: string,
+  ) {
+    const hotel = await tx.hotel.findUnique({ where: { slug } });
 
     if (!hotel) {
       throw new NotFoundException(`Hotel ${slug} was not found.`);
@@ -323,6 +327,10 @@ export class HotelsService {
   }
 
   private toInventoryDate(date: string) {
+    if (!isValidDateOnly(date)) {
+      throw new BadRequestException('date must be a valid date in YYYY-MM-DD format');
+    }
+
     return new Date(`${date}T00:00:00.000Z`);
   }
 

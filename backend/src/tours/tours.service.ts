@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { isValidDateOnly } from './dto/is-valid-date-only.validator';
 import { UpsertTourDeparturesDto } from './dto/upsert-tour-departures.dto';
 
 const CAPACITY_ERROR = 'Capacity cannot be lower than current bookings.';
@@ -218,6 +219,10 @@ export class ToursService {
   }
 
   private toInventoryDate(date: string) {
+    if (!isValidDateOnly(date)) {
+      throw new BadRequestException('date must be a valid date in YYYY-MM-DD format');
+    }
+
     return new Date(`${date}T00:00:00.000Z`);
   }
 

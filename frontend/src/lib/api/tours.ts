@@ -2,6 +2,13 @@ import { apiFetch } from "@/src/lib/api/client";
 import { toTourCard, toTourDetail } from "@/src/lib/api/adapters";
 import type { ApiTourCard, ApiTourDetail } from "@/src/lib/api/types";
 
+export type UpdateTourDeparturesInput = readonly {
+  readonly id?: string;
+  readonly date: string;
+  readonly capacity: number;
+  readonly status: "open" | "closed";
+}[];
+
 export type SaveTourInput = {
   readonly slug: string;
   readonly title: string;
@@ -48,6 +55,14 @@ export async function createTour(input: SaveTourInput) {
 export async function updateTour(slug: string, input: SaveTourInput) {
   return apiFetch<ApiTourDetail>(`/tours/${slug}`, {
     body: input,
+    cache: "no-store",
+    method: "PATCH",
+  });
+}
+
+export async function updateTourDepartures(slug: string, input: UpdateTourDeparturesInput) {
+  return apiFetch<ApiTourDetail>(`/tours/${slug}/departures`, {
+    body: { departures: input },
     cache: "no-store",
     method: "PATCH",
   });

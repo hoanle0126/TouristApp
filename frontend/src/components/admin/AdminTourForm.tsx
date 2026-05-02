@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@/src/components/ui/textarea";
 import {
   type AdminTourFormInitialValues,
+  type AdminTourDepartureFormRow,
   type GalleryItem,
   type GalleryLayout,
   type HighlightIcon,
@@ -36,7 +37,7 @@ import {
   type TourBadge,
   type TourFormState,
 } from "@/src/components/admin/adminTourFormData";
-import { createTour, updateTour, type SaveTourInput } from "@/src/lib/api/tours";
+import { createTour, updateTour, updateTourDepartures, type SaveTourInput, type UpdateTourDeparturesInput } from "@/src/lib/api/tours";
 
 interface AdminTourFormCopy {
   readonly readinessEyebrow: string;
@@ -76,6 +77,14 @@ function removeItem<T extends { readonly id: string }>(items: readonly T[], id: 
   return items.length > 1 ? items.filter((item) => item.id !== id) : items;
 }
 
+function removeDeparture(items: readonly AdminTourDepartureFormRow[], rowId: string) {
+  return items.length > 1 ? items.filter((item) => item.rowId !== rowId) : items;
+}
+
+function updateDeparture<K extends keyof AdminTourDepartureFormRow>(items: readonly AdminTourDepartureFormRow[], rowId: string, field: K, value: AdminTourDepartureFormRow[K]) {
+  return items.map((item) => (item.rowId === rowId ? { ...item, [field]: value } : item));
+}
+
 function splitLines(value: string) {
   return value
     .split("\n")
@@ -85,6 +94,17 @@ function splitLines(value: string) {
 
 function hasValue(value: string) {
   return value.trim().length > 0;
+}
+
+function toTourDeparturesPayload(departures: readonly AdminTourDepartureFormRow[]): UpdateTourDeparturesInput {
+  return departures
+    .filter((departure) => hasValue(departure.date) && hasValue(departure.capacity))
+    .map(({ capacity, date, id, status }) => ({
+      ...(id ? { id } : {}),
+      date,
+      capacity: Number(capacity) || 0,
+      status,
+    }));
 }
 
 function toTourPayload(
@@ -121,6 +141,7 @@ function toTourPayload(
 
 export function AdminTourForm({ copy, initialValues, mode = "create", originalSlug }: AdminTourFormProps) {
   const [form, setForm] = useState<TourFormState>(initialValues.form);
+  const [departures, setDepartures] = useState<readonly AdminTourDepartureFormRow[]>(initialValues.departures);
   const [highlights, setHighlights] = useState<readonly HighlightItem[]>(initialValues.highlights);
   const [itinerary, setItinerary] = useState<readonly ItineraryItem[]>(initialValues.itinerary);
   const [gallery, setGallery] = useState<readonly GalleryItem[]>(initialValues.gallery);
@@ -206,11 +227,10 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
     setIsSubmitting(true);
     try {
       const payload = toTourPayload(form, highlights, itinerary, gallery);
-      if (mode === "update") {
-        await updateTour(originalSlug ?? form.slug, payload);
-      } else {
-        await createTour(payload);
-      }
+      const savedTour = mode === "update"
+        ? await updateTour(originalSlug ?? form.slug, payload)
+        : await createTour(payload);
+      await updateTourDepartures(savedTour.slug ?? form.slug, toTourDeparturesPayload(departures));
       setSaved(true);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Unable to save tour.");
@@ -234,6 +254,11 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
     setSaved(false);
   }
 
+  function updateDepartures(items: readonly AdminTourDepartureFormRow[]) {
+    setDepartures(items);
+    setSaved(false);
+  }
+
   return (
     <form className="grid gap-6 2xl:grid-cols-[minmax(0,1.55fr)_420px]" onSubmit={handleSubmit}>
       <div className="space-y-6">
@@ -248,6 +273,7 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
           updateField={updateField}
         />
         <OperationsSection form={form} updateField={updateField} />
+        <TourDeparturesSection departures={departures} setDepartures={updateDepartures} />
       </div>
 
       <TourDraftSidebar copy={copy} form={form} isSubmitting={isSubmitting} readiness={readiness} saved={saved} submitError={submitError} />
@@ -665,6 +691,71 @@ function OperationsSection({
             onChange={(event) => updateField("merchandisingNote", event.target.value)}
             value={form.merchandisingNote}
           />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TourDeparturesSection({
+  departures,
+  setDepartures,
+}: Readonly<{
+  departures: readonly AdminTourDepartureFormRow[];
+  setDepartures: (items: readonly AdminTourDepartureFormRow[]) => void;
+}>) {
+  return (
+    <Card>
+      <CardContent className="space-y-6 p-6 sm:p-7">
+        <SectionHeader
+          description="Manage dated seat inventory. Booked seats are read-only and capacity cannot drop below current bookings."
+          eyebrow="Inventory"
+          title="Departure inventory"
+        />
+        <RepeatableHeader
+          addLabel="Add departure"
+          icon={<ListChecks className="size-4" />}
+          label="Departures"
+          onAdd={() => setDepartures([...departures, { rowId: `departure-${crypto.randomUUID()}`, date: "", capacity: "", booked: "0", status: "open" }])}
+        />
+        <div className="space-y-4">
+          {departures.map((departure, index) => (
+            <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={departure.rowId}>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <p className="text-sm font-bold text-stone-950">Departure {index + 1}</p>
+                <Button
+                  aria-label={`Remove departure ${index + 1}`}
+                  disabled={departures.length <= 1}
+                  onClick={() => setDepartures(removeDeparture(departures, departure.rowId))}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <TextField id={`${departure.rowId}-date`} label="Date" onChange={(value) => setDepartures(updateDeparture(departures, departure.rowId, "date", value))} value={departure.date} />
+                <TextField id={`${departure.rowId}-capacity`} label="Capacity" onChange={(value) => setDepartures(updateDeparture(departures, departure.rowId, "capacity", value))} value={departure.capacity} />
+                <div>
+                  <Label htmlFor={`${departure.rowId}-booked`}>Booked</Label>
+                  <Input disabled id={`${departure.rowId}-booked`} readOnly value={departure.booked} />
+                </div>
+                <div>
+                  <Label htmlFor={`${departure.rowId}-status`}>Status</Label>
+                  <Select value={departure.status} onValueChange={(value: "open" | "closed") => setDepartures(updateDeparture(departures, departure.rowId, "status", value))}>
+                    <SelectTrigger id={`${departure.rowId}-status`}>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

@@ -4,6 +4,16 @@ export type TourBadge = "none" | "Featured" | "New";
 export type GalleryLayout = "portrait" | "landscape";
 export type HighlightIcon = "boat" | "fish" | "food" | "eco";
 export type OperationalStatus = "Healthy" | "Push sales" | "Almost full";
+export type InventoryStatus = "open" | "closed";
+
+export interface AdminTourDepartureFormRow {
+  readonly id?: string;
+  readonly rowId: string;
+  readonly date: string;
+  readonly capacity: string;
+  readonly booked: string;
+  readonly status: InventoryStatus;
+}
 
 export interface HighlightItem {
   readonly id: string;
@@ -55,6 +65,7 @@ export interface TourFormState {
 
 export interface AdminTourFormInitialValues {
   readonly form: TourFormState;
+  readonly departures: readonly AdminTourDepartureFormRow[];
   readonly gallery: readonly GalleryItem[];
   readonly highlights: readonly HighlightItem[];
   readonly itinerary: readonly ItineraryItem[];
@@ -101,6 +112,15 @@ export const createTourInitialValues: AdminTourFormInitialValues = {
     operationalStatus: "Healthy",
     merchandisingNote: "Protect as a high-converting short-format product for domestic traffic.",
   },
+  departures: [
+    {
+      rowId: "departure-1",
+      date: "2026-05-02",
+      capacity: "12",
+      booked: "0",
+      status: "open",
+    },
+  ],
   highlights: [
     {
       id: "highlight-1",
@@ -214,6 +234,14 @@ export function valuesFromTourDetail(detail: TourDetail): ResolvedAdminTourEditD
       exclusions: detail.exclusions.join("\n"),
       ...operations,
     },
+    departures: detail.departures.length > 0 ? detail.departures.map((departure, index) => ({
+      id: departure.id,
+      rowId: `departure-${index + 1}`,
+      date: departure.date,
+      capacity: String(departure.capacity),
+      booked: String(departure.booked),
+      status: departure.status,
+    })) : [{ rowId: "departure-1", date: "", capacity: "", booked: "0", status: "open" }],
     gallery: detail.gallery.map((item, index) => ({
       id: `gallery-${index + 1}`,
       image: item.image,

@@ -16,6 +16,7 @@ import {
 } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 import {
+  type AdminHotelInventoryFormRow,
   createEmptyGalleryImage,
   createEmptyReview,
   createEmptyReviewScore,
@@ -31,7 +32,7 @@ import {
   type HotelSuiteRow,
   type HotelTextRow,
 } from "@/src/components/admin/adminHotelFormData";
-import { createHotel, updateHotel, type SaveHotelInput } from "@/src/lib/api/hotels";
+import { createHotel, updateHotel, updateHotelInventory, type SaveHotelInput, type UpdateHotelInventoryInput } from "@/src/lib/api/hotels";
 
 interface AdminHotelFormCopy {
   readonly readinessEyebrow: string;
@@ -75,6 +76,10 @@ function removeRow<T extends { readonly id: string }>(items: readonly T[], id: s
   return items.length > 1 ? items.filter((item) => item.id !== id) : items;
 }
 
+function removeInventoryRow(items: readonly AdminHotelInventoryFormRow[], rowId: string) {
+  return items.length > 1 ? items.filter((item) => item.rowId !== rowId) : items;
+}
+
 function updateSuiteRow<K extends keyof HotelSuiteRow>(items: readonly HotelSuiteRow[], id: string, field: K, value: HotelSuiteRow[K]) {
   return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
 }
@@ -97,6 +102,21 @@ function toApiStatus(status: HotelCommercialStatus): SaveHotelInput["status"] {
 
 function toNumber(value: string) {
   return Number(value) || 0;
+}
+
+function updateInventoryRow<K extends keyof AdminHotelInventoryFormRow>(items: readonly AdminHotelInventoryFormRow[], rowId: string, field: K, value: AdminHotelInventoryFormRow[K]) {
+  return items.map((item) => (item.rowId === rowId ? { ...item, [field]: value } : item));
+}
+
+function toHotelInventoryPayload(inventory: readonly AdminHotelInventoryFormRow[]): UpdateHotelInventoryInput {
+  return inventory
+    .filter((day) => hasValue(day.date) && hasValue(day.totalRooms))
+    .map(({ date, id, status, totalRooms }) => ({
+      ...(id ? { id } : {}),
+      date,
+      totalRooms: toNumber(totalRooms),
+      status,
+    }));
 }
 
 function toHotelPayload(
@@ -152,6 +172,7 @@ function toHotelPayload(
 
 export function AdminHotelForm({ copy, initialValues, mode = "create", originalSlug }: AdminHotelFormProps) {
   const [form, setForm] = useState<HotelFormState>(initialValues.form);
+  const [inventory, setInventory] = useState<readonly AdminHotelInventoryFormRow[]>(initialValues.inventory);
   const [amenities, setAmenities] = useState<readonly HotelTextRow[]>(initialValues.amenities);
   const [description, setDescription] = useState<readonly HotelTextRow[]>(initialValues.description);
   const [suites, setSuites] = useState<readonly HotelSuiteRow[]>(initialValues.suites);
@@ -257,11 +278,10 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
     setIsSubmitting(true);
     try {
       const payload = toHotelPayload(form, amenities, description, suites, gallery, reviewScores, reviews);
-      if (mode === "update") {
-        await updateHotel(originalSlug ?? form.slug, payload);
-      } else {
-        await createHotel(payload);
-      }
+      const savedHotel = mode === "update"
+        ? await updateHotel(originalSlug ?? form.slug, payload)
+        : await createHotel(payload);
+      await updateHotelInventory(savedHotel.slug ?? form.slug, toHotelInventoryPayload(inventory));
       setSaved(true);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Unable to save hotel.");
@@ -284,6 +304,10 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
           description={description}
           error={errors.description}
           setDescription={(items) => updateCollection(setDescription, items)}
+        />
+        <HotelDailyRoomInventorySection
+          inventory={inventory}
+          setInventory={(items) => updateCollection(setInventory, items)}
         />
         <HotelInventorySection
           amenities={amenities}
@@ -622,6 +646,64 @@ function HotelInventorySection({
           onRemove={(id) => setGallery(removeRow(gallery, id))}
           onUpdate={(id, field, value) => setGallery(updateGalleryRow(gallery, id, field, value))}
         />
+      </CardContent>
+    </Card>
+  );
+}
+
+function HotelDailyRoomInventorySection({
+  inventory,
+  setInventory,
+}: Readonly<{
+  inventory: readonly AdminHotelInventoryFormRow[];
+  setInventory: (items: readonly AdminHotelInventoryFormRow[]) => void;
+}>) {
+  return (
+    <Card>
+      <CardContent className="space-y-6 p-6 sm:p-7">
+        <SectionHeader
+          description="Manage room availability by date. Booked rooms are read-only and total rooms cannot drop below existing bookings."
+          eyebrow="Inventory"
+          title="Daily room inventory"
+        />
+        <CollectionHeader
+          addLabel="Add inventory day"
+          icon={<BedDouble className="size-4" />}
+          label="Room inventory"
+          onAdd={() => setInventory([...inventory, { rowId: `inventory-${crypto.randomUUID()}`, date: "", totalRooms: "", bookedRooms: "0", status: "open" }])}
+        />
+        <div className="space-y-4">
+          {inventory.map((day, index) => (
+            <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={day.rowId}>
+              <RowHeader
+                disabled={inventory.length <= 1}
+                label={`Inventory day ${index + 1}`}
+                onRemove={() => setInventory(removeInventoryRow(inventory, day.rowId))}
+                removeLabel={`Remove inventory day ${index + 1}`}
+              />
+              <div className="grid gap-4 md:grid-cols-2">
+                <TextField id={`${day.rowId}-date`} label="Date" onChange={(value) => setInventory(updateInventoryRow(inventory, day.rowId, "date", value))} value={day.date} />
+                <TextField id={`${day.rowId}-total-rooms`} label="Total rooms" onChange={(value) => setInventory(updateInventoryRow(inventory, day.rowId, "totalRooms", value))} value={day.totalRooms} />
+                <div>
+                  <Label htmlFor={`${day.rowId}-booked-rooms`}>Booked rooms</Label>
+                  <Input disabled id={`${day.rowId}-booked-rooms`} readOnly value={day.bookedRooms} />
+                </div>
+                <div>
+                  <Label htmlFor={`${day.rowId}-status`}>Status</Label>
+                  <Select value={day.status} onValueChange={(value: "open" | "closed") => setInventory(updateInventoryRow(inventory, day.rowId, "status", value))}>
+                    <SelectTrigger id={`${day.rowId}-status`}>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,6 +1,16 @@
 import type { HotelDetail } from "@/src/types/travel";
 
 export type HotelCommercialStatus = "Draft" | "Ready for review" | "Published";
+export type InventoryStatus = "open" | "closed";
+
+export interface AdminHotelInventoryFormRow {
+  readonly id?: string;
+  readonly rowId: string;
+  readonly date: string;
+  readonly totalRooms: string;
+  readonly bookedRooms: string;
+  readonly status: InventoryStatus;
+}
 
 export interface HotelFormState {
   readonly name: string;
@@ -64,6 +74,7 @@ export interface HotelReviewRow {
 
 export interface HotelFormInitialValues {
   readonly form: HotelFormState;
+  readonly inventory: readonly AdminHotelInventoryFormRow[];
   readonly amenities: readonly HotelTextRow[];
   readonly description: readonly HotelTextRow[];
   readonly suites: readonly HotelSuiteRow[];
@@ -142,6 +153,15 @@ export const createHotelInitialValues: HotelFormInitialValues = {
     bookingTravelers: "",
     bookingTotal: "",
   },
+  inventory: [
+    {
+      rowId: "inventory-1",
+      date: "",
+      totalRooms: "",
+      bookedRooms: "0",
+      status: "open",
+    },
+  ],
   amenities: [
     { id: "amenity-1", value: "" },
     { id: "amenity-2", value: "" },
@@ -202,6 +222,14 @@ export function valuesFromHotelDetail(detail: HotelDetail): ResolvedAdminHotelEd
         bookingTravelers: detail.booking.travelers,
         bookingTotal: detail.booking.total,
       },
+      inventory: detail.inventory.length > 0 ? detail.inventory.map((day, index) => ({
+        id: day.id,
+        rowId: `inventory-${index + 1}`,
+        date: day.date,
+        totalRooms: String(day.totalRooms),
+        bookedRooms: String(day.bookedRooms),
+        status: day.status,
+      })) : [{ rowId: "inventory-1", date: "", totalRooms: "", bookedRooms: "0", status: "open" }],
       amenities: textRows(
         "amenity",
         detail.amenities.map((amenity) => amenity.title),

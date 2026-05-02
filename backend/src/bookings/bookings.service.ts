@@ -37,7 +37,14 @@ type PreparedBookingItem = {
   unitPrice: Prisma.Decimal;
   lineTotal: Prisma.Decimal;
   currency: string;
-  hotelInventoryDays?: { id: string; date: string }[];
+  tourDeparture?: TourDeparture;
+  hotelInventoryDays?: {
+    id: string;
+    date: string;
+    status: string;
+    totalRooms: number;
+    bookedRooms: number;
+  }[];
 };
 
 @Injectable()
@@ -90,7 +97,7 @@ export class BookingsService {
         dto.items.map((item) => this.prepareItem(item, tx)),
       );
       await this.reserveInventory(items, tx);
-      const bookingItems = items.map(({ hotelInventoryDays, ...item }) => item);
+      const bookingItems = items.map(({ hotelInventoryDays, tourDeparture, ...item }) => item);
       const subtotal = items.reduce(
         (total, item) => total + item.lineTotal.toNumber(),
         0,
@@ -245,6 +252,7 @@ export class BookingsService {
       itemType: 'tour',
       tourId: tour.id,
       tourDepartureId: departure.id,
+      tourDeparture: departure,
       snapshotSlug: tour.slug,
       snapshotTitle: tour.title,
       snapshotImage: tour.image,
@@ -285,10 +293,6 @@ export class BookingsService {
       if (!inventoryDay || inventoryDay.status !== 'open') {
         throw new BadRequestException(`This hotel is unavailable on ${night}.`);
       }
-      const remaining = inventoryDay.totalRooms - inventoryDay.bookedRooms;
-      if (remaining < item.quantity) {
-        throw new BadRequestException(`Only ${remaining} rooms left on ${night}.`);
-      }
     }
 
     const unitPrice = this.resolveUnitPrice(item.unitPrice, hotel.price);
@@ -313,10 +317,16 @@ export class BookingsService {
       unitPrice,
       lineTotal: unitPrice.mul(quantity),
       currency: 'USD',
-      hotelInventoryDays: nights.map((night) => ({
-        id: inventoryByDate.get(night)!.id,
-        date: night,
-      })),
+      hotelInventoryDays: nights.map((night) => {
+        const inventoryDay = inventoryByDate.get(night)!;
+        return {
+          id: inventoryDay.id,
+          date: night,
+          status: inventoryDay.status,
+          totalRooms: inventoryDay.totalRooms,
+          bookedRooms: inventoryDay.bookedRooms,
+        };
+      }),
     };
   }
 
@@ -326,11 +336,18 @@ export class BookingsService {
   ) {
     const tourReservations = new Map<
       string,
-      { tourId: string; quantity: number }
+      { tourId: string; quantity: number; departure: TourDeparture }
     >();
     const hotelReservations = new Map<
       string,
-      { inventoryDayId: string; date: string; quantity: number }
+      {
+        inventoryDayId: string;
+        date: string;
+        quantity: number;
+        status: string;
+        totalRooms: number;
+        bookedRooms: number;
+      }
     >();
 
     for (const item of items) {
@@ -339,6 +356,7 @@ export class BookingsService {
         tourReservations.set(item.tourDepartureId, {
           tourId: item.tourId,
           quantity: (existing?.quantity ?? 0) + item.quantity,
+          departure: item.tourDeparture!,
         });
       }
 
@@ -349,9 +367,30 @@ export class BookingsService {
             inventoryDayId: day.id,
             date: day.date,
             quantity: (existing?.quantity ?? 0) + item.quantity,
+            status: day.status,
+            totalRooms: day.totalRooms,
+            bookedRooms: day.bookedRooms,
           });
         }
       }
+    }
+
+    for (const reservation of tourReservations.values()) {
+      this.ensureTourDepartureCanBeBooked(
+        reservation.departure,
+        reservation.tourId,
+        reservation.quantity,
+      );
+    }
+
+    for (const reservation of hotelReservations.values()) {
+      this.ensureHotelInventoryCanBeBooked(
+        reservation.status,
+        reservation.totalRooms,
+        reservation.bookedRooms,
+        reservation.date,
+        reservation.quantity,
+      );
     }
 
     for (const [tourDepartureId, reservation] of tourReservations) {
@@ -393,6 +432,7 @@ export class BookingsService {
   private ensureTourDepartureCanBeBooked(
     departure: TourDeparture | null,
     tourId: string,
+    requestedQuantity = 1,
   ): asserts departure is TourDeparture {
     if (!departure || departure.tourId !== tourId || departure.status !== 'open') {
       throw new BadRequestException('This departure is sold out.');
@@ -403,6 +443,26 @@ export class BookingsService {
       throw new BadRequestException('This departure is sold out.');
     }
 
+    if (remaining < requestedQuantity) {
+      throw new BadRequestException(`Only ${remaining} seats left for this departure.`);
+    }
+  }
+
+  private ensureHotelInventoryCanBeBooked(
+    status: string,
+    totalRooms: number,
+    bookedRooms: number,
+    date: string,
+    requestedQuantity: number,
+  ) {
+    if (status !== 'open') {
+      throw new BadRequestException(`This hotel is unavailable on ${date}.`);
+    }
+
+    const remaining = totalRooms - bookedRooms;
+    if (remaining < requestedQuantity) {
+      throw new BadRequestException(`Only ${remaining} rooms left on ${date}.`);
+    }
   }
 
   private throwTourAvailabilityError(

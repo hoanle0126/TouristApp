@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 
 import { useCart } from "@/src/components/travel/CartProvider";
 import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -24,9 +23,9 @@ const travelerOptions = [
   "Private Group",
 ] as const;
 
-function createCartItem(tour: TourDetail, departureDate: string, travelers: string): CartItem {
+function createCartItem(tour: TourDetail, departureId: string, departureDate: string, travelers: string): CartItem {
   return {
-    id: `${tour.title}-${departureDate}-${travelers}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    id: `${tour.slug ?? tour.title}-${departureId}-${travelers}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     alt: tour.heroAlt,
     date: departureDate,
     image: tour.heroImage,
@@ -36,6 +35,7 @@ function createCartItem(tour: TourDetail, departureDate: string, travelers: stri
     quantity: 1,
     slug: tour.slug,
     title: tour.title,
+    tourDepartureId: departureId,
   };
 }
 
@@ -56,19 +56,23 @@ function formatDepartureDate(value: string) {
 export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
   const router = useRouter();
   const { addItem, isInCart } = useCart();
-  const [departureDate, setDepartureDate] = useState("");
+  const availableDepartures = useMemo(() => tour.departures.filter((departure) => departure.status === "open" && departure.remaining > 0), [tour.departures]);
+  const [departureId, setDepartureId] = useState(availableDepartures[0]?.id ?? "");
   const [travelers, setTravelers] = useState<(typeof travelerOptions)[number]>("2 Guests");
 
   const cartItem = useMemo(() => {
-    if (!departureDate) {
+    const departure = availableDepartures.find((item) => item.id === departureId);
+
+    if (!departure) {
       return null;
     }
 
-    return createCartItem(tour, formatDepartureDate(departureDate), travelers);
-  }, [departureDate, tour, travelers]);
+    return createCartItem(tour, departure.id, formatDepartureDate(departure.date), travelers);
+  }, [availableDepartures, departureId, tour, travelers]);
 
   const inCart = cartItem ? isInCart(cartItem) : false;
   const isReadyToBook = cartItem !== null;
+  const unavailableMessage = availableDepartures.length === 0 ? "This journey is currently sold out. Please contact a curator for future departures." : null;
 
   return (
     <aside className="lg:sticky lg:top-32 lg:col-span-4">
@@ -99,13 +103,21 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
             <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-stone-500" htmlFor="tour-departure-date">
               Departure Date
             </label>
-            <Input
-              id="tour-departure-date"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(event) => setDepartureDate(event.target.value)}
-              type="date"
-              value={departureDate}
-            />
+            <Select disabled={availableDepartures.length === 0} onValueChange={setDepartureId} value={departureId}>
+              <SelectTrigger id="tour-departure-date">
+                <SelectValue placeholder="Select departure" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDepartures.map((departure) => (
+                  <SelectItem key={departure.id} value={departure.id}>
+                    {formatDepartureDate(departure.date)} • {departure.remaining} seats left
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {unavailableMessage ? (
+              <p className="mt-2 text-sm font-semibold text-rose-700">{unavailableMessage}</p>
+            ) : null}
           </div>
           <div>
             <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-stone-500" htmlFor="tour-travelers">
@@ -161,7 +173,7 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
         >
           Book This Journey
         </Button>
-        <p className="text-center text-xs uppercase tracking-widest text-stone-500">Select date and travelers to continue</p>
+        <p className="text-center text-xs uppercase tracking-widest text-stone-500">{unavailableMessage ? "No departures are available" : "Select departure and travelers to continue"}</p>
         <div className="mt-10 border-t border-stone-200 pt-8">
           <h4 className="mb-4 font-bold text-stone-950">Need help planning?</h4>
           <div className="flex items-center gap-4">

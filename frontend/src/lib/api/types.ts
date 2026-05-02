@@ -35,6 +35,15 @@ export type ApiTourCard = {
   readonly hotels: readonly ApiHotelLink[];
 };
 
+export type ApiTourDeparture = {
+  readonly id: string;
+  readonly date: string;
+  readonly capacity: number;
+  readonly booked: number;
+  readonly remaining: number;
+  readonly status: "open" | "closed";
+};
+
 export type ApiTourDetail = Omit<ApiTourCard, "description"> & {
   readonly type: string;
   readonly availability: string;
@@ -52,6 +61,7 @@ export type ApiTourDetail = Omit<ApiTourCard, "description"> & {
   readonly gallery: readonly { readonly image: string; readonly alt: string; readonly layout?: "portrait" | "landscape" }[];
   readonly inclusions: readonly string[];
   readonly exclusions: readonly string[];
+  readonly departures: readonly ApiTourDeparture[];
 };
 
 export type ApiDestinationDetail = {
@@ -89,6 +99,15 @@ export type ApiHotelCard = {
   readonly tours: readonly ApiTourLink[];
 };
 
+export type ApiHotelInventoryDay = {
+  readonly id: string;
+  readonly date: string;
+  readonly totalRooms: number;
+  readonly bookedRooms: number;
+  readonly remaining: number;
+  readonly status: "open" | "closed";
+};
+
 export type ApiHotelDetail = ApiHotelCard & {
   readonly title: string;
   readonly address: string;
@@ -109,6 +128,7 @@ export type ApiHotelDetail = ApiHotelCard & {
   readonly scoreSummary: string;
   readonly reviewScores: readonly { readonly label: string; readonly score?: number; readonly value?: string }[];
   readonly reviews: readonly { readonly author: string; readonly initials?: string; readonly location?: string; readonly quote: string; readonly stayed?: string }[];
+  readonly inventory: readonly ApiHotelInventoryDay[];
   readonly booking: {
     readonly checkIn: string;
     readonly checkOut: string;
@@ -157,6 +177,7 @@ export type ApiBookingItemInput = {
   readonly quantity: number;
   readonly unitPrice?: number;
   readonly date?: string;
+  readonly tourDepartureId?: string;
   readonly checkIn?: string;
   readonly checkOut?: string;
   readonly guests?: string;

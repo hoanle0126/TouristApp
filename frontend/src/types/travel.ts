@@ -2,6 +2,9 @@ export interface CartItem {
   readonly id: string;
   readonly alt: string;
   readonly date: string;
+  readonly tourDepartureId?: string;
+  readonly checkIn?: string;
+  readonly checkOut?: string;
   readonly image: string;
   readonly itemType?: "tour" | "hotel";
   readonly meta: string;
@@ -163,6 +166,15 @@ export interface HotelDetailReview {
   readonly stayed: string;
 }
 
+export interface HotelInventoryDay {
+  readonly id: string;
+  readonly date: string;
+  readonly totalRooms: number;
+  readonly bookedRooms: number;
+  readonly remaining: number;
+  readonly status: "open" | "closed";
+}
+
 export interface HotelDetail {
   readonly address: string;
   readonly amenities: readonly HotelDetailAmenity[];
@@ -180,6 +192,7 @@ export interface HotelDetail {
   readonly gallery: readonly HotelDetailImage[];
   readonly heroAlt: string;
   readonly heroImage: string;
+  readonly inventory: readonly HotelInventoryDay[];
   readonly location: string;
   readonly price: string;
   readonly reviewScores: readonly HotelDetailReviewScore[];
@@ -190,6 +203,15 @@ export interface HotelDetail {
   readonly slug?: string;
   readonly suites: readonly HotelDetailSuite[];
   readonly title: string;
+}
+
+export interface TourDeparture {
+  readonly id: string;
+  readonly date: string;
+  readonly capacity: number;
+  readonly booked: number;
+  readonly remaining: number;
+  readonly status: "open" | "closed";
 }
 
 export interface TourDetailHighlight {
@@ -214,6 +236,7 @@ export interface TourDetail {
   readonly curatorImage: string;
   readonly curatorImageAlt: string;
   readonly description: readonly string[];
+  readonly departures: readonly TourDeparture[];
   readonly duration: string;
   readonly exclusions: readonly string[];
   readonly gallery: readonly TourDetailImage[];

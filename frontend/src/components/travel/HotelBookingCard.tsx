@@ -55,6 +55,32 @@ function calculateNights(checkIn: string, checkOut: string) {
   return nights > 0 ? nights : 0;
 }
 
+function dateOnlyRange(checkIn: string, checkOut: string) {
+  const nights = calculateNights(checkIn, checkOut);
+  const startDate = new Date(`${checkIn}T00:00:00`);
+
+  return Array.from({ length: nights }, (_, index) => {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + index);
+    return date.toISOString().split("T")[0];
+  });
+}
+
+function roomsFromTravelers(travelers: string) {
+  const match = travelers.match(/(\d+) Rooms?/);
+  return match ? Number(match[1]) : 1;
+}
+
+function unavailableNight(hotel: HotelDetail, checkIn: string, checkOut: string, quantity: number) {
+  const inventoryByDate = new Map(hotel.inventory.map((day) => [day.date, day]));
+
+  return dateOnlyRange(checkIn, checkOut).find((date) => {
+    const day = inventoryByDate.get(date);
+
+    return !day || day.status !== "open" || day.remaining < quantity;
+  });
+}
+
 function availabilityStatusForSuite(
   suite: HotelDetailSuite,
   travelers: string,
@@ -125,6 +151,9 @@ function createCartItem(
   travelers: string,
   total: string,
   nights: number,
+  quantity: number,
+  checkIn: string,
+  checkOut: string,
 ): CartItem {
   return {
     id: `${hotel.title}-${suite.name}-${stayLabel}-${travelers}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
@@ -132,10 +161,12 @@ function createCartItem(
     date: stayLabel,
     image: hotel.heroImage,
     itemType: "hotel",
+    checkIn,
+    checkOut,
     meta: `${suite.name} • ${travelers}`,
     nights,
     price: total,
-    quantity: 1,
+    quantity,
     roomType: suite.name,
     slug: hotel.slug,
     title: hotel.title,
@@ -145,22 +176,24 @@ function createCartItem(
 export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   const router = useRouter();
   const { addItem, isInCart } = useCart();
-  const [checkIn, setCheckIn] = useState("2026-05-12");
-  const [checkOut, setCheckOut] = useState("2026-05-18");
+  const [checkIn, setCheckIn] = useState(hotel.booking.checkIn);
+  const [checkOut, setCheckOut] = useState(hotel.booking.checkOut);
   const [travelers, setTravelers] = useState<(typeof travelerOptions)[number]>("2 Adults, 1 Room");
   const [hasCheckedAvailability, setHasCheckedAvailability] = useState(false);
   const [selectedSuiteName, setSelectedSuiteName] = useState<string | null>(null);
 
+  const quantity = roomsFromTravelers(travelers);
   const nights = calculateNights(checkIn, checkOut);
+  const blockedNight = nights > 0 ? unavailableNight(hotel, checkIn, checkOut, quantity) : undefined;
   const stayLabel =
     nights > 0 ? `${formatDate(checkIn)} - ${formatDate(checkOut)}` : "";
   const availabilityOptions =
-    nights > 0 ? buildAvailabilityOptions(hotel, travelers, nights) : [];
+    nights > 0 && !blockedNight ? buildAvailabilityOptions(hotel, travelers, nights) : [];
   const selectedOption = availabilityOptions.find(
     (option) => option.suite.name === selectedSuiteName,
   );
   const cartItem = selectedOption
-    ? createCartItem(hotel, selectedOption.suite, stayLabel, travelers, selectedOption.total, nights)
+    ? createCartItem(hotel, selectedOption.suite, stayLabel, travelers, selectedOption.total, nights, quantity, checkIn, checkOut)
     : null;
   const inCart = cartItem ? isInCart(cartItem) : false;
 
@@ -247,13 +280,19 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
           <Button
             className="mt-2 w-full py-6 text-lg font-black"
             disabled={nights === 0}
-            onClick={() => setHasCheckedAvailability(true)}
+            onClick={() => {
+              setSelectedSuiteName(null);
+              setHasCheckedAvailability(true);
+            }}
             size="lg"
             type="button"
           >
             Check Availability
           </Button>
           <p className="text-center text-xs text-stone-500">You won&apos;t be charged yet</p>
+          {hasCheckedAvailability && blockedNight ? (
+            <p className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">This hotel is unavailable on {blockedNight}.</p>
+          ) : null}
 
           {hasCheckedAvailability ? (
             <div className="space-y-4 rounded-[1.5rem] border border-stone-200 bg-stone-50 p-4">

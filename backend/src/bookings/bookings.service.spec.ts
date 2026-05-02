@@ -162,11 +162,15 @@ function createPrismaMock() {
     tourDeparture: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     hotelInventoryDay: {
       findMany: jest.fn(),
+      findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
+    $executeRaw: jest.fn().mockResolvedValue(1),
     $transaction: jest.fn(async (callback) => callback(prismaMock)),
   };
   return prismaMock;
@@ -409,10 +413,7 @@ describe('BookingsService', () => {
       ],
     });
 
-    expect(prisma.tourDeparture.update).toHaveBeenCalledWith({
-      where: { id: 'departure_1' },
-      data: { booked: { increment: 2 } },
-    });
+    expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
     expect(prisma.booking.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -447,7 +448,10 @@ describe('BookingsService', () => {
   it('rejects tour departures with partial availability without creating a booking', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
-    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' });
+    prisma.tourDeparture.findUnique
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' })
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' });
+    prisma.$executeRaw.mockResolvedValue(0);
     const service = new BookingsService(prisma as never, createMailMock() as never);
 
     await expect(service.create({
@@ -476,9 +480,7 @@ describe('BookingsService', () => {
       items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 2, unitPrice: 145, checkIn: '2026-06-12', checkOut: '2026-06-15' }],
     })).resolves.toMatchObject({ bookingCode: 'TW-20260501-SEED' });
 
-    expect(prisma.hotelInventoryDay.update).toHaveBeenCalledTimes(3);
-    expect(prisma.hotelInventoryDay.update).toHaveBeenNthCalledWith(1, { where: { id: 'inventory_2026-06-12' }, data: { bookedRooms: { increment: 2 } } });
-    expect(prisma.hotelInventoryDay.update).toHaveBeenNthCalledWith(3, { where: { id: 'inventory_2026-06-14' }, data: { bookedRooms: { increment: 2 } } });
+    expect(prisma.$executeRaw).toHaveBeenCalledTimes(3);
   });
 
   it('rejects hotel bookings when a covered night is missing or closed', async () => {
@@ -514,6 +516,66 @@ describe('BookingsService', () => {
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
       items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 2, checkIn: '2026-06-12', checkOut: '2026-06-14' }],
     })).rejects.toThrow('Only 1 rooms left on 2026-06-13.');
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+  });
+
+
+  it('rejects when atomic tour reservation affects no rows', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 4, status: 'open' })
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 12, status: 'open' });
+    prisma.$executeRaw.mockResolvedValue(0);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'tour', slug: 'bay-mau-coconut-forest', quantity: 2, tourDepartureId: 'departure_1' }],
+    })).rejects.toThrow('This departure is sold out.');
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects when atomic hotel reservation fails for one night', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
+    prisma.hotelInventoryDay.findMany.mockResolvedValue(['2026-06-12', '2026-06-13'].map((date) => ({
+      id: `inventory_${date}`,
+      hotelId: 'hotel_1',
+      date: new Date(`${date}T00:00:00.000Z`),
+      totalRooms: 5,
+      bookedRooms: 1,
+      status: 'open',
+    })));
+    prisma.$executeRaw.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+    prisma.hotelInventoryDay.findUnique.mockResolvedValue({ id: 'inventory_2026-06-13', hotelId: 'hotel_1', date: new Date('2026-06-13T00:00:00.000Z'), totalRooms: 5, bookedRooms: 5, status: 'open' });
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 2, checkIn: '2026-06-12', checkOut: '2026-06-14' }],
+    })).rejects.toThrow('Only 0 rooms left on 2026-06-13.');
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+  });
+
+  it('aggregates duplicate tour departure reservations before atomic reserve', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' })
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' })
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' });
+    prisma.$executeRaw.mockResolvedValue(0);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 3, paymentMethod: 'credit-card',
+      items: [
+        { itemType: 'tour', slug: 'bay-mau-coconut-forest', quantity: 2, tourDepartureId: 'departure_1' },
+        { itemType: 'tour', slug: 'bay-mau-coconut-forest', quantity: 1, tourDepartureId: 'departure_1' },
+      ],
+    })).rejects.toThrow('Only 2 seats left for this departure.');
+    expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
     expect(prisma.booking.create).not.toHaveBeenCalled();
   });
 

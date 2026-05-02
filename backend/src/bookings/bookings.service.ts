@@ -37,6 +37,7 @@ type PreparedBookingItem = {
   unitPrice: Prisma.Decimal;
   lineTotal: Prisma.Decimal;
   currency: string;
+  hotelInventoryDays?: { id: string; date: string }[];
 };
 
 @Injectable()
@@ -88,6 +89,8 @@ export class BookingsService {
       const items = await Promise.all(
         dto.items.map((item) => this.prepareItem(item, tx)),
       );
+      await this.reserveInventory(items, tx);
+      const bookingItems = items.map(({ hotelInventoryDays, ...item }) => item);
       const subtotal = items.reduce(
         (total, item) => total + item.lineTotal.toNumber(),
         0,
@@ -122,7 +125,7 @@ export class BookingsService {
           total: new Prisma.Decimal(total),
           currency: 'USD',
           items: {
-            create: items,
+            create: bookingItems,
           },
         },
         include: { items: true },
@@ -233,11 +236,7 @@ export class BookingsService {
     const departure = await tx.tourDeparture.findUnique({
       where: { id: item.tourDepartureId },
     });
-    this.ensureTourDepartureCanBeBooked(departure, tour.id, item.quantity);
-    await tx.tourDeparture.update({
-      where: { id: departure.id },
-      data: { booked: { increment: item.quantity } },
-    });
+    this.ensureTourDepartureCanBeBooked(departure, tour.id);
 
     const unitPrice = this.resolveUnitPrice(item.unitPrice, tour.price);
     const quantity = item.quantity;
@@ -292,15 +291,6 @@ export class BookingsService {
       }
     }
 
-    await Promise.all(
-      nights.map((night) =>
-        tx.hotelInventoryDay.update({
-          where: { id: inventoryByDate.get(night)!.id },
-          data: { bookedRooms: { increment: item.quantity } },
-        }),
-      ),
-    );
-
     const unitPrice = this.resolveUnitPrice(item.unitPrice, hotel.price);
     const quantity = item.quantity;
 
@@ -323,13 +313,86 @@ export class BookingsService {
       unitPrice,
       lineTotal: unitPrice.mul(quantity),
       currency: 'USD',
+      hotelInventoryDays: nights.map((night) => ({
+        id: inventoryByDate.get(night)!.id,
+        date: night,
+      })),
     };
+  }
+
+  private async reserveInventory(
+    items: PreparedBookingItem[],
+    tx: PrismaTransaction,
+  ) {
+    const tourReservations = new Map<
+      string,
+      { tourId: string; quantity: number }
+    >();
+    const hotelReservations = new Map<
+      string,
+      { inventoryDayId: string; date: string; quantity: number }
+    >();
+
+    for (const item of items) {
+      if (item.itemType === 'tour' && item.tourDepartureId && item.tourId) {
+        const existing = tourReservations.get(item.tourDepartureId);
+        tourReservations.set(item.tourDepartureId, {
+          tourId: item.tourId,
+          quantity: (existing?.quantity ?? 0) + item.quantity,
+        });
+      }
+
+      if (item.itemType === 'hotel') {
+        for (const day of item.hotelInventoryDays ?? []) {
+          const existing = hotelReservations.get(day.id);
+          hotelReservations.set(day.id, {
+            inventoryDayId: day.id,
+            date: day.date,
+            quantity: (existing?.quantity ?? 0) + item.quantity,
+          });
+        }
+      }
+    }
+
+    for (const [tourDepartureId, reservation] of tourReservations) {
+      const affected = await tx.$executeRaw(Prisma.sql`
+        UPDATE "TourDeparture"
+        SET "booked" = "booked" + ${reservation.quantity}
+        WHERE "id" = ${tourDepartureId}
+          AND "tourId" = ${reservation.tourId}
+          AND "status" = 'open'
+          AND "booked" + ${reservation.quantity} <= "capacity"
+      `);
+
+      if (affected === 0) {
+        const departure = await tx.tourDeparture.findUnique({
+          where: { id: tourDepartureId },
+        });
+        this.throwTourAvailabilityError(departure, reservation.tourId);
+      }
+    }
+
+    for (const reservation of hotelReservations.values()) {
+      const affected = await tx.$executeRaw(Prisma.sql`
+        UPDATE "HotelInventoryDay"
+        SET "bookedRooms" = "bookedRooms" + ${reservation.quantity}
+        WHERE "id" = ${reservation.inventoryDayId}
+          AND "status" = 'open'
+          AND "bookedRooms" + ${reservation.quantity} <= "totalRooms"
+      `);
+
+      if (affected === 0) {
+        const inventoryDay = await tx.hotelInventoryDay.findUnique({
+          where: { id: reservation.inventoryDayId },
+        });
+        this.throwHotelAvailabilityError(inventoryDay, reservation.date);
+      }
+    }
   }
 
   private ensureTourDepartureCanBeBooked(
     departure: TourDeparture | null,
     tourId: string,
-    quantity: number,
   ): asserts departure is TourDeparture {
     if (!departure || departure.tourId !== tourId || departure.status !== 'open') {
       throw new BadRequestException('This departure is sold out.');
@@ -340,9 +403,34 @@ export class BookingsService {
       throw new BadRequestException('This departure is sold out.');
     }
 
-    if (remaining < quantity) {
-      throw new BadRequestException(`Only ${remaining} seats left for this departure.`);
+  }
+
+  private throwTourAvailabilityError(
+    departure: TourDeparture | null,
+    tourId: string,
+  ): never {
+    if (!departure || departure.tourId !== tourId || departure.status !== 'open') {
+      throw new BadRequestException('This departure is sold out.');
     }
+
+    const remaining = Math.max(departure.capacity - departure.booked, 0);
+    if (remaining <= 0) {
+      throw new BadRequestException('This departure is sold out.');
+    }
+
+    throw new BadRequestException(`Only ${remaining} seats left for this departure.`);
+  }
+
+  private throwHotelAvailabilityError(
+    inventoryDay: { totalRooms: number; bookedRooms: number; status: string } | null,
+    date: string,
+  ): never {
+    if (!inventoryDay || inventoryDay.status !== 'open') {
+      throw new BadRequestException(`This hotel is unavailable on ${date}.`);
+    }
+
+    const remaining = Math.max(inventoryDay.totalRooms - inventoryDay.bookedRooms, 0);
+    throw new BadRequestException(`Only ${remaining} rooms left on ${date}.`);
   }
 
   private buildHotelNights(item: CreateBookingItemDto) {

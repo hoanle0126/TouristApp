@@ -33,6 +33,10 @@ export class CreateBookingItemDto {
 
   @IsOptional()
   @IsString()
+  tourDepartureId?: string;
+
+  @IsOptional()
+  @IsString()
   date?: string;
 
   @IsOptional()

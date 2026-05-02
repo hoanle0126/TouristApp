@@ -64,6 +64,7 @@ const bookingItemRecords = [
     itemType: 'tour',
     tourId: 'tour_1',
     hotelId: null,
+    tourDepartureId: 'departure_1',
     snapshotSlug: 'bay-mau-coconut-forest',
     snapshotTitle: 'Traveling to Bay Mau Coconut Forest',
     snapshotImage: 'https://images.unsplash.com/photo-tour',
@@ -89,6 +90,7 @@ const bookingItemRecords = [
     itemType: 'hotel',
     tourId: null,
     hotelId: 'hotel_1',
+    tourDepartureId: null,
     snapshotSlug: 'shining-riverside-hoi-an',
     snapshotTitle: 'Shining Riverside Hoi An',
     snapshotImage: 'https://images.unsplash.com/photo-hotel',
@@ -144,7 +146,7 @@ const bookingRecord = {
 };
 
 function createPrismaMock() {
-  return {
+  const prismaMock = {
     booking: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
@@ -157,7 +159,17 @@ function createPrismaMock() {
     hotel: {
       findFirst: jest.fn(),
     },
+    tourDeparture: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    hotelInventoryDay: {
+      findMany: jest.fn(),
+      update: jest.fn(),
+    },
+    $transaction: jest.fn(async (callback) => callback(prismaMock)),
   };
+  return prismaMock;
 }
 
 function createMailMock() {
@@ -171,7 +183,9 @@ describe('BookingsService', () => {
   it('creates a booking with tour and hotel snapshot items', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 0, status: 'open' });
     prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
+    prisma.hotelInventoryDay.findMany.mockResolvedValue(['2026-06-12', '2026-06-13', '2026-06-14'].map((date) => ({ id: `inventory_${date}`, hotelId: 'hotel_1', date: new Date(`${date}T00:00:00.000Z`), totalRooms: 5, bookedRooms: 0, status: 'open' })));
     prisma.booking.create.mockResolvedValue(bookingRecord);
     const service = new BookingsService(prisma as never, createMailMock() as never);
 
@@ -194,6 +208,7 @@ describe('BookingsService', () => {
             itemType: 'tour',
             slug: 'bay-mau-coconut-forest',
             quantity: 2,
+            tourDepartureId: 'departure_1',
             date: '2026-06-13',
             guests: '2 travelers',
           },
@@ -260,6 +275,7 @@ describe('BookingsService', () => {
     const prisma = createPrismaMock();
     const mail = createMailMock();
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 0, status: 'open' });
     prisma.booking.create.mockResolvedValue({
       ...bookingRecord,
       items: [bookingItemRecords[0]],
@@ -278,6 +294,7 @@ describe('BookingsService', () => {
           itemType: 'tour',
           slug: 'bay-mau-coconut-forest',
           quantity: 2,
+          tourDepartureId: 'departure_1',
         },
       ],
     });
@@ -300,6 +317,7 @@ describe('BookingsService', () => {
     const prisma = createPrismaMock();
     const mail = createMailMock();
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 0, status: 'open' });
     prisma.booking.create.mockResolvedValue({
       ...bookingRecord,
       items: [bookingItemRecords[0]],
@@ -325,6 +343,7 @@ describe('BookingsService', () => {
             itemType: 'tour',
             slug: 'bay-mau-coconut-forest',
             quantity: 2,
+            tourDepartureId: 'departure_1',
           },
         ],
       }),
@@ -335,6 +354,167 @@ describe('BookingsService', () => {
       expect.any(String),
     );
     loggerSpy.mockRestore();
+  });
+
+
+  it('reserves tour departure seats and returns departure details', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({
+      id: 'departure_1',
+      tourId: 'tour_1',
+      date: new Date('2026-06-13T00:00:00.000Z'),
+      capacity: 12,
+      booked: 4,
+      status: 'open',
+      createdAt: new Date('2026-05-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+    });
+    prisma.booking.create.mockResolvedValue({
+      ...bookingRecord,
+      items: [
+        {
+          ...bookingItemRecords[0],
+          tourDepartureId: 'departure_1',
+          date: '2026-06-13',
+        },
+      ],
+    });
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(
+      service.create({
+        fullName: 'Mai Anh Nguyen',
+        email: 'mai.anh@example.com',
+        phone: '+84 90 123 4567',
+        country: 'Vietnam',
+        travelers: 2,
+        paymentMethod: 'credit-card',
+        items: [
+          {
+            itemType: 'tour',
+            slug: 'bay-mau-coconut-forest',
+            quantity: 2,
+            tourDepartureId: 'departure_1',
+          },
+        ],
+      }),
+    ).resolves.toMatchObject({
+      items: [
+        expect.objectContaining({
+          tourDepartureId: 'departure_1',
+          date: '2026-06-13',
+          quantity: 2,
+        }),
+      ],
+    });
+
+    expect(prisma.tourDeparture.update).toHaveBeenCalledWith({
+      where: { id: 'departure_1' },
+      data: { booked: { increment: 2 } },
+    });
+    expect(prisma.booking.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          items: {
+            create: [expect.objectContaining({ tourDepartureId: 'departure_1', date: '2026-06-13' })],
+          },
+        }),
+      }),
+    );
+  });
+
+  it('rejects sold-out tour departures without creating a booking', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({
+      id: 'departure_1',
+      tourId: 'tour_1',
+      date: new Date('2026-06-13T00:00:00.000Z'),
+      capacity: 12,
+      booked: 12,
+      status: 'open',
+    });
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'tour', slug: 'bay-mau-coconut-forest', quantity: 1, tourDepartureId: 'departure_1' }],
+    })).rejects.toThrow('This departure is sold out.');
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects tour departures with partial availability without creating a booking', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' });
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'tour', slug: 'bay-mau-coconut-forest', quantity: 3, tourDepartureId: 'departure_1' }],
+    })).rejects.toThrow('Only 2 seats left for this departure.');
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+  });
+
+  it('reserves hotel inventory for every covered night', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
+    prisma.hotelInventoryDay.findMany.mockResolvedValue(['2026-06-12', '2026-06-13', '2026-06-14'].map((date) => ({
+      id: `inventory_${date}`,
+      hotelId: 'hotel_1',
+      date: new Date(`${date}T00:00:00.000Z`),
+      totalRooms: 5,
+      bookedRooms: 2,
+      status: 'open',
+    })));
+    prisma.booking.create.mockResolvedValue({ ...bookingRecord, items: [bookingItemRecords[1]] });
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 2, unitPrice: 145, checkIn: '2026-06-12', checkOut: '2026-06-15' }],
+    })).resolves.toMatchObject({ bookingCode: 'TW-20260501-SEED' });
+
+    expect(prisma.hotelInventoryDay.update).toHaveBeenCalledTimes(3);
+    expect(prisma.hotelInventoryDay.update).toHaveBeenNthCalledWith(1, { where: { id: 'inventory_2026-06-12' }, data: { bookedRooms: { increment: 2 } } });
+    expect(prisma.hotelInventoryDay.update).toHaveBeenNthCalledWith(3, { where: { id: 'inventory_2026-06-14' }, data: { bookedRooms: { increment: 2 } } });
+  });
+
+  it('rejects hotel bookings when a covered night is missing or closed', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
+    prisma.hotelInventoryDay.findMany.mockResolvedValue([
+      { id: 'inventory_2026-06-12', hotelId: 'hotel_1', date: new Date('2026-06-12T00:00:00.000Z'), totalRooms: 5, bookedRooms: 1, status: 'open' },
+      { id: 'inventory_2026-06-13', hotelId: 'hotel_1', date: new Date('2026-06-13T00:00:00.000Z'), totalRooms: 5, bookedRooms: 1, status: 'closed' },
+    ]);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 1, checkIn: '2026-06-12', checkOut: '2026-06-15' }],
+    })).rejects.toThrow('This hotel is unavailable on 2026-06-13.');
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects hotel bookings when a covered night lacks rooms', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
+    prisma.hotelInventoryDay.findMany.mockResolvedValue(['2026-06-12', '2026-06-13'].map((date, index) => ({
+      id: `inventory_${date}`,
+      hotelId: 'hotel_1',
+      date: new Date(`${date}T00:00:00.000Z`),
+      totalRooms: 5,
+      bookedRooms: index === 1 ? 4 : 1,
+      status: 'open',
+    })));
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 2, checkIn: '2026-06-12', checkOut: '2026-06-14' }],
+    })).rejects.toThrow('Only 1 rooms left on 2026-06-13.');
+    expect(prisma.booking.create).not.toHaveBeenCalled();
   });
 
   it('rejects empty booking items', async () => {

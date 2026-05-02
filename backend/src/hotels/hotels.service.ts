@@ -98,6 +98,8 @@ export class HotelsService {
   }
 
   async upsertInventory(slug: string, dto: UpsertHotelInventoryDto) {
+    this.validateUniquePayload(dto.inventory);
+
     await this.prisma.$transaction(async (tx) => {
       const hotel = await this.findEditableHotelInTransaction(tx, slug);
 
@@ -115,18 +117,30 @@ export class HotelsService {
             );
           }
 
-          if (inventoryDay.totalRooms < existing.bookedRooms) {
-            throw new BadRequestException(CAPACITY_ERROR);
+          const dateConflict = await tx.hotelInventoryDay.findUnique({
+            where: { hotelId_date: { hotelId: hotel.id, date } },
+          });
+
+          if (dateConflict && dateConflict.id !== inventoryDay.id) {
+            throw new BadRequestException('Inventory date already exists.');
           }
 
-          await tx.hotelInventoryDay.update({
-            where: { id: inventoryDay.id },
+          const result = await tx.hotelInventoryDay.updateMany({
+            where: {
+              id: inventoryDay.id,
+              hotelId: hotel.id,
+              bookedRooms: { lte: inventoryDay.totalRooms },
+            },
             data: {
               date,
               totalRooms: inventoryDay.totalRooms,
               status: inventoryDay.status,
             },
           });
+
+          if (result.count !== 1) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
           continue;
         }
 
@@ -135,17 +149,21 @@ export class HotelsService {
         });
 
         if (existing) {
-          if (inventoryDay.totalRooms < existing.bookedRooms) {
-            throw new BadRequestException(CAPACITY_ERROR);
-          }
-
-          await tx.hotelInventoryDay.update({
-            where: { id: existing.id },
+          const result = await tx.hotelInventoryDay.updateMany({
+            where: {
+              id: existing.id,
+              hotelId: hotel.id,
+              bookedRooms: { lte: inventoryDay.totalRooms },
+            },
             data: {
               totalRooms: inventoryDay.totalRooms,
               status: inventoryDay.status,
             },
           });
+
+          if (result.count !== 1) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
           continue;
         }
 
@@ -161,7 +179,7 @@ export class HotelsService {
       }
     });
 
-    return this.findOne(slug);
+    return this.findEditableHotelDetail(slug);
   }
 
   private buildPublicWhere(filters: {
@@ -213,6 +231,19 @@ export class HotelsService {
 
   private async findEditableHotel(slug: string) {
     return this.findEditableHotelInTransaction(this.prisma, slug);
+  }
+
+  private async findEditableHotelDetail(slug: string) {
+    const hotel = await this.prisma.hotel.findUnique({
+      where: { slug },
+      include: hotelDetailInclude,
+    });
+
+    if (!hotel) {
+      throw new NotFoundException(`Hotel ${slug} was not found.`);
+    }
+
+    return this.toDetailResponse(hotel);
   }
 
   private async findEditableHotelInTransaction(
@@ -324,6 +355,25 @@ export class HotelsService {
         status: inventoryDay.status,
       })),
     };
+  }
+
+  private validateUniquePayload(inventory: UpsertHotelInventoryDto['inventory']) {
+    const ids = new Set<string>();
+    const dates = new Set<string>();
+
+    for (const inventoryDay of inventory) {
+      if (inventoryDay.id) {
+        if (ids.has(inventoryDay.id)) {
+          throw new BadRequestException('Duplicate inventory id in payload.');
+        }
+        ids.add(inventoryDay.id);
+      }
+
+      if (dates.has(inventoryDay.date)) {
+        throw new BadRequestException('Duplicate inventory date in payload.');
+      }
+      dates.add(inventoryDay.date);
+    }
   }
 
   private toInventoryDate(date: string) {

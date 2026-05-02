@@ -72,6 +72,8 @@ export class ToursService {
   }
 
   async upsertDepartures(slug: string, dto: UpsertTourDeparturesDto) {
+    this.validateUniquePayload(dto.departures);
+
     await this.prisma.$transaction(async (tx) => {
       const tour = await tx.tour.findUnique({ where: { slug } });
 
@@ -91,18 +93,30 @@ export class ToursService {
             throw new NotFoundException(`Tour departure ${departure.id} was not found.`);
           }
 
-          if (departure.capacity < existing.booked) {
-            throw new BadRequestException(CAPACITY_ERROR);
+          const dateConflict = await tx.tourDeparture.findUnique({
+            where: { tourId_date: { tourId: tour.id, date } },
+          });
+
+          if (dateConflict && dateConflict.id !== departure.id) {
+            throw new BadRequestException('Inventory date already exists.');
           }
 
-          await tx.tourDeparture.update({
-            where: { id: departure.id },
+          const result = await tx.tourDeparture.updateMany({
+            where: {
+              id: departure.id,
+              tourId: tour.id,
+              booked: { lte: departure.capacity },
+            },
             data: {
               date,
               capacity: departure.capacity,
               status: departure.status,
             },
           });
+
+          if (result.count !== 1) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
           continue;
         }
 
@@ -111,17 +125,21 @@ export class ToursService {
         });
 
         if (existing) {
-          if (departure.capacity < existing.booked) {
-            throw new BadRequestException(CAPACITY_ERROR);
-          }
-
-          await tx.tourDeparture.update({
-            where: { id: existing.id },
+          const result = await tx.tourDeparture.updateMany({
+            where: {
+              id: existing.id,
+              tourId: tour.id,
+              booked: { lte: departure.capacity },
+            },
             data: {
               capacity: departure.capacity,
               status: departure.status,
             },
           });
+
+          if (result.count !== 1) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
           continue;
         }
 
@@ -216,6 +234,27 @@ export class ToursService {
         status: departure.status,
       })),
     };
+  }
+
+  private validateUniquePayload(
+    departures: UpsertTourDeparturesDto['departures'],
+  ) {
+    const ids = new Set<string>();
+    const dates = new Set<string>();
+
+    for (const departure of departures) {
+      if (departure.id) {
+        if (ids.has(departure.id)) {
+          throw new BadRequestException('Duplicate inventory id in payload.');
+        }
+        ids.add(departure.id);
+      }
+
+      if (dates.has(departure.date)) {
+        throw new BadRequestException('Duplicate inventory date in payload.');
+      }
+      dates.add(departure.date);
+    }
   }
 
   private toInventoryDate(date: string) {

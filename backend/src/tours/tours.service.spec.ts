@@ -123,6 +123,7 @@ function createPrismaMock() {
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       upsert: jest.fn(),
     },
     $transaction: jest.fn(),
@@ -186,14 +187,17 @@ describe('ToursService', () => {
   it('rejects updating a departure capacity lower than existing booked seats', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique.mockResolvedValueOnce(tourRecord);
-    prisma.tourDeparture.findUnique.mockResolvedValueOnce({
-      id: 'departure_1',
-      tourId: 'tour_1',
-      date: new Date('2026-06-12T00:00:00.000Z'),
-      capacity: 12,
-      booked: 4,
-      status: 'open',
-    });
+    prisma.tourDeparture.findUnique
+      .mockResolvedValueOnce({
+        id: 'departure_1',
+        tourId: 'tour_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        capacity: 12,
+        booked: 4,
+        status: 'open',
+      })
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1' });
+    prisma.tourDeparture.updateMany.mockResolvedValueOnce({ count: 0 });
     const service = new ToursService(prisma as never);
 
     await expect(
@@ -220,6 +224,7 @@ describe('ToursService', () => {
       booked: 4,
       status: 'open',
     });
+    prisma.tourDeparture.updateMany.mockResolvedValueOnce({ count: 0 });
     const service = new ToursService(prisma as never);
 
     await expect(
@@ -279,6 +284,7 @@ describe('ToursService', () => {
             booked: 4,
             status: 'open',
           })
+          .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1' })
           .mockResolvedValueOnce({
             id: 'departure_2',
             tourId: 'tour_1',
@@ -286,10 +292,12 @@ describe('ToursService', () => {
             capacity: 12,
             booked: 6,
             status: 'open',
-          }),
-        update: jest.fn().mockImplementation((args) => {
+          })
+          .mockResolvedValueOnce({ id: 'departure_2', tourId: 'tour_1' }),
+        update: jest.fn(),
+        updateMany: jest.fn().mockImplementation((args) => {
           writes.push(args);
-          return Promise.resolve({});
+          return Promise.resolve({ count: args.where.id === 'departure_1' ? 1 : 0 });
         }),
         upsert: jest.fn(),
       },
@@ -315,7 +323,7 @@ describe('ToursService', () => {
     ).rejects.toThrow(
       new BadRequestException('Capacity cannot be lower than current bookings.'),
     );
-    expect(tx.tourDeparture.update).toHaveBeenCalledTimes(1);
+    expect(tx.tourDeparture.updateMany).toHaveBeenCalledTimes(2);
     expect(writes).toEqual([]);
     expect(prisma.tour.findUnique).not.toHaveBeenCalledTimes(2);
   });
@@ -374,6 +382,71 @@ describe('ToursService', () => {
     });
   });
 
+  it('rejects concurrent id capacity reductions below current bookings', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValueOnce(tourRecord);
+    prisma.tourDeparture.findUnique
+      .mockResolvedValueOnce({
+        id: 'departure_1',
+        tourId: 'tour_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        capacity: 12,
+        booked: 4,
+        status: 'open',
+      })
+      .mockResolvedValueOnce(null);
+    prisma.tourDeparture.updateMany.mockResolvedValueOnce({ count: 0 });
+    const service = new ToursService(prisma as never);
+
+    await expect(
+      service.upsertDepartures('bay-mau-coconut-forest', {
+        departures: [
+          { id: 'departure_1', date: '2026-06-12', capacity: 4, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(new BadRequestException('Capacity cannot be lower than current bookings.'));
+  });
+
+  it('rejects id departure updates to an existing date for the same tour', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValueOnce(tourRecord);
+    prisma.tourDeparture.findUnique
+      .mockResolvedValueOnce({
+        id: 'departure_1',
+        tourId: 'tour_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        capacity: 12,
+        booked: 4,
+        status: 'open',
+      })
+      .mockResolvedValueOnce({ id: 'departure_2', tourId: 'tour_1' });
+    const service = new ToursService(prisma as never);
+
+    await expect(
+      service.upsertDepartures('bay-mau-coconut-forest', {
+        departures: [
+          { id: 'departure_1', date: '2026-06-13', capacity: 12, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(new BadRequestException('Inventory date already exists.'));
+    expect(prisma.tourDeparture.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects duplicate departure dates before writing', async () => {
+    const prisma = createPrismaMock();
+    const service = new ToursService(prisma as never);
+
+    await expect(
+      service.upsertDepartures('bay-mau-coconut-forest', {
+        departures: [
+          { date: '2026-06-12', capacity: 12, status: 'open' },
+          { date: '2026-06-12', capacity: 14, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(new BadRequestException('Duplicate inventory date in payload.'));
+    expect(prisma.tour.findUnique).not.toHaveBeenCalled();
+  });
+
   it('upserts departures and returns detail with remaining seats', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique
@@ -393,15 +466,17 @@ describe('ToursService', () => {
           },
         ],
       });
-    prisma.tourDeparture.findUnique.mockResolvedValueOnce({
-      id: 'departure_1',
-      tourId: 'tour_1',
-      date: new Date('2026-06-12T00:00:00.000Z'),
-      capacity: 12,
-      booked: 4,
-      status: 'open',
-    });
-    prisma.tourDeparture.update.mockResolvedValueOnce({});
+    prisma.tourDeparture.findUnique
+      .mockResolvedValueOnce({
+        id: 'departure_1',
+        tourId: 'tour_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        capacity: 12,
+        booked: 4,
+        status: 'open',
+      })
+      .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1' });
+    prisma.tourDeparture.updateMany.mockResolvedValueOnce({ count: 1 });
     const service = new ToursService(prisma as never);
 
     await expect(

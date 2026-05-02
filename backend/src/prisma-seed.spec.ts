@@ -36,7 +36,14 @@ describe('Prisma seed data', () => {
       ['bavarian-trails', 2, 4, 3, 2, 1],
     ] as const;
 
-    for (const [slug, introCount, factCount, spotlightCount, tourCount, hotelCount] of expectations) {
+    for (const [
+      slug,
+      introCount,
+      factCount,
+      spotlightCount,
+      tourCount,
+      hotelCount,
+    ] of expectations) {
       const destination = seedDestinations.find((item) => item.slug === slug);
 
       expect(destination?.intro).toHaveLength(introCount);
@@ -48,13 +55,17 @@ describe('Prisma seed data', () => {
   });
 
   it('includes enough detail sections for the Kyoto journal detail layout', () => {
-    const kyotoPost = seedBlogPosts.find((post) => post.slug === 'kyotos-new-wave');
+    const kyotoPost = seedBlogPosts.find(
+      (post) => post.slug === 'kyotos-new-wave',
+    );
 
     expect(kyotoPost?.sections).toHaveLength(3);
   });
 
   it('includes enough gallery and booking data for the Shining Riverside detail layout', () => {
-    const shiningRiverside = seedHotels.find((hotel) => hotel.slug === 'shining-riverside-hoi-an');
+    const shiningRiverside = seedHotels.find(
+      (hotel) => hotel.slug === 'shining-riverside-hoi-an',
+    );
 
     expect(shiningRiverside?.gallery).toHaveLength(2);
     expect(shiningRiverside?.booking).toMatchObject({
@@ -69,6 +80,54 @@ describe('Prisma seed data', () => {
     for (const tour of seedTours) {
       expect(tour.gallery.length).toBeGreaterThanOrEqual(1);
       expect(tour.gallery[0]).toMatchObject({ layout: 'portrait' });
+    }
+  });
+
+  it('seeds generic open tour departures without booked counts', () => {
+    for (const tour of seedTours) {
+      expect(tour.departures).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            date: new Date('2026-06-15T00:00:00.000Z'),
+            booked: 0,
+            status: 'open',
+          }),
+          expect.objectContaining({
+            date: new Date('2026-06-22T00:00:00.000Z'),
+            booked: 0,
+            status: 'open',
+          }),
+          expect.objectContaining({
+            date: new Date('2026-06-29T00:00:00.000Z'),
+            booked: 0,
+            status: 'open',
+          }),
+        ]),
+      );
+    }
+  });
+
+  it('seeds generic open hotel inventory without booked room counts', () => {
+    for (const hotel of seedHotels) {
+      expect(hotel.inventory).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            date: new Date('2026-06-15T00:00:00.000Z'),
+            bookedRooms: 0,
+            status: 'open',
+          }),
+          expect.objectContaining({
+            date: new Date('2026-06-16T00:00:00.000Z'),
+            bookedRooms: 0,
+            status: 'open',
+          }),
+          expect.objectContaining({
+            date: new Date('2026-06-17T00:00:00.000Z'),
+            bookedRooms: 0,
+            status: 'open',
+          }),
+        ]),
+      );
     }
   });
 

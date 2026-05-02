@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ToursService } from './tours.service';
 
 const tourRecord = {
@@ -64,6 +64,18 @@ const tourRecord = {
       updatedAt: new Date('2026-04-30T00:00:00.000Z'),
     },
   ],
+  departures: [
+    {
+      id: 'departure_1',
+      tourId: 'tour_1',
+      date: new Date('2026-06-12T00:00:00.000Z'),
+      capacity: 12,
+      booked: 4,
+      status: 'open',
+      createdAt: new Date('2026-04-30T00:00:00.000Z'),
+      updatedAt: new Date('2026-04-30T00:00:00.000Z'),
+    },
+  ],
   hotels: [
     {
       id: 'hotel_1',
@@ -105,6 +117,10 @@ function createPrismaMock() {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    tourDeparture: {
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+    },
   };
 }
 
@@ -144,6 +160,81 @@ describe('ToursService', () => {
         ],
       },
     ]);
+  });
+
+  it('rejects updating a departure capacity lower than existing booked seats', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValueOnce(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValueOnce({
+      id: 'departure_1',
+      tourId: 'tour_1',
+      date: new Date('2026-06-12T00:00:00.000Z'),
+      capacity: 12,
+      booked: 4,
+      status: 'open',
+    });
+    const service = new ToursService(prisma as never);
+
+    await expect(
+      service.upsertDepartures('bay-mau-coconut-forest', {
+        departures: [
+          { id: 'departure_1', date: '2026-06-12', capacity: 3, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('Capacity cannot be lower than current bookings.'),
+    );
+    expect(prisma.tourDeparture.upsert).not.toHaveBeenCalled();
+  });
+
+  it('upserts departures and returns detail with remaining seats', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique
+      .mockResolvedValueOnce(tourRecord)
+      .mockResolvedValueOnce({
+        ...tourRecord,
+        departures: [
+          {
+            id: 'departure_1',
+            tourId: 'tour_1',
+            date: new Date('2026-06-12T00:00:00.000Z'),
+            capacity: 16,
+            booked: 4,
+            status: 'open',
+            createdAt: new Date('2026-04-30T00:00:00.000Z'),
+            updatedAt: new Date('2026-04-30T00:00:00.000Z'),
+          },
+        ],
+      });
+    prisma.tourDeparture.findUnique.mockResolvedValueOnce({
+      id: 'departure_1',
+      tourId: 'tour_1',
+      date: new Date('2026-06-12T00:00:00.000Z'),
+      capacity: 12,
+      booked: 4,
+      status: 'open',
+    });
+    prisma.tourDeparture.upsert.mockResolvedValueOnce({});
+    const service = new ToursService(prisma as never);
+
+    await expect(
+      service.upsertDepartures('bay-mau-coconut-forest', {
+        departures: [
+          { id: 'departure_1', date: '2026-06-12', capacity: 16, status: 'open' },
+        ],
+      }),
+    ).resolves.toMatchObject({
+      departures: [
+        {
+          id: 'departure_1',
+          date: '2026-06-12',
+          capacity: 16,
+          booked: 4,
+          remaining: 12,
+          status: 'open',
+        },
+      ],
+    });
   });
 
   it('returns tour detail by slug', async () => {

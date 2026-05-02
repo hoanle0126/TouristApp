@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { UpsertTourDeparturesDto } from './dto/upsert-tour-departures.dto';
 import { ToursService } from './tours.service';
 
 @Controller('tours')
@@ -28,6 +29,14 @@ export class ToursController {
   @Post()
   create(@Body() dto: CreateTourDto) {
     return this.toursService.create(dto);
+  }
+
+  @Patch(':slug/departures')
+  upsertDepartures(
+    @Param('slug') slug: string,
+    @Body() dto: UpsertTourDeparturesDto,
+  ) {
+    return this.toursService.upsertDepartures(slug, dto);
   }
 
   @Patch(':slug')

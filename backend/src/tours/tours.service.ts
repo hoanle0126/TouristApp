@@ -1,11 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { UpsertTourDeparturesDto } from './dto/upsert-tour-departures.dto';
+
+const CAPACITY_ERROR = 'Capacity cannot be lower than current bookings.';
+
+const tourDetailInclude = {
+  destinations: true,
+  hotels: true,
+  departures: { orderBy: { date: 'asc' as const } },
+};
+
+type TourCardRecord = Prisma.TourGetPayload<{
+  include: { destinations: true; hotels: true };
+}>;
 
 type TourRecord = Prisma.TourGetPayload<{
-  include: { destinations: true; hotels: true };
+  include: typeof tourDetailInclude;
 }>;
 
 @Injectable()
@@ -23,7 +36,7 @@ export class ToursService {
   async findOne(slug: string) {
     const tour = await this.prisma.tour.findUnique({
       where: { slug },
-      include: { destinations: true, hotels: true },
+      include: tourDetailInclude,
     });
 
     if (!tour) {
@@ -36,7 +49,7 @@ export class ToursService {
   async create(dto: CreateTourDto) {
     const tour = await this.prisma.tour.create({
       data: dto,
-      include: { destinations: true, hotels: true },
+      include: tourDetailInclude,
     });
     return this.toDetailResponse(tour);
   }
@@ -46,7 +59,7 @@ export class ToursService {
     const tour = await this.prisma.tour.update({
       where: { slug },
       data: dto,
-      include: { destinations: true, hotels: true },
+      include: tourDetailInclude,
     });
     return this.toDetailResponse(tour);
   }
@@ -57,7 +70,48 @@ export class ToursService {
     return { deleted: true, slug };
   }
 
-  private toCardResponse(tour: TourRecord) {
+  async upsertDepartures(slug: string, dto: UpsertTourDeparturesDto) {
+    const tour = await this.prisma.tour.findUnique({ where: { slug } });
+
+    if (!tour) {
+      throw new NotFoundException(`Tour ${slug} was not found.`);
+    }
+
+    for (const departure of dto.departures) {
+      const date = this.toInventoryDate(departure.date);
+      const existing = departure.id
+        ? await this.prisma.tourDeparture.findUnique({
+            where: { id: departure.id },
+          })
+        : null;
+
+      if (existing && departure.capacity < existing.booked) {
+        throw new BadRequestException(CAPACITY_ERROR);
+      }
+
+      await this.prisma.tourDeparture.upsert({
+        where: departure.id
+          ? { id: departure.id }
+          : { tourId_date: { tourId: tour.id, date } },
+        create: {
+          tourId: tour.id,
+          date,
+          capacity: departure.capacity,
+          status: departure.status,
+          booked: 0,
+        },
+        update: {
+          date,
+          capacity: departure.capacity,
+          status: departure.status,
+        },
+      });
+    }
+
+    return this.findOne(slug);
+  }
+
+  private toCardResponse(tour: TourCardRecord) {
     return {
       slug: tour.slug,
       title: tour.title,
@@ -124,6 +178,22 @@ export class ToursService {
         this.toDestinationResponse(destination),
       ),
       hotels: tour.hotels.map((hotel) => this.toHotelResponse(hotel)),
+      departures: tour.departures.map((departure) => ({
+        id: departure.id,
+        date: this.toDateString(departure.date),
+        capacity: departure.capacity,
+        booked: departure.booked,
+        remaining: departure.capacity - departure.booked,
+        status: departure.status,
+      })),
     };
+  }
+
+  private toInventoryDate(date: string) {
+    return new Date(`${date}T00:00:00.000Z`);
+  }
+
+  private toDateString(date: Date) {
+    return date.toISOString().slice(0, 10);
   }
 }

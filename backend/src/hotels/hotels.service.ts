@@ -1,11 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 import { UpdateHotelDto } from './dto/update-hotel.dto';
+import { UpsertHotelInventoryDto } from './dto/upsert-hotel-inventory.dto';
+
+const CAPACITY_ERROR = 'Capacity cannot be lower than current bookings.';
+
+const hotelDetailInclude = {
+  destinations: true,
+  tours: true,
+  inventoryDays: { orderBy: { date: 'asc' as const } },
+};
+
+type HotelCardRecord = Prisma.HotelGetPayload<{
+  include: { destinations: true; tours: true };
+}>;
 
 type HotelRecord = Prisma.HotelGetPayload<{
-  include: { destinations: true; tours: true };
+  include: typeof hotelDetailInclude;
 }>;
 
 type RelationInput = {
@@ -39,7 +52,7 @@ export class HotelsService {
   async findOne(slug: string) {
     const hotel = await this.prisma.hotel.findFirst({
       where: { slug, status: 'published' },
-      include: { destinations: true, tours: true },
+      include: hotelDetailInclude,
     });
 
     if (!hotel) {
@@ -56,7 +69,7 @@ export class HotelsService {
         ...data,
         ...this.toRelationData({ destinationSlugs, tourSlugs }),
       },
-      include: { destinations: true, tours: true },
+      include: hotelDetailInclude,
     });
 
     return this.toDetailResponse(hotel);
@@ -71,7 +84,7 @@ export class HotelsService {
         ...data,
         ...this.toRelationData({ destinationSlugs, tourSlugs }, true),
       },
-      include: { destinations: true, tours: true },
+      include: hotelDetailInclude,
     });
 
     return this.toDetailResponse(hotel);
@@ -81,6 +94,43 @@ export class HotelsService {
     await this.findEditableHotel(slug);
     await this.prisma.hotel.delete({ where: { slug } });
     return { deleted: true, slug };
+  }
+
+  async upsertInventory(slug: string, dto: UpsertHotelInventoryDto) {
+    const hotel = await this.findEditableHotel(slug);
+
+    for (const inventoryDay of dto.inventory) {
+      const date = this.toInventoryDate(inventoryDay.date);
+      const existing = inventoryDay.id
+        ? await this.prisma.hotelInventoryDay.findUnique({
+            where: { id: inventoryDay.id },
+          })
+        : null;
+
+      if (existing && inventoryDay.totalRooms < existing.bookedRooms) {
+        throw new BadRequestException(CAPACITY_ERROR);
+      }
+
+      await this.prisma.hotelInventoryDay.upsert({
+        where: inventoryDay.id
+          ? { id: inventoryDay.id }
+          : { hotelId_date: { hotelId: hotel.id, date } },
+        create: {
+          hotelId: hotel.id,
+          date,
+          totalRooms: inventoryDay.totalRooms,
+          status: inventoryDay.status,
+          bookedRooms: 0,
+        },
+        update: {
+          date,
+          totalRooms: inventoryDay.totalRooms,
+          status: inventoryDay.status,
+        },
+      });
+    }
+
+    return this.findOne(slug);
   }
 
   private buildPublicWhere(filters: {
@@ -184,7 +234,7 @@ export class HotelsService {
     };
   }
 
-  private toCardResponse(hotel: HotelRecord) {
+  private toCardResponse(hotel: HotelCardRecord) {
     return {
       slug: hotel.slug,
       amenities: hotel.amenities,
@@ -227,6 +277,22 @@ export class HotelsService {
         this.toDestinationResponse(destination),
       ),
       tours: hotel.tours.map((tour) => this.toTourResponse(tour)),
+      inventory: hotel.inventoryDays.map((inventoryDay) => ({
+        id: inventoryDay.id,
+        date: this.toDateString(inventoryDay.date),
+        totalRooms: inventoryDay.totalRooms,
+        bookedRooms: inventoryDay.bookedRooms,
+        remaining: inventoryDay.totalRooms - inventoryDay.bookedRooms,
+        status: inventoryDay.status,
+      })),
     };
+  }
+
+  private toInventoryDate(date: string) {
+    return new Date(`${date}T00:00:00.000Z`);
+  }
+
+  private toDateString(date: Date) {
+    return date.toISOString().slice(0, 10);
   }
 }

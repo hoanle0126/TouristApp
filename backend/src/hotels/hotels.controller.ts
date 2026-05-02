@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 import { UpdateHotelDto } from './dto/update-hotel.dto';
+import { UpsertHotelInventoryDto } from './dto/upsert-hotel-inventory.dto';
 import { HotelsService } from './hotels.service';
 
 @Controller('hotels')
@@ -41,6 +42,14 @@ export class HotelsController {
   @Post()
   create(@Body() dto: CreateHotelDto) {
     return this.hotelsService.create(dto);
+  }
+
+  @Patch(':slug/inventory')
+  upsertInventory(
+    @Param('slug') slug: string,
+    @Body() dto: UpsertHotelInventoryDto,
+  ) {
+    return this.hotelsService.upsertInventory(slug, dto);
   }
 
   @Patch(':slug')

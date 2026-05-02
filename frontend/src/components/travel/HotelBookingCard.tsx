@@ -36,19 +36,25 @@ function parseCurrency(value: string) {
   return Number(value.replace(/[^0-9.]/g, ""));
 }
 
+function parseDateOnlyUtc(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
 function formatDate(value: string) {
-  const parsedDate = new Date(`${value}T00:00:00`);
+  const parsedDate = parseDateOnlyUtc(value);
 
   return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "short",
+    timeZone: "UTC",
     year: "numeric",
   }).format(parsedDate);
 }
 
 function calculateNights(checkIn: string, checkOut: string) {
-  const checkInDate = new Date(`${checkIn}T00:00:00`);
-  const checkOutDate = new Date(`${checkOut}T00:00:00`);
+  const checkInDate = parseDateOnlyUtc(checkIn);
+  const checkOutDate = parseDateOnlyUtc(checkOut);
   const difference = checkOutDate.getTime() - checkInDate.getTime();
   const nights = Math.round(difference / (1000 * 60 * 60 * 24));
 
@@ -57,11 +63,11 @@ function calculateNights(checkIn: string, checkOut: string) {
 
 function dateOnlyRange(checkIn: string, checkOut: string) {
   const nights = calculateNights(checkIn, checkOut);
-  const startDate = new Date(`${checkIn}T00:00:00`);
+  const startDate = parseDateOnlyUtc(checkIn);
 
   return Array.from({ length: nights }, (_, index) => {
     const date = new Date(startDate);
-    date.setDate(startDate.getDate() + index);
+    date.setUTCDate(startDate.getUTCDate() + index);
     return date.toISOString().split("T")[0];
   });
 }
@@ -105,11 +111,12 @@ function buildAvailabilityOptions(
   hotel: HotelDetail,
   travelers: string,
   nights: number,
+  quantity: number,
 ): readonly AvailabilityOption[] {
   return hotel.suites.map((suite) => {
     const nightlyRate = parseCurrency(suite.price);
     const status = availabilityStatusForSuite(suite, travelers, nights);
-    const total = nightlyRate * nights + parseCurrency(hotel.booking.fee);
+    const total = nightlyRate * nights * quantity + parseCurrency(hotel.booking.fee);
 
     return {
       nightlyRate: suite.price,
@@ -167,6 +174,7 @@ function createCartItem(
     nights,
     price: total,
     quantity,
+    unitPrice: parseCurrency(total) / quantity,
     roomType: suite.name,
     slug: hotel.slug,
     title: hotel.title,
@@ -188,7 +196,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   const stayLabel =
     nights > 0 ? `${formatDate(checkIn)} - ${formatDate(checkOut)}` : "";
   const availabilityOptions =
-    nights > 0 && !blockedNight ? buildAvailabilityOptions(hotel, travelers, nights) : [];
+    nights > 0 && !blockedNight ? buildAvailabilityOptions(hotel, travelers, nights, quantity) : [];
   const selectedOption = availabilityOptions.find(
     (option) => option.suite.name === selectedSuiteName,
   );
@@ -359,8 +367,8 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
 
           <div className="space-y-4 border-t border-stone-200 pt-8">
             <div className="flex justify-between text-stone-500">
-              <span>{selectedOption ? `${selectedOption.nightlyRate} x ${nights} nights` : `${hotel.price} x ${hotel.booking.nights}`}</span>
-              <span>{selectedOption ? `$${(parseCurrency(selectedOption.nightlyRate) * nights).toLocaleString()}` : hotel.booking.nightlyTotal}</span>
+              <span>{selectedOption ? `${selectedOption.nightlyRate} x ${nights} nights x ${quantity} ${quantity === 1 ? "room" : "rooms"}` : `${hotel.price} x ${hotel.booking.nights}`}</span>
+              <span>{selectedOption ? `$${(parseCurrency(selectedOption.nightlyRate) * nights * quantity).toLocaleString()}` : hotel.booking.nightlyTotal}</span>
             </div>
             <div className="flex justify-between text-stone-500">
               <span>Wellness Service Fee</span>

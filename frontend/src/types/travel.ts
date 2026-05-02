@@ -12,6 +12,7 @@ export interface CartItem {
   readonly price: string;
   readonly quantity?: number;
   readonly roomType?: string;
+  readonly unitPrice?: number;
   readonly slug?: string;
   readonly title: string;
 }

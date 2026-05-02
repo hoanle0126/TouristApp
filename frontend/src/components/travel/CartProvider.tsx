@@ -87,7 +87,7 @@ export function CartProvider({
   const value = useMemo<CartContextValue>(() => {
     const subtotal = items.reduce((total, item) => {
       const price = Number(item.price.replace(/[^0-9.]/g, ""));
-      return total + price * item.quantity;
+      return total + (item.unitPrice === undefined ? price * item.quantity : price);
     }, 0);
 
     const totalItems = items.length;
@@ -106,7 +106,7 @@ export function CartProvider({
           return;
         }
 
-        writeStoredItems([...currentItems, { ...item, quantity: 1 }]);
+        writeStoredItems([...currentItems, { ...item, quantity: item.quantity ?? 1 }]);
       },
       clearCart() {
         writeStoredItems([]);

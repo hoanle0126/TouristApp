@@ -23,7 +23,12 @@ const travelerOptions = [
   "Private Group",
 ] as const;
 
-function createCartItem(tour: TourDetail, departureId: string, departureDate: string, travelers: string): CartItem {
+function travelersToQuantity(travelers: string) {
+  const match = travelers.match(/^(\d+) Guests?/);
+  return match ? Number(match[1]) : null;
+}
+
+function createCartItem(tour: TourDetail, departureId: string, departureDate: string, travelers: string, quantity: number): CartItem {
   return {
     id: `${tour.slug ?? tour.title}-${departureId}-${travelers}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     alt: tour.heroAlt,
@@ -32,7 +37,7 @@ function createCartItem(tour: TourDetail, departureId: string, departureDate: st
     itemType: "tour",
     meta: `${tour.duration} • ${travelers}`,
     price: tour.price,
-    quantity: 1,
+    quantity,
     slug: tour.slug,
     title: tour.title,
     tourDepartureId: departureId,
@@ -62,15 +67,23 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
 
   const cartItem = useMemo(() => {
     const departure = availableDepartures.find((item) => item.id === departureId);
+    const quantity = travelersToQuantity(travelers);
 
-    if (!departure) {
+    if (!departure || quantity === null || departure.remaining < quantity) {
       return null;
     }
 
-    return createCartItem(tour, departure.id, formatDepartureDate(departure.date), travelers);
+    return createCartItem(tour, departure.id, formatDepartureDate(departure.date), travelers, quantity);
   }, [availableDepartures, departureId, tour, travelers]);
 
   const inCart = cartItem ? isInCart(cartItem) : false;
+  const selectedDeparture = availableDepartures.find((item) => item.id === departureId);
+  const selectedTravelerQuantity = travelersToQuantity(travelers);
+  const travelerMessage = travelers === "Private Group"
+    ? "Private group bookings need a curator-confirmed seat count before checkout."
+    : selectedDeparture && selectedTravelerQuantity !== null && selectedDeparture.remaining < selectedTravelerQuantity
+      ? `Only ${selectedDeparture.remaining} seats remain for this departure.`
+      : null;
   const isReadyToBook = cartItem !== null;
   const unavailableMessage = availableDepartures.length === 0 ? "This journey is currently sold out. Please contact a curator for future departures." : null;
 
@@ -135,6 +148,9 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
                 ))}
               </SelectContent>
             </Select>
+            {travelerMessage ? (
+              <p className="mt-2 text-sm font-semibold text-rose-700">{travelerMessage}</p>
+            ) : null}
           </div>
         </div>
 

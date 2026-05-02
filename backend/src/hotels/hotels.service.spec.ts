@@ -1,4 +1,6 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { validate } from 'class-validator';
+import { HotelInventoryInputDto } from './dto/upsert-hotel-inventory.dto';
 import { HotelsService } from './hotels.service';
 
 const destinationRecord = {
@@ -102,6 +104,18 @@ const hotelRecord = {
     travelers: '2 travelers',
     total: '$453 total',
   },
+  inventoryDays: [
+    {
+      id: 'inventory_1',
+      hotelId: 'hotel_1',
+      date: new Date('2026-06-12T00:00:00.000Z'),
+      totalRooms: 10,
+      bookedRooms: 3,
+      status: 'open',
+      createdAt: new Date('2026-05-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+    },
+  ],
   destinations: [destinationRecord],
   tours: [tourRecord],
   createdAt: new Date('2026-05-01T00:00:00.000Z'),
@@ -109,7 +123,7 @@ const hotelRecord = {
 };
 
 function createPrismaMock() {
-  return {
+  const prisma = {
     hotel: {
       findMany: jest.fn(),
       findFirst: jest.fn(),
@@ -118,10 +132,34 @@ function createPrismaMock() {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    hotelInventoryDay: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+      upsert: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
+  prisma.$transaction.mockImplementation((callback) => callback(prisma));
+  return prisma;
 }
 
 describe('HotelsService', () => {
+  it('rejects invalid calendar inventory dates at DTO validation', async () => {
+    const dto = Object.assign(new HotelInventoryInputDto(), {
+      date: '2026-02-31',
+      totalRooms: 10,
+      status: 'open',
+    });
+
+    await expect(validate(dto)).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ property: 'date' }),
+      ]),
+    );
+  });
+
   it('returns published hotel cards with relation summaries', async () => {
     const prisma = createPrismaMock();
     prisma.hotel.findMany.mockResolvedValue([hotelRecord]);
@@ -152,6 +190,347 @@ describe('HotelsService', () => {
         ],
       }),
     ]);
+  });
+
+  it('rejects updating totalRooms lower than existing bookedRooms', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique
+      .mockResolvedValueOnce({
+        id: 'inventory_1',
+        hotelId: 'hotel_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        totalRooms: 10,
+        bookedRooms: 3,
+        status: 'open',
+      })
+      .mockResolvedValueOnce({ id: 'inventory_1', hotelId: 'hotel_1' });
+    prisma.hotelInventoryDay.updateMany.mockResolvedValueOnce({ count: 0 });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          { id: 'inventory_1', date: '2026-06-12', totalRooms: 2, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('Capacity cannot be lower than current bookings.'),
+    );
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects no-id inventory date update when totalRooms is lower than existing bookedRooms', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique.mockResolvedValueOnce({
+      id: 'inventory_1',
+      hotelId: 'hotel_1',
+      date: new Date('2026-06-12T00:00:00.000Z'),
+      totalRooms: 10,
+      bookedRooms: 3,
+      status: 'open',
+    });
+    prisma.hotelInventoryDay.updateMany.mockResolvedValueOnce({ count: 0 });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [{ date: '2026-06-12', totalRooms: 2, status: 'open' }],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('Capacity cannot be lower than current bookings.'),
+    );
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.create).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects an inventory day id that belongs to another hotel without writing', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique.mockResolvedValueOnce({
+      id: 'inventory_other',
+      hotelId: 'hotel_other',
+      date: new Date('2026-06-13T00:00:00.000Z'),
+      totalRooms: 10,
+      bookedRooms: 0,
+      status: 'open',
+    });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          {
+            id: 'inventory_other',
+            date: '2026-06-13',
+            totalRooms: 10,
+            status: 'open',
+          },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rolls back batch inventory updates when a later row is invalid', async () => {
+    const prisma = createPrismaMock();
+    const writes: unknown[] = [];
+    const tx = {
+      hotel: { findUnique: jest.fn().mockResolvedValue(hotelRecord) },
+      hotelInventoryDay: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValueOnce({
+            id: 'inventory_1',
+            hotelId: 'hotel_1',
+            date: new Date('2026-06-12T00:00:00.000Z'),
+            totalRooms: 10,
+            bookedRooms: 3,
+            status: 'open',
+          })
+          .mockResolvedValueOnce({ id: 'inventory_1', hotelId: 'hotel_1' })
+          .mockResolvedValueOnce({
+            id: 'inventory_2',
+            hotelId: 'hotel_1',
+            date: new Date('2026-06-13T00:00:00.000Z'),
+            totalRooms: 10,
+            bookedRooms: 6,
+            status: 'open',
+          })
+          .mockResolvedValueOnce({ id: 'inventory_2', hotelId: 'hotel_1' }),
+        update: jest.fn(),
+        updateMany: jest.fn().mockImplementation((args) => {
+          writes.push(args);
+          return Promise.resolve({ count: args.where.id === 'inventory_1' ? 1 : 0 });
+        }),
+        upsert: jest.fn(),
+      },
+    };
+    prisma.$transaction.mockImplementationOnce(async (callback) => {
+      writes.length = 0;
+      try {
+        return await callback(tx);
+      } catch (error) {
+        writes.length = 0;
+        throw error;
+      }
+    });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          { id: 'inventory_1', date: '2026-06-12', totalRooms: 12, status: 'open' },
+          { id: 'inventory_2', date: '2026-06-13', totalRooms: 5, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('Capacity cannot be lower than current bookings.'),
+    );
+    expect(tx.hotelInventoryDay.updateMany).toHaveBeenCalledTimes(2);
+    expect(writes).toEqual([]);
+    expect(prisma.hotel.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('rejects invalid calendar inventory dates before writing', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [{ date: '2026-02-31', totalRooms: 10, status: 'open' }],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('date must be a valid date in YYYY-MM-DD format'),
+    );
+    expect(prisma.hotelInventoryDay.findUnique).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.create).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+  });
+
+  it('does not allow payload booked rooms to affect inventory writes', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord).mockResolvedValueOnce({
+      ...hotelRecord,
+      inventoryDays: [
+        {
+          id: 'inventory_2',
+          hotelId: 'hotel_1',
+          date: new Date('2026-06-13T00:00:00.000Z'),
+          totalRooms: 10,
+          bookedRooms: 0,
+          status: 'open',
+          createdAt: new Date('2026-05-01T00:00:00.000Z'),
+          updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+        },
+      ],
+    });
+    const service = new HotelsService(prisma as never);
+
+    await service.upsertInventory('shining-riverside-hoi-an', {
+      inventory: [
+        { date: '2026-06-13', totalRooms: 10, status: 'open', bookedRooms: 8 } as never,
+      ],
+    });
+
+    expect(prisma.hotelInventoryDay.create).toHaveBeenCalledWith({
+      data: expect.not.objectContaining({ bookedRooms: 8 }),
+    });
+    expect(prisma.hotelInventoryDay.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ bookedRooms: 0 }),
+    });
+  });
+
+  it('rejects concurrent id total room reductions below current bookings', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique
+      .mockResolvedValueOnce({
+        id: 'inventory_1',
+        hotelId: 'hotel_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        totalRooms: 10,
+        bookedRooms: 3,
+        status: 'open',
+      })
+      .mockResolvedValueOnce(null);
+    prisma.hotelInventoryDay.updateMany.mockResolvedValueOnce({ count: 0 });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          { id: 'inventory_1', date: '2026-06-12', totalRooms: 3, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(new BadRequestException('Capacity cannot be lower than current bookings.'));
+  });
+
+  it('rejects id inventory updates to an existing date for the same hotel', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique
+      .mockResolvedValueOnce({
+        id: 'inventory_1',
+        hotelId: 'hotel_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        totalRooms: 10,
+        bookedRooms: 3,
+        status: 'open',
+      })
+      .mockResolvedValueOnce({ id: 'inventory_2', hotelId: 'hotel_1' });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          { id: 'inventory_1', date: '2026-06-13', totalRooms: 10, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(new BadRequestException('Inventory date already exists.'));
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects duplicate inventory dates before writing', async () => {
+    const prisma = createPrismaMock();
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          { date: '2026-06-12', totalRooms: 10, status: 'open' },
+          { date: '2026-06-12', totalRooms: 12, status: 'open' },
+        ],
+      }),
+    ).rejects.toThrow(new BadRequestException('Duplicate inventory date in payload.'));
+    expect(prisma.hotel.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('upserts unpublished hotel inventory and returns editable detail', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique
+      .mockResolvedValueOnce({ ...hotelRecord, status: 'draft' })
+      .mockResolvedValueOnce({
+        ...hotelRecord,
+        status: 'draft',
+        inventoryDays: [
+          {
+            id: 'inventory_2',
+            hotelId: 'hotel_1',
+            date: new Date('2026-06-13T00:00:00.000Z'),
+            totalRooms: 10,
+            bookedRooms: 0,
+            status: 'open',
+            createdAt: new Date('2026-05-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+          },
+        ],
+      });
+    prisma.hotelInventoryDay.findUnique.mockResolvedValueOnce(null);
+    prisma.hotelInventoryDay.create.mockResolvedValueOnce({});
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [{ date: '2026-06-13', totalRooms: 10, status: 'open' }],
+      }),
+    ).resolves.toMatchObject({ slug: 'shining-riverside-hoi-an' });
+    expect(prisma.hotel.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('upserts inventory and returns detail with remaining rooms', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord).mockResolvedValueOnce({
+      ...hotelRecord,
+      inventoryDays: [
+        {
+          id: 'inventory_1',
+          hotelId: 'hotel_1',
+          date: new Date('2026-06-12T00:00:00.000Z'),
+          totalRooms: 12,
+          bookedRooms: 3,
+          status: 'open',
+          createdAt: new Date('2026-05-01T00:00:00.000Z'),
+          updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+        },
+      ],
+    });
+    prisma.hotelInventoryDay.findUnique
+      .mockResolvedValueOnce({
+        id: 'inventory_1',
+        hotelId: 'hotel_1',
+        date: new Date('2026-06-12T00:00:00.000Z'),
+        totalRooms: 10,
+        bookedRooms: 3,
+        status: 'open',
+      })
+      .mockResolvedValueOnce({ id: 'inventory_1', hotelId: 'hotel_1' });
+    prisma.hotelInventoryDay.updateMany.mockResolvedValueOnce({ count: 1 });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [
+          { id: 'inventory_1', date: '2026-06-12', totalRooms: 12, status: 'open' },
+        ],
+      }),
+    ).resolves.toMatchObject({
+      inventory: [
+        {
+          id: 'inventory_1',
+          date: '2026-06-12',
+          totalRooms: 12,
+          bookedRooms: 3,
+          remaining: 9,
+          status: 'open',
+        },
+      ],
+    });
   });
 
   it('applies listing filters', async () => {

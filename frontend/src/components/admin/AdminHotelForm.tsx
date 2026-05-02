@@ -16,6 +16,7 @@ import {
 } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 import {
+  type AdminHotelInventoryFormRow,
   createEmptyGalleryImage,
   createEmptyReview,
   createEmptyReviewScore,
@@ -31,7 +32,8 @@ import {
   type HotelSuiteRow,
   type HotelTextRow,
 } from "@/src/components/admin/adminHotelFormData";
-import { createHotel, updateHotel, type SaveHotelInput } from "@/src/lib/api/hotels";
+import { createHotel, updateHotel, updateHotelInventory, type SaveHotelInput, type UpdateHotelInventoryInput } from "@/src/lib/api/hotels";
+import type { ApiHotelDetail } from "@/src/lib/api/types";
 
 interface AdminHotelFormCopy {
   readonly readinessEyebrow: string;
@@ -59,6 +61,11 @@ interface FormErrors {
   description?: string;
 }
 
+interface InventoryValidationResult {
+  readonly errors: readonly string[];
+  readonly payload: UpdateHotelInventoryInput;
+}
+
 function hasValue(value: string) {
   return value.trim().length > 0;
 }
@@ -73,6 +80,16 @@ function updateTextRow(items: readonly HotelTextRow[], id: string, value: string
 
 function removeRow<T extends { readonly id: string }>(items: readonly T[], id: string) {
   return items.length > 1 ? items.filter((item) => item.id !== id) : items;
+}
+
+function removeInventoryRow(items: readonly AdminHotelInventoryFormRow[], rowId: string) {
+  const row = items.find((item) => item.rowId === rowId);
+
+  if (!row || row.id || items.length <= 1) {
+    return items;
+  }
+
+  return items.filter((item) => item.rowId !== rowId);
 }
 
 function updateSuiteRow<K extends keyof HotelSuiteRow>(items: readonly HotelSuiteRow[], id: string, field: K, value: HotelSuiteRow[K]) {
@@ -97,6 +114,79 @@ function toApiStatus(status: HotelCommercialStatus): SaveHotelInput["status"] {
 
 function toNumber(value: string) {
   return Number(value) || 0;
+}
+
+function updateInventoryRow<K extends keyof AdminHotelInventoryFormRow>(items: readonly AdminHotelInventoryFormRow[], rowId: string, field: K, value: AdminHotelInventoryFormRow[K]) {
+  return items.map((item) => (item.rowId === rowId ? { ...item, [field]: value } : item));
+}
+
+function isStrictDateOnly(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function parseNonNegativeInteger(value: string) {
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+
+  return Number(value);
+}
+
+function rowsFromHotelDetail(detail: ApiHotelDetail): readonly AdminHotelInventoryFormRow[] {
+  return detail.inventory.length > 0 ? detail.inventory.map((day, index) => ({
+    id: day.id,
+    rowId: `inventory-${index + 1}`,
+    date: day.date,
+    totalRooms: String(day.totalRooms),
+    bookedRooms: String(day.bookedRooms),
+    status: day.status,
+  })) : [{ rowId: "inventory-1", date: "", totalRooms: "", bookedRooms: "0", status: "open" }];
+}
+
+function validateHotelInventory(inventory: readonly AdminHotelInventoryFormRow[]): InventoryValidationResult {
+  const errors: string[] = [];
+  const dates = new Set<string>();
+  const payload: {
+    readonly id?: string;
+    readonly date: string;
+    readonly totalRooms: number;
+    readonly status: "open" | "closed";
+  }[] = [];
+
+  inventory.forEach(({ bookedRooms, date, id, status, totalRooms }, index) => {
+    const label = `Inventory day ${index + 1}`;
+    const trimmedDate = date.trim();
+    const trimmedTotalRooms = totalRooms.trim();
+    const parsedTotalRooms = parseNonNegativeInteger(trimmedTotalRooms);
+    const parsedBookedRooms = parseNonNegativeInteger(bookedRooms.trim()) ?? 0;
+
+    if (!isStrictDateOnly(trimmedDate)) {
+      errors.push(`${label}: Date must be a real YYYY-MM-DD date.`);
+    } else if (dates.has(trimmedDate)) {
+      errors.push(`${label}: Duplicate inventory date ${trimmedDate}.`);
+    } else {
+      dates.add(trimmedDate);
+    }
+
+    if (parsedTotalRooms === null) {
+      errors.push(`${label}: Total rooms must be a non-negative whole number.`);
+    } else if (parsedTotalRooms < parsedBookedRooms) {
+      errors.push(`${label}: Capacity cannot be lower than current bookings.`);
+    }
+
+    if (isStrictDateOnly(trimmedDate) && parsedTotalRooms !== null && parsedTotalRooms >= parsedBookedRooms) {
+      payload.push({ ...(id ? { id } : {}), date: trimmedDate, totalRooms: parsedTotalRooms, status });
+    }
+  });
+
+  return { errors, payload };
 }
 
 function toHotelPayload(
@@ -152,6 +242,7 @@ function toHotelPayload(
 
 export function AdminHotelForm({ copy, initialValues, mode = "create", originalSlug }: AdminHotelFormProps) {
   const [form, setForm] = useState<HotelFormState>(initialValues.form);
+  const [inventory, setInventory] = useState<readonly AdminHotelInventoryFormRow[]>(initialValues.inventory);
   const [amenities, setAmenities] = useState<readonly HotelTextRow[]>(initialValues.amenities);
   const [description, setDescription] = useState<readonly HotelTextRow[]>(initialValues.description);
   const [suites, setSuites] = useState<readonly HotelSuiteRow[]>(initialValues.suites);
@@ -256,13 +347,29 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
 
     setIsSubmitting(true);
     try {
-      const payload = toHotelPayload(form, amenities, description, suites, gallery, reviewScores, reviews);
-      if (mode === "update") {
-        await updateHotel(originalSlug ?? form.slug, payload);
-      } else {
-        await createHotel(payload);
+      const inventoryValidation = validateHotelInventory(inventory);
+
+      if (inventoryValidation.errors.length > 0) {
+        setSubmitError(inventoryValidation.errors.join(" "));
+        return;
       }
-      setSaved(true);
+
+      const payload = toHotelPayload(form, amenities, description, suites, gallery, reviewScores, reviews);
+      const savedHotel = mode === "update"
+        ? await updateHotel(originalSlug ?? form.slug, payload)
+        : await createHotel(payload);
+
+      try {
+        const savedHotelWithInventory = await updateHotelInventory(savedHotel.slug ?? form.slug, inventoryValidation.payload);
+        setInventory(rowsFromHotelDetail(savedHotelWithInventory));
+        if (savedHotelWithInventory.slug) {
+          setForm((current) => ({ ...current, slug: savedHotelWithInventory.slug }));
+        }
+        setSaved(true);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unable to save hotel inventory.";
+        setSubmitError(`Core details were saved, but inventory failed: ${message}`);
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Unable to save hotel.");
     } finally {
@@ -284,6 +391,10 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
           description={description}
           error={errors.description}
           setDescription={(items) => updateCollection(setDescription, items)}
+        />
+        <HotelDailyRoomInventorySection
+          inventory={inventory}
+          setInventory={(items) => updateCollection(setInventory, items)}
         />
         <HotelInventorySection
           amenities={amenities}
@@ -627,6 +738,66 @@ function HotelInventorySection({
   );
 }
 
+function HotelDailyRoomInventorySection({
+  inventory,
+  setInventory,
+}: Readonly<{
+  inventory: readonly AdminHotelInventoryFormRow[];
+  setInventory: (items: readonly AdminHotelInventoryFormRow[]) => void;
+}>) {
+  return (
+    <Card>
+      <CardContent className="space-y-6 p-6 sm:p-7">
+        <SectionHeader
+          description="Manage room availability by date. Booked rooms are read-only and total rooms cannot drop below existing bookings."
+          eyebrow="Inventory"
+          title="Daily room inventory"
+        />
+        <CollectionHeader
+          addLabel="Add inventory day"
+          icon={<BedDouble className="size-4" />}
+          label="Room inventory"
+          onAdd={() => setInventory([...inventory, { rowId: `inventory-${crypto.randomUUID()}`, date: "", totalRooms: "", bookedRooms: "0", status: "open" }])}
+        />
+        <div className="space-y-4">
+          {inventory.map((day, index) => (
+            <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={day.rowId}>
+              <RowHeader
+                disabled={inventory.length <= 1 || Boolean(day.id)}
+                helper={day.id ? "Saved inventory days cannot be deleted here. Remove unsaved rows before saving." : undefined}
+                label={`Inventory day ${index + 1}`}
+                onRemove={() => setInventory(removeInventoryRow(inventory, day.rowId))}
+                removeLabel={`Remove inventory day ${index + 1}`}
+              />
+              <div className="grid gap-4 md:grid-cols-2">
+                <TextField id={`${day.rowId}-date`} label="Date" onChange={(value) => setInventory(updateInventoryRow(inventory, day.rowId, "date", value))} value={day.date} />
+                <TextField id={`${day.rowId}-total-rooms`} label="Total rooms" onChange={(value) => setInventory(updateInventoryRow(inventory, day.rowId, "totalRooms", value))} value={day.totalRooms} />
+                <div>
+                  <Label htmlFor={`${day.rowId}-booked-rooms`}>Booked rooms</Label>
+                  <Input id={`${day.rowId}-booked-rooms`} readOnly value={day.bookedRooms} />
+                  <p className="mt-2 text-xs font-medium text-stone-500">Booked rooms are read-only and updated by bookings.</p>
+                </div>
+                <div>
+                  <Label htmlFor={`${day.rowId}-status`}>Status</Label>
+                  <Select value={day.status} onValueChange={(value: "open" | "closed") => setInventory(updateInventoryRow(inventory, day.rowId, "status", value))}>
+                    <SelectTrigger id={`${day.rowId}-status`}>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function HotelReviewsSection({
   form,
   reviewScores,
@@ -923,11 +1094,13 @@ function CollectionHeader({
 
 function RowHeader({
   disabled,
+  helper,
   label,
   onRemove,
   removeLabel,
 }: Readonly<{
   disabled: boolean;
+  helper?: string;
   label: string;
   onRemove: () => void;
   removeLabel: string;
@@ -945,6 +1118,7 @@ function RowHeader({
       >
         <Trash2 className="size-4" />
       </Button>
+      {helper ? <p className="basis-full text-xs font-medium text-stone-500">{helper}</p> : null}
     </div>
   );
 }

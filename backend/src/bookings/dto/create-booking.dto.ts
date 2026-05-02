@@ -14,6 +14,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { IsValidDateOnly } from '../../tours/dto/is-valid-date-only.validator';
 
 export class CreateBookingItemDto {
   @IsIn(['tour', 'hotel'])
@@ -33,14 +34,18 @@ export class CreateBookingItemDto {
 
   @IsOptional()
   @IsString()
+  tourDepartureId?: string;
+
+  @IsOptional()
+  @IsString()
   date?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsValidDateOnly()
   checkIn?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsValidDateOnly()
   checkOut?: string;
 
   @IsOptional()

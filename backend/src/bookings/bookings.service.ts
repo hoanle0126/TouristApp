@@ -4,20 +4,23 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Booking, BookingItem, Hotel, Prisma, Tour } from '@prisma/client';
+import { Booking, BookingItem, Hotel, Prisma, Tour, TourDeparture } from '@prisma/client';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateBookingDto,
   CreateBookingItemDto,
 } from './dto/create-booking.dto';
+import { isValidDateOnly } from '../tours/dto/is-valid-date-only.validator';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
 type BookingRecord = Booking & { items: BookingItem[] };
+type PrismaTransaction = Prisma.TransactionClient;
 
 type PreparedBookingItem = {
   itemType: 'tour' | 'hotel';
   tourId?: string;
+  tourDepartureId?: string;
   hotelId?: string;
   snapshotSlug: string;
   snapshotTitle: string;
@@ -35,6 +38,14 @@ type PreparedBookingItem = {
   unitPrice: Prisma.Decimal;
   lineTotal: Prisma.Decimal;
   currency: string;
+  tourDeparture?: TourDeparture;
+  hotelInventoryDays?: {
+    id: string;
+    date: string;
+    status: string;
+    totalRooms: number;
+    bookedRooms: number;
+  }[];
 };
 
 @Injectable()
@@ -82,47 +93,51 @@ export class BookingsService {
       throw new BadRequestException('Booking must contain at least one item.');
     }
 
-    const items = await Promise.all(
-      dto.items.map((item) => this.prepareItem(item)),
-    );
-    const subtotal = items.reduce(
-      (total, item) => total + item.lineTotal.toNumber(),
-      0,
-    );
-    const taxesAndFees = 0;
-    const total = subtotal + taxesAndFees;
+    const booking = await this.prisma.$transaction(async (tx) => {
+      const items = await Promise.all(
+        dto.items.map((item) => this.prepareItem(item, tx)),
+      );
+      await this.reserveInventory(items, tx);
+      const bookingItems = items.map(({ hotelInventoryDays, tourDeparture, ...item }) => item);
+      const subtotal = items.reduce(
+        (total, item) => total + item.lineTotal.toNumber(),
+        0,
+      );
+      const taxesAndFees = 0;
+      const total = subtotal + taxesAndFees;
 
-    const booking = await this.prisma.booking.create({
-      data: {
-        bookingCode: this.generateBookingCode(),
-        fullName: dto.fullName,
-        email: dto.email,
-        phone: dto.phone,
-        country: dto.country,
-        city: dto.city,
-        address: dto.address,
-        travelers: dto.travelers,
-        primaryTravelerName: dto.primaryTravelerName,
-        primaryTravelerEmail: dto.primaryTravelerEmail,
-        primaryTravelerPhone: dto.primaryTravelerPhone,
-        travelerDetails: dto.travelerDetails ?? Prisma.JsonNull,
-        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-        endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-        pickupLocation: dto.pickupLocation,
-        dropoffLocation: dto.dropoffLocation,
-        arrivalFlight: dto.arrivalFlight,
-        specialRequests: dto.specialRequests,
-        internalNotes: dto.internalNotes,
-        paymentMethod: dto.paymentMethod,
-        subtotal: new Prisma.Decimal(subtotal),
-        taxesAndFees: new Prisma.Decimal(taxesAndFees),
-        total: new Prisma.Decimal(total),
-        currency: 'USD',
-        items: {
-          create: items,
+      return tx.booking.create({
+        data: {
+          bookingCode: this.generateBookingCode(),
+          fullName: dto.fullName,
+          email: dto.email,
+          phone: dto.phone,
+          country: dto.country,
+          city: dto.city,
+          address: dto.address,
+          travelers: dto.travelers,
+          primaryTravelerName: dto.primaryTravelerName,
+          primaryTravelerEmail: dto.primaryTravelerEmail,
+          primaryTravelerPhone: dto.primaryTravelerPhone,
+          travelerDetails: dto.travelerDetails ?? Prisma.JsonNull,
+          startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+          endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+          pickupLocation: dto.pickupLocation,
+          dropoffLocation: dto.dropoffLocation,
+          arrivalFlight: dto.arrivalFlight,
+          specialRequests: dto.specialRequests,
+          internalNotes: dto.internalNotes,
+          paymentMethod: dto.paymentMethod,
+          subtotal: new Prisma.Decimal(subtotal),
+          taxesAndFees: new Prisma.Decimal(taxesAndFees),
+          total: new Prisma.Decimal(total),
+          currency: 'USD',
+          items: {
+            create: bookingItems,
+          },
         },
-      },
-      include: { items: true },
+        include: { items: true },
+      });
     });
     const response = this.toResponse(booking);
 
@@ -192,9 +207,10 @@ export class BookingsService {
 
   private async prepareItem(
     item: CreateBookingItemDto,
+    tx: PrismaTransaction,
   ): Promise<PreparedBookingItem> {
     if (item.itemType === 'tour') {
-      const tour = await this.prisma.tour.findUnique({
+      const tour = await tx.tour.findUnique({
         where: { slug: item.slug },
       });
 
@@ -202,10 +218,10 @@ export class BookingsService {
         throw new NotFoundException(`Tour ${item.slug} was not found.`);
       }
 
-      return this.prepareTourItem(item, tour);
+      return this.prepareTourItem(item, tour, tx);
     }
 
-    const hotel = await this.prisma.hotel.findFirst({
+    const hotel = await tx.hotel.findFirst({
       where: { slug: item.slug, status: 'published' },
     });
 
@@ -213,26 +229,38 @@ export class BookingsService {
       throw new NotFoundException(`Hotel ${item.slug} was not found.`);
     }
 
-    return this.prepareHotelItem(item, hotel);
+    return this.prepareHotelItem(item, hotel, tx);
   }
 
-  private prepareTourItem(
+  private async prepareTourItem(
     item: CreateBookingItemDto,
     tour: Tour,
-  ): PreparedBookingItem {
+    tx: PrismaTransaction,
+  ): Promise<PreparedBookingItem> {
+    if (!item.tourDepartureId) {
+      throw new BadRequestException('Tour departure is required.');
+    }
+
+    const departure = await tx.tourDeparture.findUnique({
+      where: { id: item.tourDepartureId },
+    });
+    this.ensureTourDepartureCanBeBooked(departure, tour.id);
+
     const unitPrice = this.resolveUnitPrice(item.unitPrice, tour.price);
     const quantity = item.quantity;
 
     return {
       itemType: 'tour',
       tourId: tour.id,
+      tourDepartureId: departure.id,
+      tourDeparture: departure,
       snapshotSlug: tour.slug,
       snapshotTitle: tour.title,
       snapshotImage: tour.image,
       snapshotAlt: tour.alt,
       snapshotMeta: item.meta ?? `${tour.duration} • ${tour.guests}`,
       snapshotPriceLabel: tour.price,
-      date: item.date,
+      date: this.toDateOnlyString(departure.date),
       checkIn: item.checkIn ? new Date(item.checkIn) : undefined,
       checkOut: item.checkOut ? new Date(item.checkOut) : undefined,
       guests: item.guests,
@@ -245,10 +273,30 @@ export class BookingsService {
     };
   }
 
-  private prepareHotelItem(
+  private async prepareHotelItem(
     item: CreateBookingItemDto,
     hotel: Hotel,
-  ): PreparedBookingItem {
+    tx: PrismaTransaction,
+  ): Promise<PreparedBookingItem> {
+    const nights = this.buildHotelNights(item);
+    const inventoryDays = await tx.hotelInventoryDay.findMany({
+      where: {
+        hotelId: hotel.id,
+        date: { in: nights.map((night) => new Date(`${night}T00:00:00.000Z`)) },
+      },
+    });
+    const inventoryByDate = new Map(
+      inventoryDays.map((day) => [this.toDateOnlyString(day.date), day]),
+    );
+
+    const today = this.getTodayDateOnly();
+    for (const night of nights) {
+      const inventoryDay = inventoryByDate.get(night);
+      if (night < today || !inventoryDay || inventoryDay.status !== 'open') {
+        throw new BadRequestException(`This hotel is unavailable on ${night}.`);
+      }
+    }
+
     const unitPrice = this.resolveUnitPrice(item.unitPrice, hotel.price);
     const quantity = item.quantity;
 
@@ -271,7 +319,219 @@ export class BookingsService {
       unitPrice,
       lineTotal: unitPrice.mul(quantity),
       currency: 'USD',
+      hotelInventoryDays: nights.map((night) => {
+        const inventoryDay = inventoryByDate.get(night)!;
+        return {
+          id: inventoryDay.id,
+          date: night,
+          status: inventoryDay.status,
+          totalRooms: inventoryDay.totalRooms,
+          bookedRooms: inventoryDay.bookedRooms,
+        };
+      }),
     };
+  }
+
+  private async reserveInventory(
+    items: PreparedBookingItem[],
+    tx: PrismaTransaction,
+  ) {
+    const tourReservations = new Map<
+      string,
+      { tourId: string; quantity: number; departure: TourDeparture }
+    >();
+    const hotelReservations = new Map<
+      string,
+      {
+        inventoryDayId: string;
+        date: string;
+        quantity: number;
+        status: string;
+        totalRooms: number;
+        bookedRooms: number;
+      }
+    >();
+
+    for (const item of items) {
+      if (item.itemType === 'tour' && item.tourDepartureId && item.tourId) {
+        const existing = tourReservations.get(item.tourDepartureId);
+        tourReservations.set(item.tourDepartureId, {
+          tourId: item.tourId,
+          quantity: (existing?.quantity ?? 0) + item.quantity,
+          departure: item.tourDeparture!,
+        });
+      }
+
+      if (item.itemType === 'hotel') {
+        for (const day of item.hotelInventoryDays ?? []) {
+          const existing = hotelReservations.get(day.id);
+          hotelReservations.set(day.id, {
+            inventoryDayId: day.id,
+            date: day.date,
+            quantity: (existing?.quantity ?? 0) + item.quantity,
+            status: day.status,
+            totalRooms: day.totalRooms,
+            bookedRooms: day.bookedRooms,
+          });
+        }
+      }
+    }
+
+    for (const reservation of tourReservations.values()) {
+      this.ensureTourDepartureCanBeBooked(
+        reservation.departure,
+        reservation.tourId,
+        reservation.quantity,
+      );
+    }
+
+    for (const reservation of hotelReservations.values()) {
+      this.ensureHotelInventoryCanBeBooked(
+        reservation.status,
+        reservation.totalRooms,
+        reservation.bookedRooms,
+        reservation.date,
+        reservation.quantity,
+      );
+    }
+
+    for (const [tourDepartureId, reservation] of tourReservations) {
+      const affected = await tx.$executeRaw(Prisma.sql`
+        UPDATE "TourDeparture"
+        SET "booked" = "booked" + ${reservation.quantity}
+        WHERE "id" = ${tourDepartureId}
+          AND "tourId" = ${reservation.tourId}
+          AND "status" = 'open'
+          AND "booked" + ${reservation.quantity} <= "capacity"
+      `);
+
+      if (affected === 0) {
+        const departure = await tx.tourDeparture.findUnique({
+          where: { id: tourDepartureId },
+        });
+        this.throwTourAvailabilityError(departure, reservation.tourId);
+      }
+    }
+
+    for (const reservation of hotelReservations.values()) {
+      const affected = await tx.$executeRaw(Prisma.sql`
+        UPDATE "HotelInventoryDay"
+        SET "bookedRooms" = "bookedRooms" + ${reservation.quantity}
+        WHERE "id" = ${reservation.inventoryDayId}
+          AND "status" = 'open'
+          AND "bookedRooms" + ${reservation.quantity} <= "totalRooms"
+      `);
+
+      if (affected === 0) {
+        const inventoryDay = await tx.hotelInventoryDay.findUnique({
+          where: { id: reservation.inventoryDayId },
+        });
+        this.throwHotelAvailabilityError(inventoryDay, reservation.date);
+      }
+    }
+  }
+
+  private ensureTourDepartureCanBeBooked(
+    departure: TourDeparture | null,
+    tourId: string,
+    requestedQuantity = 1,
+  ): asserts departure is TourDeparture {
+    if (!departure || departure.tourId !== tourId || departure.status !== 'open') {
+      throw new BadRequestException('This departure is sold out.');
+    }
+
+    if (this.toDateOnlyString(departure.date) < this.getTodayDateOnly()) {
+      throw new BadRequestException('This departure is sold out.');
+    }
+
+    const remaining = departure.capacity - departure.booked;
+    if (remaining <= 0) {
+      throw new BadRequestException('This departure is sold out.');
+    }
+
+    if (remaining < requestedQuantity) {
+      throw new BadRequestException(`Only ${remaining} seats left for this departure.`);
+    }
+  }
+
+  private ensureHotelInventoryCanBeBooked(
+    status: string,
+    totalRooms: number,
+    bookedRooms: number,
+    date: string,
+    requestedQuantity: number,
+  ) {
+    if (status !== 'open') {
+      throw new BadRequestException(`This hotel is unavailable on ${date}.`);
+    }
+
+    const remaining = totalRooms - bookedRooms;
+    if (remaining < requestedQuantity) {
+      throw new BadRequestException(`Only ${remaining} rooms left on ${date}.`);
+    }
+  }
+
+  private throwTourAvailabilityError(
+    departure: TourDeparture | null,
+    tourId: string,
+  ): never {
+    if (!departure || departure.tourId !== tourId || departure.status !== 'open') {
+      throw new BadRequestException('This departure is sold out.');
+    }
+
+    const remaining = Math.max(departure.capacity - departure.booked, 0);
+    if (remaining <= 0) {
+      throw new BadRequestException('This departure is sold out.');
+    }
+
+    throw new BadRequestException(`Only ${remaining} seats left for this departure.`);
+  }
+
+  private throwHotelAvailabilityError(
+    inventoryDay: { totalRooms: number; bookedRooms: number; status: string } | null,
+    date: string,
+  ): never {
+    if (!inventoryDay || inventoryDay.status !== 'open') {
+      throw new BadRequestException(`This hotel is unavailable on ${date}.`);
+    }
+
+    const remaining = Math.max(inventoryDay.totalRooms - inventoryDay.bookedRooms, 0);
+    throw new BadRequestException(`Only ${remaining} rooms left on ${date}.`);
+  }
+
+  private buildHotelNights(item: CreateBookingItemDto) {
+    if (!item.checkIn || !item.checkOut) {
+      throw new BadRequestException('Hotel check-in and check-out are required.');
+    }
+
+    const checkIn = this.parseDateOnly(item.checkIn);
+    const checkOut = this.parseDateOnly(item.checkOut);
+    if (!checkIn || !checkOut || checkOut <= checkIn) {
+      throw new BadRequestException('Hotel check-out must be after check-in.');
+    }
+
+    const nights: string[] = [];
+    for (const current = new Date(checkIn); current < checkOut; current.setUTCDate(current.getUTCDate() + 1)) {
+      nights.push(this.toDateOnlyString(current));
+    }
+
+    return nights;
+  }
+
+  private parseDateOnly(value: string) {
+    if (!isValidDateOnly(value)) {
+      return null;
+    }
+
+    return new Date(`${value}T00:00:00.000Z`);
+  }
+
+  private getTodayDateOnly() {
+    return this.toDateOnlyString(new Date());
+  }
+
+  private toDateOnlyString(date: Date) {
+    return date.toISOString().slice(0, 10);
   }
 
   private resolveUnitPrice(inputPrice: number | undefined, priceLabel: string) {
@@ -341,6 +601,7 @@ export class BookingsService {
       id: item.id,
       itemType: item.itemType,
       tourId: item.tourId,
+      tourDepartureId: item.tourDepartureId,
       hotelId: item.hotelId,
       slug: item.snapshotSlug,
       title: item.snapshotTitle,

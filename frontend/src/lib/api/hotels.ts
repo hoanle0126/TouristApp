@@ -2,6 +2,13 @@ import { apiFetch } from "@/src/lib/api/client";
 import { toHotelCard, toHotelDetail } from "@/src/lib/api/adapters";
 import type { ApiHotelCard, ApiHotelDetail } from "@/src/lib/api/types";
 
+export type UpdateHotelInventoryInput = readonly {
+  readonly id?: string;
+  readonly date: string;
+  readonly totalRooms: number;
+  readonly status: "open" | "closed";
+}[];
+
 export type SaveHotelInput = {
   readonly slug: string;
   readonly name: string;
@@ -64,6 +71,14 @@ export async function createHotel(input: SaveHotelInput) {
 export async function updateHotel(slug: string, input: SaveHotelInput) {
   return apiFetch<ApiHotelDetail>(`/hotels/${slug}`, {
     body: input,
+    cache: "no-store",
+    method: "PATCH",
+  });
+}
+
+export async function updateHotelInventory(slug: string, input: UpdateHotelInventoryInput) {
+  return apiFetch<ApiHotelDetail>(`/hotels/${slug}/inventory`, {
+    body: { inventory: input },
     cache: "no-store",
     method: "PATCH",
   });

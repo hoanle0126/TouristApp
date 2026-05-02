@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@/src/components/ui/textarea";
 import {
   type AdminTourFormInitialValues,
+  type AdminTourDepartureFormRow,
   type GalleryItem,
   type GalleryLayout,
   type HighlightIcon,
@@ -36,7 +37,8 @@ import {
   type TourBadge,
   type TourFormState,
 } from "@/src/components/admin/adminTourFormData";
-import { createTour, updateTour, type SaveTourInput } from "@/src/lib/api/tours";
+import { createTour, updateTour, updateTourDepartures, type SaveTourInput, type UpdateTourDeparturesInput } from "@/src/lib/api/tours";
+import type { ApiTourDetail } from "@/src/lib/api/types";
 
 interface AdminTourFormCopy {
   readonly readinessEyebrow: string;
@@ -64,6 +66,11 @@ interface FormErrors {
   shortDescription?: string;
 }
 
+interface InventoryValidationResult {
+  readonly errors: readonly string[];
+  readonly payload: UpdateTourDeparturesInput;
+}
+
 function updateItem<T extends { readonly id: string }>(
   items: readonly T[],
   id: string,
@@ -76,6 +83,20 @@ function removeItem<T extends { readonly id: string }>(items: readonly T[], id: 
   return items.length > 1 ? items.filter((item) => item.id !== id) : items;
 }
 
+function removeDeparture(items: readonly AdminTourDepartureFormRow[], rowId: string) {
+  const row = items.find((item) => item.rowId === rowId);
+
+  if (!row || row.id || items.length <= 1) {
+    return items;
+  }
+
+  return items.filter((item) => item.rowId !== rowId);
+}
+
+function updateDeparture<K extends keyof AdminTourDepartureFormRow>(items: readonly AdminTourDepartureFormRow[], rowId: string, field: K, value: AdminTourDepartureFormRow[K]) {
+  return items.map((item) => (item.rowId === rowId ? { ...item, [field]: value } : item));
+}
+
 function splitLines(value: string) {
   return value
     .split("\n")
@@ -85,6 +106,75 @@ function splitLines(value: string) {
 
 function hasValue(value: string) {
   return value.trim().length > 0;
+}
+
+function isStrictDateOnly(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function parseNonNegativeInteger(value: string) {
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+
+  return Number(value);
+}
+
+function rowsFromTourDetail(detail: ApiTourDetail): readonly AdminTourDepartureFormRow[] {
+  return detail.departures.length > 0 ? detail.departures.map((departure, index) => ({
+    id: departure.id,
+    rowId: `departure-${index + 1}`,
+    date: departure.date,
+    capacity: String(departure.capacity),
+    booked: String(departure.booked),
+    status: departure.status,
+  })) : [{ rowId: "departure-1", date: "", capacity: "", booked: "0", status: "open" }];
+}
+
+function validateTourDepartures(departures: readonly AdminTourDepartureFormRow[]): InventoryValidationResult {
+  const errors: string[] = [];
+  const dates = new Set<string>();
+  const payload: {
+    readonly id?: string;
+    readonly date: string;
+    readonly capacity: number;
+    readonly status: "open" | "closed";
+  }[] = [];
+
+  departures.forEach(({ booked, capacity, date, id, status }, index) => {
+    const label = `Departure ${index + 1}`;
+    const trimmedDate = date.trim();
+    const trimmedCapacity = capacity.trim();
+    const parsedCapacity = parseNonNegativeInteger(trimmedCapacity);
+    const parsedBooked = parseNonNegativeInteger(booked.trim()) ?? 0;
+
+    if (!isStrictDateOnly(trimmedDate)) {
+      errors.push(`${label}: Date must be a real YYYY-MM-DD date.`);
+    } else if (dates.has(trimmedDate)) {
+      errors.push(`${label}: Duplicate departure date ${trimmedDate}.`);
+    } else {
+      dates.add(trimmedDate);
+    }
+
+    if (parsedCapacity === null) {
+      errors.push(`${label}: Capacity must be a non-negative whole number.`);
+    } else if (parsedCapacity < parsedBooked) {
+      errors.push(`${label}: Capacity cannot be lower than current bookings.`);
+    }
+
+    if (isStrictDateOnly(trimmedDate) && parsedCapacity !== null && parsedCapacity >= parsedBooked) {
+      payload.push({ ...(id ? { id } : {}), date: trimmedDate, capacity: parsedCapacity, status });
+    }
+  });
+
+  return { errors, payload };
 }
 
 function toTourPayload(
@@ -121,6 +211,7 @@ function toTourPayload(
 
 export function AdminTourForm({ copy, initialValues, mode = "create", originalSlug }: AdminTourFormProps) {
   const [form, setForm] = useState<TourFormState>(initialValues.form);
+  const [departures, setDepartures] = useState<readonly AdminTourDepartureFormRow[]>(initialValues.departures);
   const [highlights, setHighlights] = useState<readonly HighlightItem[]>(initialValues.highlights);
   const [itinerary, setItinerary] = useState<readonly ItineraryItem[]>(initialValues.itinerary);
   const [gallery, setGallery] = useState<readonly GalleryItem[]>(initialValues.gallery);
@@ -205,13 +296,29 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
 
     setIsSubmitting(true);
     try {
-      const payload = toTourPayload(form, highlights, itinerary, gallery);
-      if (mode === "update") {
-        await updateTour(originalSlug ?? form.slug, payload);
-      } else {
-        await createTour(payload);
+      const inventoryValidation = validateTourDepartures(departures);
+
+      if (inventoryValidation.errors.length > 0) {
+        setSubmitError(inventoryValidation.errors.join(" "));
+        return;
       }
-      setSaved(true);
+
+      const payload = toTourPayload(form, highlights, itinerary, gallery);
+      const savedTour = mode === "update"
+        ? await updateTour(originalSlug ?? form.slug, payload)
+        : await createTour(payload);
+
+      try {
+        const savedTourWithDepartures = await updateTourDepartures(savedTour.slug ?? form.slug, inventoryValidation.payload);
+        setDepartures(rowsFromTourDetail(savedTourWithDepartures));
+        if (savedTourWithDepartures.slug) {
+          setForm((current) => ({ ...current, slug: savedTourWithDepartures.slug }));
+        }
+        setSaved(true);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unable to save tour inventory.";
+        setSubmitError(`Core details were saved, but inventory failed: ${message}`);
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Unable to save tour.");
     } finally {
@@ -234,6 +341,11 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
     setSaved(false);
   }
 
+  function updateDepartures(items: readonly AdminTourDepartureFormRow[]) {
+    setDepartures(items);
+    setSaved(false);
+  }
+
   return (
     <form className="grid gap-6 2xl:grid-cols-[minmax(0,1.55fr)_420px]" onSubmit={handleSubmit}>
       <div className="space-y-6">
@@ -248,6 +360,7 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
           updateField={updateField}
         />
         <OperationsSection form={form} updateField={updateField} />
+        <TourDeparturesSection departures={departures} setDepartures={updateDepartures} />
       </div>
 
       <TourDraftSidebar copy={copy} form={form} isSubmitting={isSubmitting} readiness={readiness} saved={saved} submitError={submitError} />
@@ -665,6 +778,78 @@ function OperationsSection({
             onChange={(event) => updateField("merchandisingNote", event.target.value)}
             value={form.merchandisingNote}
           />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TourDeparturesSection({
+  departures,
+  setDepartures,
+}: Readonly<{
+  departures: readonly AdminTourDepartureFormRow[];
+  setDepartures: (items: readonly AdminTourDepartureFormRow[]) => void;
+}>) {
+  return (
+    <Card>
+      <CardContent className="space-y-6 p-6 sm:p-7">
+        <SectionHeader
+          description="Manage dated seat inventory. Booked seats are read-only and capacity cannot drop below current bookings."
+          eyebrow="Inventory"
+          title="Departure inventory"
+        />
+        <RepeatableHeader
+          addLabel="Add departure"
+          icon={<ListChecks className="size-4" />}
+          label="Departures"
+          onAdd={() => setDepartures([...departures, { rowId: `departure-${crypto.randomUUID()}`, date: "", capacity: "", booked: "0", status: "open" }])}
+        />
+        <div className="space-y-4">
+          {departures.map((departure, index) => (
+            <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={departure.rowId}>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <p className="text-sm font-bold text-stone-950">Departure {index + 1}</p>
+                <Button
+                  aria-describedby={departure.id ? `${departure.rowId}-remove-help` : undefined}
+                  aria-label={`Remove departure ${index + 1}`}
+                  disabled={departures.length <= 1 || Boolean(departure.id)}
+                  onClick={() => setDepartures(removeDeparture(departures, departure.rowId))}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+              {departure.id ? (
+                <p className="mb-4 text-xs font-medium text-stone-500" id={`${departure.rowId}-remove-help`}>
+                  Saved departures cannot be deleted here. Remove unsaved rows before saving.
+                </p>
+              ) : null}
+              <div className="grid gap-4 md:grid-cols-2">
+                <TextField id={`${departure.rowId}-date`} label="Date" onChange={(value) => setDepartures(updateDeparture(departures, departure.rowId, "date", value))} value={departure.date} />
+                <TextField id={`${departure.rowId}-capacity`} label="Capacity" onChange={(value) => setDepartures(updateDeparture(departures, departure.rowId, "capacity", value))} value={departure.capacity} />
+                <div>
+                  <Label htmlFor={`${departure.rowId}-booked`}>Booked</Label>
+                  <Input id={`${departure.rowId}-booked`} readOnly value={departure.booked} />
+                  <p className="mt-2 text-xs font-medium text-stone-500">Booked seats are read-only and updated by bookings.</p>
+                </div>
+                <div>
+                  <Label htmlFor={`${departure.rowId}-status`}>Status</Label>
+                  <Select value={departure.status} onValueChange={(value: "open" | "closed") => setDepartures(updateDeparture(departures, departure.rowId, "status", value))}>
+                    <SelectTrigger id={`${departure.rowId}-status`}>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

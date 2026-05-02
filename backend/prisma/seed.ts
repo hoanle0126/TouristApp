@@ -23,6 +23,48 @@ type SeedDestination = {
   relatedHotels: { href: string; label: string; meta: string; title: string }[];
 };
 
+const genericTourDepartures = [
+  {
+    date: new Date('2026-06-15T00:00:00.000Z'),
+    capacity: 12,
+    booked: 0,
+    status: 'open',
+  },
+  {
+    date: new Date('2026-06-22T00:00:00.000Z'),
+    capacity: 12,
+    booked: 0,
+    status: 'open',
+  },
+  {
+    date: new Date('2026-06-29T00:00:00.000Z'),
+    capacity: 12,
+    booked: 0,
+    status: 'open',
+  },
+];
+
+const genericHotelInventory = [
+  {
+    date: new Date('2026-06-15T00:00:00.000Z'),
+    totalRooms: 8,
+    bookedRooms: 0,
+    status: 'open',
+  },
+  {
+    date: new Date('2026-06-16T00:00:00.000Z'),
+    totalRooms: 8,
+    bookedRooms: 0,
+    status: 'open',
+  },
+  {
+    date: new Date('2026-06-17T00:00:00.000Z'),
+    totalRooms: 8,
+    bookedRooms: 0,
+    status: 'open',
+  },
+];
+
 type SeedTour = {
   slug: string;
   title: string;
@@ -48,10 +90,25 @@ type SeedTour = {
   exclusions: string[];
   destinationSlugs: string[];
   hotelSlugs: string[];
+  departures: {
+    date: Date;
+    capacity: number;
+    booked: number;
+    status: string;
+  }[];
 };
 
-type SeedHotel = Omit<Prisma.HotelCreateInput, 'destinations' | 'tours' | 'mentionedInPosts'> & {
+type SeedHotel = Omit<
+  Prisma.HotelCreateInput,
+  'destinations' | 'tours' | 'mentionedInPosts' | 'inventoryDays'
+> & {
   destinationSlugs: string[];
+  inventory: {
+    date: Date;
+    totalRooms: number;
+    bookedRooms: number;
+    status: string;
+  }[];
 };
 
 type SeedBlogPost = Omit<
@@ -88,7 +145,8 @@ export const seedDestinations: SeedDestination[] = [
     market: 'Northern Europe',
     status: 'published',
     heroImage: nordicFjordsImage,
-    heroAlt: 'Norwegian fjords with deep blue water and dramatic mountain peaks',
+    heroAlt:
+      'Norwegian fjords with deep blue water and dramatic mountain peaks',
     summary:
       'A premium scenic destination for travelers who want atmosphere, nature, and calm logistical flow rather than constant activity.',
     intro: [
@@ -315,7 +373,10 @@ export const seedHotels: SeedHotel[] = [
     ],
     gallery: [
       { image: shiningRiversideImage, alt: 'Modern minimalist hotel suite' },
-      { image: shiningRiversideImage, alt: 'Lantern-lit riverside pool terrace at Shining Riverside' },
+      {
+        image: shiningRiversideImage,
+        alt: 'Lantern-lit riverside pool terrace at Shining Riverside',
+      },
     ],
     reviewScores: [
       { label: 'Cleanliness', score: '9.8' },
@@ -334,15 +395,46 @@ export const seedHotels: SeedHotel[] = [
       total: '$1,125',
     },
     destinationSlugs: [],
+    inventory: genericHotelInventory,
   },
   ...(
     [
-      ['aman-tokyo', 'Aman Tokyo', 'Otemachi, Japan', '$1,200', 'Zen Sanctuary'],
-      ['the-glass-house', 'The Glass House', 'Tuscany, Italy', '$890', 'Editorial Pick'],
-      ['villa-marittima', 'Villa Marittima', 'Amalfi, Italy', '$1,450', 'Coastal Living'],
+      [
+        'aman-tokyo',
+        'Aman Tokyo',
+        'Otemachi, Japan',
+        '$1,200',
+        'Zen Sanctuary',
+      ],
+      [
+        'the-glass-house',
+        'The Glass House',
+        'Tuscany, Italy',
+        '$890',
+        'Editorial Pick',
+      ],
+      [
+        'villa-marittima',
+        'Villa Marittima',
+        'Amalfi, Italy',
+        '$1,450',
+        'Coastal Living',
+      ],
       ['amangiri', 'Amangiri', 'Utah, USA', '$2,100', 'Wilderness Luxury'],
-      ['soneva-jani', 'Soneva Jani', 'Noonu Atoll, Maldives', '$3,400', 'Hidden Gem'],
-      ['72-north-lodge', '72 North Lodge', 'Tromsø, Norway', '$620', 'Arctic Design'],
+      [
+        'soneva-jani',
+        'Soneva Jani',
+        'Noonu Atoll, Maldives',
+        '$3,400',
+        'Hidden Gem',
+      ],
+      [
+        '72-north-lodge',
+        '72 North Lodge',
+        'Tromsø, Norway',
+        '$620',
+        'Arctic Design',
+      ],
     ] satisfies [string, string, string, string, string][]
   ).map(([slug, name, location, price, badge]) => ({
     slug,
@@ -359,7 +451,9 @@ export const seedHotels: SeedHotel[] = [
     listingAlt: `${name} hotel exterior`,
     heroImage: nordicFjordsImage,
     heroAlt: `${name} hotel hero image`,
-    description: [`${name} is part of the curated TouristWeb hotel collection.`],
+    description: [
+      `${name} is part of the curated TouristWeb hotel collection.`,
+    ],
     amenities: [],
     suites: [],
     gallery: [{ image: nordicFjordsImage, alt: `${name} hotel gallery image` }],
@@ -367,6 +461,7 @@ export const seedHotels: SeedHotel[] = [
     reviews: [],
     booking: {},
     destinationSlugs: [],
+    inventory: genericHotelInventory,
   })),
 ];
 
@@ -408,18 +503,32 @@ export const seedTours: SeedTour[] = [
     itinerary: [
       {
         title: 'Pick-up & Arrival at Bay Mau',
-        description: 'Morning departure from your hotel in Hoi An ancient town.',
+        description:
+          'Morning departure from your hotel in Hoi An ancient town.',
       },
       {
         title: 'Bamboo Basket Boat Experience',
         description: 'Enjoy crab fishing and the spinning boat performance.',
       },
     ],
-    gallery: [{ image: bayMauImage, alt: 'Basket boat through water palms', layout: 'portrait' }],
-    inclusions: ['Round-trip hotel pickup in Hoi An', 'Professional English-speaking guide'],
-    exclusions: ['Personal expenses & souvenirs', 'Gratuities/Tips for guide and boat rowers'],
+    gallery: [
+      {
+        image: bayMauImage,
+        alt: 'Basket boat through water palms',
+        layout: 'portrait',
+      },
+    ],
+    inclusions: [
+      'Round-trip hotel pickup in Hoi An',
+      'Professional English-speaking guide',
+    ],
+    exclusions: [
+      'Personal expenses & souvenirs',
+      'Gratuities/Tips for guide and boat rowers',
+    ],
     destinationSlugs: [],
     hotelSlugs: ['shining-riverside-hoi-an'],
+    departures: genericTourDepartures,
   },
   ...(
     [
@@ -432,42 +541,42 @@ export const seedTours: SeedTour[] = [
         '$4,200',
         'Experience the quiet majesty of Gion, private tea ceremonies, and dawn meditations in hidden forest shrines.',
       ],
-    [
-      'amalfi-coast-discovery',
-      'Amalfi Coast Discovery',
-      'New',
-      '8 Days',
-      'Max 12 Guests',
-      '$3,850',
-      'Sailing the Tyrrhenian sea, lemon grove lunches, and private access to the villas of Ravello.',
-    ],
-    [
-      'arctic-sky-expedition',
-      'Arctic Sky Expedition',
-      undefined,
-      '7 Days',
-      'Max 6 Guests',
-      '$5,600',
-      'Chase the Northern Lights in luxury glass igloos with expert astronomers and local Nordic guides.',
-    ],
-    [
-      'colors-of-marrakech',
-      'Colors of Marrakech',
-      undefined,
-      '12 Days',
-      'Max 10 Guests',
-      '$3,200',
-      'From the vibrant souks to the quiet of the Sahara, immerse yourself in the textures of Morocco.',
-    ],
-    [
-      'cyclades-silk-sails',
-      'Cyclades Silk Sails',
-      undefined,
-      '14 Days',
-      'Private Charter',
-      '$8,900',
-      'A private nautical journey through the lesser-known islands of the Aegean on a heritage wood schooner.',
-    ],
+      [
+        'amalfi-coast-discovery',
+        'Amalfi Coast Discovery',
+        'New',
+        '8 Days',
+        'Max 12 Guests',
+        '$3,850',
+        'Sailing the Tyrrhenian sea, lemon grove lunches, and private access to the villas of Ravello.',
+      ],
+      [
+        'arctic-sky-expedition',
+        'Arctic Sky Expedition',
+        undefined,
+        '7 Days',
+        'Max 6 Guests',
+        '$5,600',
+        'Chase the Northern Lights in luxury glass igloos with expert astronomers and local Nordic guides.',
+      ],
+      [
+        'colors-of-marrakech',
+        'Colors of Marrakech',
+        undefined,
+        '12 Days',
+        'Max 10 Guests',
+        '$3,200',
+        'From the vibrant souks to the quiet of the Sahara, immerse yourself in the textures of Morocco.',
+      ],
+      [
+        'cyclades-silk-sails',
+        'Cyclades Silk Sails',
+        undefined,
+        '14 Days',
+        'Private Charter',
+        '$8,900',
+        'A private nautical journey through the lesser-known islands of the Aegean on a heritage wood schooner.',
+      ],
       [
         'venetian-renaissance',
         'Venetian Renaissance',
@@ -477,7 +586,15 @@ export const seedTours: SeedTour[] = [
         '$5,200',
         'Exclusive after-hours tours of St. Mark Basilica and private dinners in historic canal-side palazzos.',
       ],
-    ] satisfies [string, string, string | undefined, string, string, string, string][]
+    ] satisfies [
+      string,
+      string,
+      string | undefined,
+      string,
+      string,
+      string,
+      string,
+    ][]
   ).map(([slug, title, badge, duration, guests, price, shortDescription]) => ({
     slug,
     title,
@@ -499,12 +616,17 @@ export const seedTours: SeedTour[] = [
     highlights: [],
     itinerary: [],
     gallery: [
-      { image: nordicFjordsImage, alt: `${title} visual journal portrait`, layout: 'portrait' },
+      {
+        image: nordicFjordsImage,
+        alt: `${title} visual journal portrait`,
+        layout: 'portrait',
+      },
     ],
     inclusions: [],
     exclusions: [],
     destinationSlugs: [],
     hotelSlugs: [],
+    departures: genericTourDepartures,
   })),
 ];
 
@@ -526,8 +648,7 @@ export const seedBlogPosts: SeedBlogPost[] = [
     intro:
       'In Kyoto, traditional machiya are being reimagined by a new generation of architects.',
     meta: '8 min read',
-    quote:
-      'We are not designing houses; we are designing vessels for shadows.',
+    quote: 'We are not designing houses; we are designing vessels for shadows.',
     sections: [
       {
         heading: 'The Vocabulary of Restraint',
@@ -550,11 +671,17 @@ export const seedBlogPosts: SeedBlogPost[] = [
         ],
       },
     ],
-    inlineImage: { image: nordicFjordsImage, alt: 'Modern machiya interior details' },
+    inlineImage: {
+      image: nordicFjordsImage,
+      alt: 'Modern machiya interior details',
+    },
     secondaryFeature: {
       title: 'A Dialogue with Nature',
       body: 'Pocket gardens remain the spiritual heart of the home.',
-      image: { image: nordicFjordsImage, alt: 'Small tsubo-niwa courtyard garden' },
+      image: {
+        image: nordicFjordsImage,
+        alt: 'Small tsubo-niwa courtyard garden',
+      },
     },
     relatedPosts: [],
     seo: {
@@ -566,14 +693,42 @@ export const seedBlogPosts: SeedBlogPost[] = [
     mentionedHotelSlugs: [],
   },
   ...[
-    ['dolomites-quietude', 'Quietude in the High Alps: A Guide to Slow Living', 'Guides'],
-    ['uncharted-shores-aegean', 'Uncharted Shores: 10 Secret Islands in the Aegean', 'Guides'],
-    ['foragers-table', 'The Forager’s Table: A Morning with Chef Elias', 'Interviews'],
-    ['cinque-terre-light', 'Chasing the Light: A Photographer&apos;s Cinque Terre', 'Destinations'],
-    ['ubud-rituals', 'The Rituals of Ubud: Morning Prayer and Matcha', 'Lifestyle'],
-    ['remote-life-sweden', 'The New Nomad: Designing a Remote Life in Sweden', 'Guides'],
+    [
+      'dolomites-quietude',
+      'Quietude in the High Alps: A Guide to Slow Living',
+      'Guides',
+    ],
+    [
+      'uncharted-shores-aegean',
+      'Uncharted Shores: 10 Secret Islands in the Aegean',
+      'Guides',
+    ],
+    [
+      'foragers-table',
+      'The Forager’s Table: A Morning with Chef Elias',
+      'Interviews',
+    ],
+    [
+      'cinque-terre-light',
+      'Chasing the Light: A Photographer&apos;s Cinque Terre',
+      'Destinations',
+    ],
+    [
+      'ubud-rituals',
+      'The Rituals of Ubud: Morning Prayer and Matcha',
+      'Lifestyle',
+    ],
+    [
+      'remote-life-sweden',
+      'The New Nomad: Designing a Remote Life in Sweden',
+      'Guides',
+    ],
     ['tokyo-getting-lost', 'The Art of Getting Lost in Tokyo', 'Slow Travel'],
-    ['dolomites-vertical-symphony', 'Dolomites: A Vertical Symphony', 'Adventure'],
+    [
+      'dolomites-vertical-symphony',
+      'Dolomites: A Vertical Symphony',
+      'Adventure',
+    ],
     ['parisian-bistros-2024', 'The Best Parisian Bistros of 2024', 'Lifestyle'],
   ].map(([slug, title, category]) => ({
     slug,
@@ -609,7 +764,9 @@ async function main() {
     throw new Error('DATABASE_URL is not configured.');
   }
 
-  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  const prisma = new PrismaClient({
+    adapter: new PrismaPg({ connectionString }),
+  });
 
   await prisma.$connect();
 
@@ -623,33 +780,43 @@ async function main() {
     }
 
     for (const hotel of seedHotels) {
-      const { destinationSlugs, ...data } = hotel;
+      const { destinationSlugs, inventory, ...data } = hotel;
       await prisma.hotel.upsert({
         where: { slug: hotel.slug },
         create: {
           ...data,
           destinations: { connect: destinationSlugs.map((slug) => ({ slug })) },
+          inventoryDays: { create: inventory },
         },
         update: {
           ...data,
           destinations: { set: destinationSlugs.map((slug) => ({ slug })) },
+          inventoryDays: {
+            deleteMany: {},
+            create: inventory,
+          },
         },
       });
     }
 
     for (const tour of seedTours) {
-      const { destinationSlugs, hotelSlugs, ...data } = tour;
+      const { destinationSlugs, hotelSlugs, departures, ...data } = tour;
       await prisma.tour.upsert({
         where: { slug: tour.slug },
         create: {
           ...data,
           destinations: { connect: destinationSlugs.map((slug) => ({ slug })) },
           hotels: { connect: hotelSlugs.map((slug) => ({ slug })) },
+          departures: { create: departures },
         },
         update: {
           ...data,
           destinations: { set: destinationSlugs.map((slug) => ({ slug })) },
           hotels: { set: hotelSlugs.map((slug) => ({ slug })) },
+          departures: {
+            deleteMany: {},
+            create: departures,
+          },
         },
       });
     }

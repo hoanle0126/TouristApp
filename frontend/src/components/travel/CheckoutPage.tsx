@@ -165,7 +165,7 @@ export default function CheckoutPage() {
       title:
         items.length > 1 ? `${primaryItem.title} + ${items.length - 1} more` : primaryItem.title,
       totalPrice: `$${subtotal.toFixed(2)}`,
-      travelers: items.length > 1 ? `${items.length} items in cart` : primaryItem.meta,
+      travelers: items.length > 1 ? `${items.reduce((total, item) => total + (item.quantity ?? 1), 0)} total travelers/rooms` : primaryItem.meta,
     };
   }, [items, primaryItem, subtotal]);
 
@@ -201,12 +201,16 @@ export default function CheckoutPage() {
           fullName,
           items: items.map((item) => ({
             itemType: item.itemType ?? "tour",
+            checkIn: item.checkIn,
+            checkOut: item.checkOut,
+            date: item.date,
             meta: item.meta,
             nights: item.nights,
             quantity: item.quantity ?? 1,
             roomType: item.roomType,
+            tourDepartureId: item.tourDepartureId,
             slug: item.slug ?? item.id,
-            unitPrice: Number(item.price.replace(/[^0-9.]/g, "")),
+            unitPrice: item.unitPrice ?? Number(item.price.replace(/[^0-9.]/g, "")),
           })),
           paymentMethod,
           phone,
@@ -318,13 +322,14 @@ export default function CheckoutPage() {
               <SectionHeading index="02" title="Payment Method" />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {paymentOptions.map((option) => (
-                  <label className="cursor-pointer" key={option.value}>
+                  <label className="cursor-pointer rounded-xl focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-emerald-800" key={option.value}>
                     <input
                       checked={paymentMethod === option.value}
                       className="sr-only"
                       name="payment-method"
                       onChange={() => setPaymentMethod(option.value)}
                       type="radio"
+                      value={option.value}
                     />
                     <PaymentOptionCard
                       checked={paymentMethod === option.value}
@@ -379,7 +384,7 @@ export default function CheckoutPage() {
 
             <section className="pt-2">
               {errorMessage ? (
-                <p className="mb-4 rounded-xl bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700">
+                <p aria-live="polite" className="mb-4 rounded-xl bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700" role="alert">
                   {errorMessage}
                 </p>
               ) : null}

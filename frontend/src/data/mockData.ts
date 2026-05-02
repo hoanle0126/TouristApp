@@ -8,6 +8,8 @@ export interface VisualDiaryItem {
 
 export interface SuggestionCard {
   readonly alt: string;
+  readonly category: "destination" | "tour" | "hotel";
+  readonly href: string;
   readonly image: string;
   readonly location: string;
   readonly price: string;
@@ -93,6 +95,7 @@ export const navigationItems = [
   "Destinations",
   "Tours",
   "Hotels",
+  "Booking history",
   "Blog",
   "About Us",
   "Contact",
@@ -137,6 +140,8 @@ export const visualDiaryItems: readonly VisualDiaryItem[] = [
 export const suggestionCards: readonly SuggestionCard[] = [
   {
     alt: "Minimalist modern villa with an infinity pool overlooking a vineyard",
+    category: "hotel",
+    href: "/hotels",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBkw-TrvS0JWahNeSAf6KTALx0u6Rrbegt31EcXVvHFPieRtl6V4vkxzCrPVPfr-uJdef8bDhsPQAAsmrOKPN9nEp--h-3RKSZMaaeTWeFJzHXxc4DPvu-TlMqNBuiRiokaMn9oaDpjZZzrHR6WPPDcbtqdvXYHqBg-F3i1A7EDk3LIaTBVWdOZbuJBOzyVc0R1lTwiIAbcshvds1h4fCvFvUkca_rU4umBUWHDPVZE5EiQiAmBGQ5ugcAhWYgdja275XacPDgfxQwp",
     location: "Tuscany, Italy",
@@ -145,6 +150,8 @@ export const suggestionCards: readonly SuggestionCard[] = [
   },
   {
     alt: "Luxury eco-resort in a dense tropical forest",
+    category: "hotel",
+    href: "/hotels",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCJobfkEYOAXGvJu_F0oRnLZJYZqLgRyDtVQraRwbpXsYOD5-tqPyPvIJk2mWwD4xlXvXdkoo8is-cGJwMsh3yrolNyZzeaHMbCUG5xWbTgcoYDvJTWZef4SCZ7UsrIKqYOtIlpZmYrrkNUhs4cfvCMOL7A-8oS_1VVJFuK_oY0FEo2E1p-1BvGOxF_j6DVYSRIMefSEWYhAjNOm0xvaarbJVsFa1-IzSBLv6VCSX5FYjc3xVWr-ciGCsNDiyU1_brubeMTUevO81il",
     location: "Maldives",
@@ -153,6 +160,8 @@ export const suggestionCards: readonly SuggestionCard[] = [
   },
   {
     alt: "Luxury yacht sailing through turquoise Mediterranean waters",
+    category: "tour",
+    href: "/tours",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCLmxLbLp9No_ehZTLqY_5nrYVKNIbcsUFHvN1FUo4YsJpn4BuuGJVhtps750yfqY0ciORlKhhjKeysB7j1foXXHbxTcx_PeW_5m9u1ySIFMK6p2ojBfOuA_MafNjfnBvrxt6EnTjL2Ye8cvhRyGcR2A63G11F2mFesiN8VJBVmtoJBbO6frIhbmgoYzVauyaM_E2Ao0ddeJNjoHKJo_dp0Jz9bLx-MQ6v4Fq5IkxCZytnAhLyEpl6qbVWn4PDbqzyWrKsz-Vd9c_wB",
     location: "Monaco",
@@ -161,6 +170,8 @@ export const suggestionCards: readonly SuggestionCard[] = [
   },
   {
     alt: "Adventurer sitting by a campfire under a starry desert sky",
+    category: "tour",
+    href: "/tours",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAn4NNneXeR47MVW6PYI_VVfrTIRc_zR52zyEoO7o-N5KG1K-1-dADaAwpuQepsbr31DuwHTETK-I_sComrcw3U-HPGSaH1_waCYeKnBD9YzvVH3uqI0WjXh4jDAWGGWnxysrpJvdgg96a3B7QggLy9-MvRJMIRvy1BFXseWdOHm_e-w5lptHzoL_wqECmJiAfew5JU4IXbUSeTg5bdzg4ikqDTxU3CxDuwlm0d1Iom-PqGJDcEOhmIkpJoFGUrTnzUR8qPSf4nnPHX",
     location: "Wadi Rum, Jordan",

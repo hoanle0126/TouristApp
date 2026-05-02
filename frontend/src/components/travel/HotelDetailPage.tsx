@@ -55,6 +55,9 @@ function HotelBreadcrumb({ title }: Readonly<{ title: string }>) {
 
 function HotelHero({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   const [firstGalleryImage, secondGalleryImage] = hotel.gallery;
+  const fallbackGalleryImage = { alt: hotel.heroAlt, image: hotel.heroImage };
+  const topGalleryImage = firstGalleryImage ?? fallbackGalleryImage;
+  const bottomGalleryImage = secondGalleryImage ?? firstGalleryImage ?? fallbackGalleryImage;
 
   return (
     <section className="mx-auto max-w-screen-2xl px-8 pb-16 pt-32 lg:px-24">
@@ -74,10 +77,10 @@ function HotelHero({ hotel }: Readonly<{ hotel: HotelDetail }>) {
         </div>
         <div className="grid grid-cols-1 gap-5 md:col-span-4 lg:col-span-3">
           <div className="relative min-h-72 overflow-hidden rounded-[2rem] bg-stone-200 md:min-h-0">
-            <Image alt={firstGalleryImage.alt} className="object-cover" fill sizes="(min-width: 1024px) 25vw, 100vw" src={firstGalleryImage.image} />
+            <Image alt={topGalleryImage.alt} className="object-cover" fill sizes="(min-width: 1024px) 25vw, 100vw" src={topGalleryImage.image} />
           </div>
           <div className="group relative min-h-72 overflow-hidden rounded-[2rem] bg-stone-200 md:min-h-0">
-            <Image alt={secondGalleryImage.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes="(min-width: 1024px) 25vw, 100vw" src={secondGalleryImage.image} />
+            <Image alt={bottomGalleryImage.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes="(min-width: 1024px) 25vw, 100vw" src={bottomGalleryImage.image} />
             <div className="absolute inset-0 flex items-center justify-center bg-stone-950/45 opacity-0 transition-opacity group-hover:opacity-100">
               <span className="rounded-full bg-white/95 px-5 py-2 text-xs font-black uppercase tracking-widest text-stone-950">+12 Photos</span>
             </div>

@@ -770,4 +770,85 @@ describe('BookingsService', () => {
       data: { status: 'completed', paymentStatus: 'paid' },
     });
   });
+
+  it('looks up a public booking by booking code and email', async () => {
+    const prisma = createPrismaMock();
+    prisma.booking.findUnique.mockResolvedValue(bookingRecord);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(
+      service.lookupPublicBooking({
+        bookingCode: ' tw-20260501-seed ',
+        contact: ' MAI.ANH@example.com ',
+      }),
+    ).resolves.toMatchObject({
+      bookingCode: 'TW-20260501-SEED',
+      customer: { email: 'mai.anh@example.com' },
+      items: expect.arrayContaining([
+        expect.objectContaining({ title: 'Traveling to Bay Mau Coconut Forest' }),
+      ]),
+    });
+    expect(prisma.booking.findUnique).toHaveBeenCalledWith({
+      where: { bookingCode: 'TW-20260501-SEED' },
+      include: { items: true },
+    });
+  });
+
+  it('looks up a public booking by booking code and normalized phone', async () => {
+    const prisma = createPrismaMock();
+    prisma.booking.findUnique.mockResolvedValue(bookingRecord);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(
+      service.lookupPublicBooking({
+        bookingCode: 'TW-20260501-SEED',
+        contact: '+84901234567',
+      }),
+    ).resolves.toMatchObject({
+      bookingCode: 'TW-20260501-SEED',
+      customer: { phone: '+84 90 123 4567' },
+    });
+  });
+
+  it('does not expose internal notes in public booking lookup', async () => {
+    const prisma = createPrismaMock();
+    prisma.booking.findUnique.mockResolvedValue({
+      ...bookingRecord,
+      internalNotes: 'VIP staff note',
+    });
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    const response = await service.lookupPublicBooking({
+      bookingCode: 'TW-20260501-SEED',
+      contact: 'mai.anh@example.com',
+    });
+
+    expect(response.trip).not.toHaveProperty('internalNotes');
+  });
+
+  it('does not expose a booking when contact does not match', async () => {
+    const prisma = createPrismaMock();
+    prisma.booking.findUnique.mockResolvedValue(bookingRecord);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(
+      service.lookupPublicBooking({
+        bookingCode: 'TW-20260501-SEED',
+        contact: 'someone-else@example.com',
+      }),
+    ).rejects.toThrow('We could not find a booking matching those details.');
+  });
+
+  it('returns the same generic error when public lookup booking is missing', async () => {
+    const prisma = createPrismaMock();
+    prisma.booking.findUnique.mockResolvedValue(null);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(
+      service.lookupPublicBooking({
+        bookingCode: 'TW-MISSING',
+        contact: 'mai.anh@example.com',
+      }),
+    ).rejects.toThrow('We could not find a booking matching those details.');
+  });
 });

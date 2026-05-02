@@ -27,6 +27,10 @@ function itemHref(item: string) {
     return "/hotels";
   }
 
+  if (item === "Booking history") {
+    return "/bookings/lookup";
+  }
+
   if (item === "Blog") {
     return "/blog";
   }
@@ -50,20 +54,25 @@ export function TravelHeader({ activeItem = "Home" }: Readonly<TravelHeaderProps
           <Navigation className="size-6 text-emerald-800" strokeWidth={2.4} />
           CURATOR
         </Link>
-        <div className="hidden items-center space-x-8 md:flex">
-          {navigationItems.map((item) => (
-            <Link
-              className={
-                item === activeItem
-                  ? "border-b-2 border-emerald-700 pb-1 text-sm font-semibold uppercase tracking-tight text-emerald-700"
-                  : "text-sm font-semibold uppercase tracking-tight text-stone-500 transition-colors hover:text-emerald-700"
-              }
-              href={itemHref(item)}
-              key={item}
-            >
-              {item}
-            </Link>
-          ))}
+        <div className="hidden items-center gap-5 lg:flex xl:gap-7">
+          {navigationItems.map((item) => {
+            const isActive = item === activeItem;
+
+            return (
+              <Link
+                aria-current={isActive ? "page" : undefined}
+                className={
+                  isActive
+                    ? "border-b-2 border-emerald-700 pb-1 text-xs font-semibold uppercase tracking-tight text-emerald-700 xl:text-sm"
+                    : "text-xs font-semibold uppercase tracking-tight text-stone-500 transition-colors hover:text-emerald-700 xl:text-sm"
+                }
+                href={itemHref(item)}
+                key={item}
+              >
+                {item}
+              </Link>
+            );
+          })}
         </div>
         <div className="flex items-center gap-4">
           <CartSidebar />

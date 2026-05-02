@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
-  Heart,
   Mail,
   MapPin,
   Phone,
@@ -13,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { SuggestionTabs } from "@/src/components/travel/SuggestionsSection";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { VisualDiaryCarousel } from "@/src/components/travel/VisualDiaryCarousel";
 import { Button } from "@/src/components/ui/button";
@@ -29,7 +29,6 @@ import {
 import { Textarea } from "@/src/components/ui/textarea";
 import {
   heroImage,
-  suggestionCards,
   visualDiaryItems,
   type SuggestionCard,
   type VisualDiaryItem,
@@ -61,10 +60,6 @@ interface DestinationCardViewProps {
 
 interface SuggestionsSectionProps {
   readonly suggestions: readonly SuggestionCard[];
-}
-
-interface SuggestionCardViewProps {
-  readonly suggestion: SuggestionCard;
 }
 
 interface BlogSectionProps {
@@ -239,53 +234,11 @@ function DestinationSection({ destinations }: Readonly<DestinationSectionProps>)
   );
 }
 
-function SuggestionCardView({ suggestion }: Readonly<SuggestionCardViewProps>) {
-  return (
-    <article className="group cursor-pointer">
-      <div className="relative mb-4 aspect-[4/5] overflow-hidden rounded-2xl">
-        <Image alt={suggestion.alt} className="object-cover transition-transform duration-700 group-hover:scale-110" fill sizes="(min-width: 1024px) 25vw, 50vw" src={suggestion.image} />
-        <Button aria-label={`Save ${suggestion.title}`} className="absolute left-4 top-4" size="icon" variant="glass">
-          <Heart className="size-5" />
-        </Button>
-      </div>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h4 className="font-bold text-stone-950">{suggestion.title}</h4>
-          <p className="text-sm text-stone-600">{suggestion.location}</p>
-        </div>
-        <p className="whitespace-nowrap font-bold text-emerald-800">{suggestion.price}</p>
-      </div>
-    </article>
-  );
-}
-
 function SuggestionsSection({ suggestions }: Readonly<SuggestionsSectionProps>) {
   return (
     <section className="bg-stone-50 py-24">
       <div className="mx-auto max-w-screen-2xl px-8">
-        <div className="mb-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
-          <SectionHeading
-            subtitle="Bespoke selections tailored to your aesthetic preferences and travel philosophy."
-            eyebrow="Private Collection"
-            title="Suggestions For You"
-          />
-          <div className="flex flex-wrap gap-2">
-            {['All', 'Tours', 'Hotels', 'Villas', 'Activities'].map((filter) => (
-              <Button
-                key={filter}
-                size="pill"
-                variant={filter === 'All' ? "secondary" : "outline"}
-              >
-                {filter}
-              </Button>
-            ))}
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {suggestions.map((suggestion) => (
-            <SuggestionCardView key={suggestion.title} suggestion={suggestion} />
-          ))}
-        </div>
+        <SuggestionTabs suggestions={suggestions} />
       </div>
     </section>
   );
@@ -300,9 +253,9 @@ function BlogCard({ post }: Readonly<BlogCardProps>) {
       <span className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-700">{post.category}</span>
       <h3 className="mb-4 text-2xl font-bold leading-snug text-stone-950">{post.title}</h3>
       <p className="mb-6 flex-grow text-sm leading-relaxed text-stone-600">{post.excerpt}</p>
-      <a className="group inline-flex items-center gap-2 text-sm font-bold text-emerald-800" href="#">
+      <Link className="group inline-flex items-center gap-2 text-sm font-bold text-emerald-800" href={post.slug ? `/blog/${post.slug}` : "/blog"}>
         Read More <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-      </a>
+      </Link>
     </article>
   );
 }
@@ -391,9 +344,11 @@ function ContactSection() {
                 </Label>
                 <Textarea id="message" placeholder="Message" rows={4} />
               </div>
-              <Button className="w-full py-6 text-base font-bold" type="submit">
-                <Send className="size-4" />
-                Send Inquiry
+              <Button asChild className="w-full py-6 text-base font-bold">
+                <Link href="/contact">
+                  <Send className="size-4" />
+                  Send Inquiry
+                </Link>
               </Button>
             </form>
           </CardContent>
@@ -406,9 +361,10 @@ function ContactSection() {
 interface TravelLandingPageProps {
   readonly blogPosts: readonly BlogPost[];
   readonly destinationCards: readonly DestinationCard[];
+  readonly suggestionCards: readonly SuggestionCard[];
 }
 
-export default function TravelLandingPage({ blogPosts, destinationCards }: Readonly<TravelLandingPageProps>) {
+export default function TravelLandingPage({ blogPosts, destinationCards, suggestionCards }: Readonly<TravelLandingPageProps>) {
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <TravelHeader activeItem="Home" />

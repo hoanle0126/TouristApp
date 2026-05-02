@@ -2,7 +2,6 @@ import {
   AlertTriangle,
   CalendarCheck2,
   CreditCard,
-  Plus,
   ReceiptText,
   ShieldAlert,
   Users,
@@ -10,7 +9,6 @@ import {
 
 import { AdminBookingQueuePanel } from "@/src/components/admin/AdminBookingQueuePanel";
 import { AdminShell } from "@/src/components/admin/AdminShell";
-import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { getBookings } from "@/src/lib/api/bookings";
 import type { ApiBooking } from "@/src/lib/api/types";
@@ -213,12 +211,6 @@ export default async function AdminBookingsPage() {
   return (
     <AdminShell
       activePath="/admin/bookings"
-      action={
-        <Button>
-          <Plus className="size-4" />
-          New booking
-        </Button>
-      }
       dateLabel="Wednesday, April 29, 2026"
       pageTitle="Booking management"
       searchPlaceholder="Search guest, booking, invoice..."

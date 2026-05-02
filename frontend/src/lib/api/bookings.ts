@@ -1,5 +1,5 @@
 import { apiFetch } from "@/src/lib/api/client";
-import type { ApiBooking, CreateBookingInput } from "@/src/lib/api/types";
+import type { ApiBooking, CreateBookingInput, LookupBookingInput } from "@/src/lib/api/types";
 
 export async function createBooking(input: CreateBookingInput) {
   return apiFetch<ApiBooking>("/bookings", {
@@ -12,6 +12,14 @@ export async function createBooking(input: CreateBookingInput) {
 export async function getBooking(bookingCode: string) {
   return apiFetch<ApiBooking>(`/bookings/${bookingCode}`, {
     cache: "no-store",
+  });
+}
+
+export async function lookupBooking(input: LookupBookingInput) {
+  return apiFetch<ApiBooking>("/bookings/lookup", {
+    body: input,
+    cache: "no-store",
+    method: "POST",
   });
 }
 

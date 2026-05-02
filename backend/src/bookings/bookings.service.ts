@@ -88,6 +88,22 @@ export class BookingsService {
     return this.toResponse(booking);
   }
 
+  async lookupPublicBooking(input: { bookingCode: string; contact: string }) {
+    const bookingCode = this.normalizeBookingCode(input.bookingCode);
+    const booking = await this.prisma.booking.findUnique({
+      where: { bookingCode },
+      include: { items: true },
+    });
+
+    if (!booking || !this.matchesBookingContact(booking, input.contact)) {
+      throw new NotFoundException(
+        'We could not find a booking matching those details.',
+      );
+    }
+
+    return this.toPublicResponse(booking);
+  }
+
   async create(dto: CreateBookingDto) {
     if (dto.items.length === 0) {
       throw new BadRequestException('Booking must contain at least one item.');
@@ -191,6 +207,30 @@ export class BookingsService {
         ? { paymentStatus: filters.paymentStatus }
         : {}),
     } satisfies Prisma.BookingWhereInput;
+  }
+
+  private normalizeBookingCode(value: string) {
+    return value.trim().toUpperCase();
+  }
+
+  private normalizeEmail(value: string) {
+    return value.trim().toLowerCase();
+  }
+
+  private normalizePhone(value: string) {
+    const trimmed = value.trim();
+    const prefix = trimmed.startsWith('+') ? '+' : '';
+    return `${prefix}${trimmed.replace(/[^0-9]/g, '')}`;
+  }
+
+  private matchesBookingContact(booking: Booking, contact: string) {
+    const normalizedContactEmail = this.normalizeEmail(contact);
+    const normalizedContactPhone = this.normalizePhone(contact);
+
+    return (
+      this.normalizeEmail(booking.email) === normalizedContactEmail ||
+      this.normalizePhone(booking.phone) === normalizedContactPhone
+    );
   }
 
   private async ensureBookingExists(bookingCode: string) {
@@ -593,6 +633,16 @@ export class BookingsService {
       items: booking.items.map((item) => this.toItemResponse(item)),
       createdAt: booking.createdAt.toISOString(),
       updatedAt: booking.updatedAt.toISOString(),
+    };
+  }
+
+  private toPublicResponse(booking: BookingRecord) {
+    const response = this.toResponse(booking);
+    const { internalNotes, ...trip } = response.trip;
+
+    return {
+      ...response,
+      trip,
     };
   }
 

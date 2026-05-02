@@ -199,6 +199,11 @@ export type CreateBookingInput = {
   readonly items: readonly ApiBookingItemInput[];
 };
 
+export type LookupBookingInput = {
+  readonly bookingCode: string;
+  readonly contact: string;
+};
+
 export type ApiBooking = {
   readonly id: string;
   readonly bookingCode: string;
@@ -214,6 +219,15 @@ export type ApiBooking = {
     readonly address?: string;
   };
   readonly travelers: number;
+  readonly travelerDetails?: unknown;
+  readonly trip?: {
+    readonly startDate?: string;
+    readonly endDate?: string;
+    readonly pickupLocation?: string;
+    readonly dropoffLocation?: string;
+    readonly arrivalFlight?: string;
+    readonly specialRequests?: string;
+  };
   readonly totals: {
     readonly subtotal: number;
     readonly taxesAndFees: number;
@@ -229,6 +243,12 @@ export type ApiBooking = {
     readonly alt?: string;
     readonly meta?: string;
     readonly priceLabel?: string;
+    readonly date?: string;
+    readonly checkIn?: string;
+    readonly checkOut?: string;
+    readonly guests?: string;
+    readonly nights?: number;
+    readonly roomType?: string;
     readonly quantity: number;
     readonly unitPrice: number;
     readonly lineTotal: number;

@@ -87,6 +87,30 @@ function unavailableNight(hotel: HotelDetail, checkIn: string, checkOut: string,
   });
 }
 
+function addDays(value: string, days: number) {
+  const date = parseDateOnlyUtc(value);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().split("T")[0];
+}
+
+function isDateOnly(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function getInitialStayDates(hotel: HotelDetail) {
+  const firstOpenDay = hotel.inventory.find((day) => day.status === "open" && day.remaining > 0);
+
+  if (firstOpenDay) {
+    return { checkIn: firstOpenDay.date, checkOut: addDays(firstOpenDay.date, 1) };
+  }
+
+  if (isDateOnly(hotel.booking.checkIn) && isDateOnly(hotel.booking.checkOut)) {
+    return { checkIn: hotel.booking.checkIn, checkOut: hotel.booking.checkOut };
+  }
+
+  return { checkIn: "", checkOut: "" };
+}
+
 function availabilityStatusForSuite(
   suite: HotelDetailSuite,
   travelers: string,
@@ -184,8 +208,9 @@ function createCartItem(
 export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   const router = useRouter();
   const { addItem, isInCart } = useCart();
-  const [checkIn, setCheckIn] = useState(hotel.booking.checkIn);
-  const [checkOut, setCheckOut] = useState(hotel.booking.checkOut);
+  const initialStayDates = getInitialStayDates(hotel);
+  const [checkIn, setCheckIn] = useState(initialStayDates.checkIn);
+  const [checkOut, setCheckOut] = useState(initialStayDates.checkOut);
   const [travelers, setTravelers] = useState<(typeof travelerOptions)[number]>("2 Adults, 1 Room");
   const [hasCheckedAvailability, setHasCheckedAvailability] = useState(false);
   const [selectedSuiteName, setSelectedSuiteName] = useState<string | null>(null);
@@ -221,12 +246,12 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
 
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl bg-stone-100 p-4">
+            <div className="min-w-0 rounded-xl bg-stone-100 p-4">
               <label className="mb-1 block text-[10px] font-black uppercase tracking-widest text-stone-500" htmlFor="hotel-check-in">
                 Check-in
               </label>
               <Input
-                className="mt-2 h-11 rounded-xl border border-stone-200 bg-white px-4 text-sm font-bold shadow-none focus-visible:ring-0"
+                className="mt-2 h-11 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-3 text-xs font-bold shadow-none focus-visible:ring-0 sm:text-sm"
                 id="hotel-check-in"
                 min={new Date().toISOString().split("T")[0]}
                 onChange={(event) => {
@@ -238,12 +263,12 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                 value={checkIn}
               />
             </div>
-            <div className="rounded-xl bg-stone-100 p-4">
+            <div className="min-w-0 rounded-xl bg-stone-100 p-4">
               <label className="mb-1 block text-[10px] font-black uppercase tracking-widest text-stone-500" htmlFor="hotel-check-out">
                 Check-out
               </label>
               <Input
-                className="mt-2 h-11 rounded-xl border border-stone-200 bg-white px-4 text-sm font-bold shadow-none focus-visible:ring-0"
+                className="mt-2 h-11 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-3 text-xs font-bold shadow-none focus-visible:ring-0 sm:text-sm"
                 id="hotel-check-out"
                 min={checkIn}
                 onChange={(event) => {

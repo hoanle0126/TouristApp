@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { LookupBookingDto } from './dto/lookup-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
 @Controller('bookings')
@@ -28,6 +29,11 @@ export class BookingsController {
       paymentStatus,
       perPage: this.parsePerPage(perPage),
     });
+  }
+
+  @Post('lookup')
+  lookup(@Body() dto: LookupBookingDto) {
+    return this.bookingsService.lookupPublicBooking(dto);
   }
 
   @Get(':bookingCode')

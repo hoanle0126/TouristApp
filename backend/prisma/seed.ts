@@ -746,9 +746,34 @@ export const seedBlogPosts: SeedBlogPost[] = [
     intro: `${title} from the TouristWeb journal collection.`,
     meta: '5 min read',
     quote: 'Travel rewards the patient eye.',
-    sections: [],
+    sections: [
+      {
+        heading: 'A Slower Arrival',
+        body: [
+          `${title} begins with a quieter rhythm, inviting travelers to notice texture, light, and local rituals before chasing an itinerary.`,
+          'Our editors favor routes that leave space for unplanned markets, long lunches, and conversations that reveal the character of a place.',
+        ],
+      },
+      {
+        heading: 'The Curated Route',
+        body: [
+          'Each stop balances comfort with a strong sense of setting, from design-led stays to guides who can open doors usually missed by first-time visitors.',
+          'The result is a journey that feels composed without becoming rigid, with enough structure to travel confidently and enough openness to feel personal.',
+        ],
+      },
+      {
+        heading: 'What Stays With You',
+        body: [
+          'The best journeys linger through details: the sound of a harbor before breakfast, a table set with regional produce, or a viewpoint reached just as the crowds thin.',
+        ],
+      },
+    ],
     inlineImage: { image: nordicFjordsImage, alt: `${title} inline image` },
-    secondaryFeature: {},
+    secondaryFeature: {
+      title: 'Editor’s Field Note',
+      body: `A focused companion note for ${title}, pairing practical context with the sensory details that shape the experience.`,
+      image: { image: nordicFjordsImage, alt: `${title} field note image` },
+    },
     relatedPosts: [],
     seo: { title, description: `${title} travel journal.` },
     mentionedDestinationSlugs: [],

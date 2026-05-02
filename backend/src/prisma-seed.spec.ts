@@ -54,12 +54,15 @@ describe('Prisma seed data', () => {
     }
   });
 
-  it('includes enough detail sections for the Kyoto journal detail layout', () => {
-    const kyotoPost = seedBlogPosts.find(
-      (post) => post.slug === 'kyotos-new-wave',
-    );
-
-    expect(kyotoPost?.sections).toHaveLength(3);
+  it('includes enough detail content for every published journal detail page', () => {
+    for (const post of seedBlogPosts) {
+      expect(post.sections).toHaveLength(3);
+      expect(post.secondaryFeature).toMatchObject({
+        title: expect.any(String),
+        body: expect.any(String),
+        image: { image: expect.any(String), alt: expect.any(String) },
+      });
+    }
   });
 
   it('includes enough gallery and booking data for the Shining Riverside detail layout', () => {

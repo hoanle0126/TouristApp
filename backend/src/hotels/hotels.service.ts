@@ -133,18 +133,32 @@ export class HotelsService {
           continue;
         }
 
-        await tx.hotelInventoryDay.upsert({
+        const existing = await tx.hotelInventoryDay.findUnique({
           where: { hotelId_date: { hotelId: hotel.id, date } },
-          create: {
+        });
+
+        if (existing) {
+          if (inventoryDay.totalRooms < existing.bookedRooms) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
+
+          await tx.hotelInventoryDay.update({
+            where: { id: existing.id },
+            data: {
+              totalRooms: inventoryDay.totalRooms,
+              status: inventoryDay.status,
+            },
+          });
+          continue;
+        }
+
+        await tx.hotelInventoryDay.create({
+          data: {
             hotelId: hotel.id,
             date,
             totalRooms: inventoryDay.totalRooms,
             status: inventoryDay.status,
             bookedRooms: 0,
-          },
-          update: {
-            totalRooms: inventoryDay.totalRooms,
-            status: inventoryDay.status,
           },
         });
       }

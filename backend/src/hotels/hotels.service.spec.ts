@@ -132,6 +132,7 @@ function createPrismaMock() {
     },
     hotelInventoryDay: {
       findUnique: jest.fn(),
+      create: jest.fn(),
       update: jest.fn(),
       upsert: jest.fn(),
     },
@@ -197,6 +198,31 @@ describe('HotelsService', () => {
       new BadRequestException('Capacity cannot be lower than current bookings.'),
     );
     expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects no-id inventory date update when totalRooms is lower than existing bookedRooms', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord);
+    prisma.hotelInventoryDay.findUnique.mockResolvedValueOnce({
+      id: 'inventory_1',
+      hotelId: 'hotel_1',
+      date: new Date('2026-06-12T00:00:00.000Z'),
+      totalRooms: 10,
+      bookedRooms: 3,
+      status: 'open',
+    });
+    const service = new HotelsService(prisma as never);
+
+    await expect(
+      service.upsertInventory('shining-riverside-hoi-an', {
+        inventory: [{ date: '2026-06-12', totalRooms: 2, status: 'open' }],
+      }),
+    ).rejects.toThrow(
+      new BadRequestException('Capacity cannot be lower than current bookings.'),
+    );
+    expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
+    expect(prisma.hotelInventoryDay.create).not.toHaveBeenCalled();
     expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
   });
 

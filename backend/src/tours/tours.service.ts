@@ -105,18 +105,32 @@ export class ToursService {
           continue;
         }
 
-        await tx.tourDeparture.upsert({
+        const existing = await tx.tourDeparture.findUnique({
           where: { tourId_date: { tourId: tour.id, date } },
-          create: {
+        });
+
+        if (existing) {
+          if (departure.capacity < existing.booked) {
+            throw new BadRequestException(CAPACITY_ERROR);
+          }
+
+          await tx.tourDeparture.update({
+            where: { id: existing.id },
+            data: {
+              capacity: departure.capacity,
+              status: departure.status,
+            },
+          });
+          continue;
+        }
+
+        await tx.tourDeparture.create({
+          data: {
             tourId: tour.id,
             date,
             capacity: departure.capacity,
             status: departure.status,
             booked: 0,
-          },
-          update: {
-            capacity: departure.capacity,
-            status: departure.status,
           },
         });
       }

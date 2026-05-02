@@ -221,8 +221,8 @@ describe('BookingsService', () => {
             slug: 'shining-riverside-hoi-an',
             quantity: 1,
             unitPrice: 390,
-            checkIn: '2026-06-12T00:00:00.000Z',
-            checkOut: '2026-06-15T00:00:00.000Z',
+            checkIn: '2026-06-12',
+            checkOut: '2026-06-15',
             nights: 3,
             roomType: 'River View Suite',
             meta: 'River View Suite • 2 travelers',
@@ -425,6 +425,29 @@ describe('BookingsService', () => {
     );
   });
 
+  it('rejects past tour departures without creating a booking', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-12T12:00:00.000Z'));
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({
+      id: 'departure_1',
+      tourId: 'tour_1',
+      date: new Date('2026-06-11T00:00:00.000Z'),
+      capacity: 12,
+      booked: 0,
+      status: 'open',
+    });
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'tour', slug: 'bay-mau-coconut-forest', quantity: 1, tourDepartureId: 'departure_1' }],
+    })).rejects.toThrow('This departure is sold out.');
+    expect(prisma.$executeRaw).not.toHaveBeenCalled();
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
   it('rejects sold-out tour departures without creating a booking', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
@@ -481,6 +504,42 @@ describe('BookingsService', () => {
     })).resolves.toMatchObject({ bookingCode: 'TW-20260501-SEED' });
 
     expect(prisma.$executeRaw).toHaveBeenCalledTimes(3);
+  });
+
+  it('rejects past hotel nights without creating a booking', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-12T12:00:00.000Z'));
+    const prisma = createPrismaMock();
+    prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
+    prisma.hotelInventoryDay.findMany.mockResolvedValue(['2026-06-11', '2026-06-12'].map((date) => ({
+      id: `inventory_${date}`,
+      hotelId: 'hotel_1',
+      date: new Date(`${date}T00:00:00.000Z`),
+      totalRooms: 5,
+      bookedRooms: 0,
+      status: 'open',
+    })));
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 1, checkIn: '2026-06-11', checkOut: '2026-06-13' }],
+    })).rejects.toThrow('This hotel is unavailable on 2026-06-11.');
+    expect(prisma.$executeRaw).not.toHaveBeenCalled();
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('rejects hotel bookings with non-date-only checkout without creating a booking', async () => {
+    const prisma = createPrismaMock();
+    prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
+    const service = new BookingsService(prisma as never, createMailMock() as never);
+
+    await expect(service.create({
+      fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
+      items: [{ itemType: 'hotel', slug: 'shining-riverside-hoi-an', quantity: 1, checkIn: '2026-06-12T23:59:59Z', checkOut: '2026-06-15' }],
+    })).rejects.toThrow('Hotel check-out must be after check-in.');
+    expect(prisma.hotelInventoryDay.findMany).not.toHaveBeenCalled();
+    expect(prisma.booking.create).not.toHaveBeenCalled();
   });
 
   it('rejects hotel bookings when a covered night is missing or closed', async () => {

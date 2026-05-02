@@ -11,6 +11,7 @@ import {
   CreateBookingDto,
   CreateBookingItemDto,
 } from './dto/create-booking.dto';
+import { isValidDateOnly } from '../tours/dto/is-valid-date-only.validator';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
 type BookingRecord = Booking & { items: BookingItem[] };
@@ -288,9 +289,10 @@ export class BookingsService {
       inventoryDays.map((day) => [this.toDateOnlyString(day.date), day]),
     );
 
+    const today = this.getTodayDateOnly();
     for (const night of nights) {
       const inventoryDay = inventoryByDate.get(night);
-      if (!inventoryDay || inventoryDay.status !== 'open') {
+      if (night < today || !inventoryDay || inventoryDay.status !== 'open') {
         throw new BadRequestException(`This hotel is unavailable on ${night}.`);
       }
     }
@@ -438,6 +440,10 @@ export class BookingsService {
       throw new BadRequestException('This departure is sold out.');
     }
 
+    if (this.toDateOnlyString(departure.date) < this.getTodayDateOnly()) {
+      throw new BadRequestException('This departure is sold out.');
+    }
+
     const remaining = departure.capacity - departure.booked;
     if (remaining <= 0) {
       throw new BadRequestException('This departure is sold out.');
@@ -513,9 +519,15 @@ export class BookingsService {
   }
 
   private parseDateOnly(value: string) {
-    const dateOnly = value.slice(0, 10);
-    const date = new Date(`${dateOnly}T00:00:00.000Z`);
-    return Number.isNaN(date.getTime()) ? null : date;
+    if (!isValidDateOnly(value)) {
+      return null;
+    }
+
+    return new Date(`${value}T00:00:00.000Z`);
+  }
+
+  private getTodayDateOnly() {
+    return this.toDateOnlyString(new Date());
   }
 
   private toDateOnlyString(date: Date) {

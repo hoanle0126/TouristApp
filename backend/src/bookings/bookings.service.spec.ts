@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { AiBookingSummaryService } from './ai-booking-summary.service';
 import { BookingsService } from './bookings.service';
 
 const tourRecord = {
@@ -133,6 +134,7 @@ const bookingRecord = {
   arrivalFlight: 'VN123',
   specialRequests: 'Vegetarian lunch for one guest.',
   internalNotes: null,
+  aiSummary: null,
   paymentMethod: 'credit-card',
   paymentStatus: 'pending',
   status: 'confirmed',
@@ -144,6 +146,53 @@ const bookingRecord = {
   createdAt: new Date('2026-05-01T00:00:00.000Z'),
   updatedAt: new Date('2026-05-01T00:00:00.000Z'),
 };
+
+const validBookingInput = {
+  fullName: 'Mai Anh Nguyen',
+  email: 'mai.anh@example.com',
+  phone: '+84 90 123 4567',
+  country: 'Vietnam',
+  travelers: 2,
+  paymentMethod: 'credit-card' as const,
+  items: [
+    {
+      itemType: 'tour' as const,
+      slug: 'bay-mau-coconut-forest',
+      quantity: 2,
+      tourDepartureId: 'departure_1',
+    },
+  ],
+};
+
+function createAiSummaryMock() {
+  return {
+    generate: jest.fn().mockResolvedValue(null),
+  };
+}
+
+function createFetchResponse(
+  overrides: Partial<{ ok: boolean; status: number; json: () => Promise<unknown> }> = {},
+) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({ summary: 'Ops summary' }),
+    ...overrides,
+  };
+}
+
+const originalEnv = process.env;
+const originalFetch = global.fetch;
+
+beforeEach(() => {
+  process.env = { ...originalEnv };
+  jest.clearAllMocks();
+});
+
+afterEach(() => {
+  process.env = originalEnv;
+  global.fetch = originalFetch;
+});
 
 function createPrismaMock() {
   const prismaMock = {
@@ -183,6 +232,189 @@ function createMailMock() {
   };
 }
 
+describe('AiBookingSummaryService', () => {
+  function createSettingsMock(overrides: Partial<{
+    getAiProviderRuntimeConfig: jest.Mock;
+  }> = {}) {
+    return {
+      getAiProviderRuntimeConfig: jest.fn(),
+      ...overrides,
+    };
+  }
+
+  it('returns null when provider is disabled', async () => {
+    const settings = createSettingsMock({
+      getAiProviderRuntimeConfig: jest.fn().mockResolvedValue({
+        provider: 'openai-compatible',
+        baseUrl: 'https://api.openai.com/v1',
+        model: 'gpt-4o-mini',
+        enabled: false,
+        apiKey: 'sk-test-secret',
+      }),
+    });
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock as typeof global.fetch;
+    const service = new AiBookingSummaryService(settings as never);
+
+    await expect(
+      service.generate({
+        bookingCode: 'TW-20260501-SEED',
+        travelers: 2,
+        paymentStatus: 'pending',
+        items: [],
+      }),
+    ).resolves.toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('returns null when provider has no stored api key', async () => {
+    const settings = createSettingsMock({
+      getAiProviderRuntimeConfig: jest.fn().mockResolvedValue({
+        provider: 'openai-compatible',
+        baseUrl: 'https://api.openai.com/v1',
+        model: 'gpt-4o-mini',
+        enabled: true,
+        apiKey: null,
+      }),
+    });
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock as typeof global.fetch;
+    const service = new AiBookingSummaryService(settings as never);
+
+    await expect(
+      service.generate({
+        bookingCode: 'TW-20260501-SEED',
+        travelers: 2,
+        paymentStatus: 'pending',
+        items: [],
+      }),
+    ).resolves.toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('returns a trimmed summary from the openai-compatible provider response', async () => {
+    const settings = createSettingsMock({
+      getAiProviderRuntimeConfig: jest.fn().mockResolvedValue({
+        provider: 'openai-compatible',
+        baseUrl: 'https://api.openai.com/v1',
+        model: 'gpt-4o-mini',
+        enabled: true,
+        apiKey: 'sk-test-secret',
+      }),
+    });
+    const fetchMock = jest.fn().mockResolvedValue(
+      createFetchResponse({
+        json: async () => ({
+          choices: [
+            {
+              message: {
+                content: '  Short ops note  ',
+              },
+            },
+          ],
+        }),
+      }),
+    );
+    global.fetch = fetchMock as typeof global.fetch;
+    const service = new AiBookingSummaryService(settings as never);
+
+    await expect(
+      service.generate({
+        bookingCode: 'TW-20260501-SEED',
+        travelers: 2,
+        paymentStatus: 'pending',
+        specialRequests: 'Vegetarian lunch for one guest.',
+        items: [
+          {
+            itemType: 'tour',
+            title: 'Traveling to Bay Mau Coconut Forest',
+            quantity: 2,
+          },
+        ],
+      }),
+    ).resolves.toBe('Short ops note');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.openai.com/v1/chat/completions',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'content-type': 'application/json',
+          authorization: 'Bearer sk-test-secret',
+        }),
+        signal: expect.any(AbortSignal),
+      }),
+    );
+
+    const [, request] = fetchMock.mock.calls[0];
+    expect(JSON.parse((request as { body: string }).body)).toMatchObject({
+      model: 'gpt-4o-mini',
+      messages: expect.arrayContaining([
+        expect.objectContaining({ role: 'system' }),
+        expect.objectContaining({ role: 'user' }),
+      ]),
+    });
+  });
+
+  it('returns null when the provider responds with a blank message', async () => {
+    const settings = createSettingsMock({
+      getAiProviderRuntimeConfig: jest.fn().mockResolvedValue({
+        provider: 'openai-compatible',
+        baseUrl: 'https://api.openai.com/v1',
+        model: 'gpt-4o-mini',
+        enabled: true,
+        apiKey: 'sk-test-secret',
+      }),
+    });
+    global.fetch = jest.fn().mockResolvedValue(
+      createFetchResponse({
+        json: async () => ({
+          choices: [{ message: { content: '   ' } }],
+        }),
+      }),
+    ) as typeof global.fetch;
+    const service = new AiBookingSummaryService(settings as never);
+
+    await expect(
+      service.generate({
+        bookingCode: 'TW-20260501-SEED',
+        travelers: 2,
+        paymentStatus: 'pending',
+        items: [],
+      }),
+    ).resolves.toBeNull();
+  });
+
+  it('returns null when the provider request fails', async () => {
+    const settings = createSettingsMock({
+      getAiProviderRuntimeConfig: jest.fn().mockResolvedValue({
+        provider: 'openai-compatible',
+        baseUrl: 'https://api.openai.com/v1',
+        model: 'gpt-4o-mini',
+        enabled: true,
+        apiKey: 'sk-test-secret',
+      }),
+    });
+    global.fetch = jest.fn().mockRejectedValue(new Error('timeout')) as typeof global.fetch;
+    const service = new AiBookingSummaryService(settings as never);
+    const loggerSpy = jest.spyOn(service['logger'], 'warn').mockImplementation(() => undefined);
+
+    await expect(
+      service.generate({
+        bookingCode: 'TW-20260501-SEED',
+        travelers: 2,
+        paymentStatus: 'pending',
+        items: [],
+      }),
+    ).resolves.toBeNull();
+    expect(loggerSpy).toHaveBeenCalledWith(
+      'Booking AI summary provider request failed',
+      expect.any(String),
+    );
+    loggerSpy.mockRestore();
+  });
+});
+
 describe('BookingsService', () => {
   it('creates a booking with tour and hotel snapshot items', async () => {
     const prisma = createPrismaMock();
@@ -191,7 +423,7 @@ describe('BookingsService', () => {
     prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
     prisma.hotelInventoryDay.findMany.mockResolvedValue(['2026-06-12', '2026-06-13', '2026-06-14'].map((date) => ({ id: `inventory_${date}`, hotelId: 'hotel_1', date: new Date(`${date}T00:00:00.000Z`), totalRooms: 5, bookedRooms: 0, status: 'open' })));
     prisma.booking.create.mockResolvedValue(bookingRecord);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.create({
@@ -284,7 +516,7 @@ describe('BookingsService', () => {
       ...bookingRecord,
       items: [bookingItemRecords[0]],
     });
-    const service = new BookingsService(prisma as never, mail as never);
+    const service = new BookingsService(prisma as never, mail as never, createAiSummaryMock() as never);
 
     await service.create({
       fullName: 'Mai Anh Nguyen',
@@ -329,7 +561,7 @@ describe('BookingsService', () => {
     mail.sendBookingConfirmationToUser.mockRejectedValue(
       new Error('SMTP unavailable'),
     );
-    const service = new BookingsService(prisma as never, mail as never);
+    const service = new BookingsService(prisma as never, mail as never, createAiSummaryMock() as never);
     const loggerSpy = jest
       .spyOn(service['logger'], 'error')
       .mockImplementation(() => undefined);
@@ -360,6 +592,96 @@ describe('BookingsService', () => {
     loggerSpy.mockRestore();
   });
 
+  it('persists the generated AI summary after booking creation succeeds', async () => {
+    const prisma = createPrismaMock();
+    const aiSummary = createAiSummaryMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 0, status: 'open' });
+    prisma.booking.create.mockResolvedValue({
+      ...bookingRecord,
+      items: [bookingItemRecords[0]],
+      aiSummary: null,
+    });
+    prisma.booking.update.mockResolvedValue({
+      ...bookingRecord,
+      items: [bookingItemRecords[0]],
+      aiSummary: '2 travelers arriving 12 Jun with payment pending.',
+    });
+    aiSummary.generate.mockResolvedValue('2 travelers arriving 12 Jun with payment pending.');
+    const service = new BookingsService(prisma as never, createMailMock() as never, aiSummary as never);
+
+    await expect(service.create(validBookingInput)).resolves.toMatchObject({
+      bookingCode: 'TW-20260501-SEED',
+      aiSummary: '2 travelers arriving 12 Jun with payment pending.',
+    });
+
+    expect(prisma.booking.update).toHaveBeenCalledWith({
+      where: { id: 'booking_1' },
+      data: { aiSummary: '2 travelers arriving 12 Jun with payment pending.' },
+      include: { items: true },
+    });
+  });
+
+  it('returns the persisted booking when AI summary generation throws', async () => {
+    const prisma = createPrismaMock();
+    const aiSummary = createAiSummaryMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 0, status: 'open' });
+    prisma.booking.create.mockResolvedValue({
+      ...bookingRecord,
+      items: [bookingItemRecords[0]],
+      aiSummary: null,
+    });
+    aiSummary.generate.mockRejectedValue(new Error('provider timeout'));
+    const service = new BookingsService(prisma as never, createMailMock() as never, aiSummary as never);
+
+    await expect(service.create(validBookingInput)).resolves.toMatchObject({
+      bookingCode: 'TW-20260501-SEED',
+      aiSummary: null,
+    });
+    expect(prisma.booking.update).not.toHaveBeenCalled();
+  });
+
+  it('does not persist an AI summary when the generator returns null', async () => {
+    const prisma = createPrismaMock();
+    const aiSummary = createAiSummaryMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 0, status: 'open' });
+    prisma.booking.create.mockResolvedValue({
+      ...bookingRecord,
+      items: [bookingItemRecords[0]],
+      aiSummary: null,
+    });
+    aiSummary.generate.mockResolvedValue(null);
+    const service = new BookingsService(prisma as never, createMailMock() as never, aiSummary as never);
+
+    await expect(service.create(validBookingInput)).resolves.toMatchObject({
+      bookingCode: 'TW-20260501-SEED',
+      aiSummary: null,
+    });
+    expect(prisma.booking.update).not.toHaveBeenCalled();
+  });
+
+  it('still sends booking emails when AI summary generation returns null', async () => {
+    const prisma = createPrismaMock();
+    const mail = createMailMock();
+    const aiSummary = createAiSummaryMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tourDeparture.findUnique.mockResolvedValue({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 0, status: 'open' });
+    prisma.booking.create.mockResolvedValue({
+      ...bookingRecord,
+      items: [bookingItemRecords[0]],
+      aiSummary: null,
+    });
+    aiSummary.generate.mockResolvedValue(null);
+    const service = new BookingsService(prisma as never, mail as never, aiSummary as never);
+
+    await service.create(validBookingInput);
+
+    expect(mail.sendBookingConfirmationToUser).toHaveBeenCalled();
+    expect(mail.sendNewBookingNotificationToAdmin).toHaveBeenCalled();
+  });
+
 
   it('reserves tour departure seats and returns departure details', async () => {
     const prisma = createPrismaMock();
@@ -384,7 +706,7 @@ describe('BookingsService', () => {
         },
       ],
     });
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.create({
@@ -437,7 +759,7 @@ describe('BookingsService', () => {
       booked: 0,
       status: 'open',
     });
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -459,7 +781,7 @@ describe('BookingsService', () => {
       booked: 12,
       status: 'open',
     });
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -475,7 +797,7 @@ describe('BookingsService', () => {
       .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' })
       .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' });
     prisma.$executeRaw.mockResolvedValue(0);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -496,7 +818,7 @@ describe('BookingsService', () => {
       status: 'open',
     })));
     prisma.booking.create.mockResolvedValue({ ...bookingRecord, items: [bookingItemRecords[1]] });
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -518,7 +840,7 @@ describe('BookingsService', () => {
       bookedRooms: 0,
       status: 'open',
     })));
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -532,7 +854,7 @@ describe('BookingsService', () => {
   it('rejects hotel bookings with non-date-only checkout without creating a booking', async () => {
     const prisma = createPrismaMock();
     prisma.hotel.findFirst.mockResolvedValue(hotelRecord);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -549,7 +871,7 @@ describe('BookingsService', () => {
       { id: 'inventory_2026-06-12', hotelId: 'hotel_1', date: new Date('2026-06-12T00:00:00.000Z'), totalRooms: 5, bookedRooms: 1, status: 'open' },
       { id: 'inventory_2026-06-13', hotelId: 'hotel_1', date: new Date('2026-06-13T00:00:00.000Z'), totalRooms: 5, bookedRooms: 1, status: 'closed' },
     ]);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -569,7 +891,7 @@ describe('BookingsService', () => {
       bookedRooms: index === 1 ? 4 : 1,
       status: 'open',
     })));
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -586,7 +908,7 @@ describe('BookingsService', () => {
       { id: 'inventory_2026-06-12', hotelId: 'hotel_1', date: new Date('2026-06-12T00:00:00.000Z'), totalRooms: 5, bookedRooms: 4, status: 'open' },
       { id: 'inventory_2026-06-13', hotelId: 'hotel_1', date: new Date('2026-06-13T00:00:00.000Z'), totalRooms: 5, bookedRooms: 4, status: 'open' },
     ]);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -607,7 +929,7 @@ describe('BookingsService', () => {
       .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 4, status: 'open' })
       .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 12, status: 'open' });
     prisma.$executeRaw.mockResolvedValue(0);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -629,7 +951,7 @@ describe('BookingsService', () => {
     })));
     prisma.$executeRaw.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
     prisma.hotelInventoryDay.findUnique.mockResolvedValue({ id: 'inventory_2026-06-13', hotelId: 'hotel_1', date: new Date('2026-06-13T00:00:00.000Z'), totalRooms: 5, bookedRooms: 5, status: 'open' });
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 2, paymentMethod: 'credit-card',
@@ -646,7 +968,7 @@ describe('BookingsService', () => {
       .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' })
       .mockResolvedValueOnce({ id: 'departure_1', tourId: 'tour_1', date: new Date('2026-06-13T00:00:00.000Z'), capacity: 12, booked: 10, status: 'open' });
     prisma.$executeRaw.mockResolvedValue(0);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.create({
       fullName: 'Mai Anh Nguyen', email: 'mai.anh@example.com', phone: '+84 90 123 4567', country: 'Vietnam', travelers: 3, paymentMethod: 'credit-card',
@@ -661,7 +983,7 @@ describe('BookingsService', () => {
 
   it('rejects empty booking items', async () => {
     const prisma = createPrismaMock();
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.create({
@@ -679,7 +1001,7 @@ describe('BookingsService', () => {
   it('throws NotFoundException when an item slug is missing', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique.mockResolvedValue(null);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.create({
@@ -697,7 +1019,7 @@ describe('BookingsService', () => {
   it('lists bookings with filters', async () => {
     const prisma = createPrismaMock();
     prisma.booking.findMany.mockResolvedValue([bookingRecord]);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await service.findAll({
       email: 'mai',
@@ -721,7 +1043,7 @@ describe('BookingsService', () => {
   it('returns booking detail by booking code', async () => {
     const prisma = createPrismaMock();
     prisma.booking.findUnique.mockResolvedValue(bookingRecord);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.findOne('TW-20260501-SEED')).resolves.toMatchObject({
       bookingCode: 'TW-20260501-SEED',
@@ -730,10 +1052,24 @@ describe('BookingsService', () => {
     });
   });
 
+  it('includes the persisted AI summary in admin booking detail responses', async () => {
+    const prisma = createPrismaMock();
+    prisma.booking.findUnique.mockResolvedValue({
+      ...bookingRecord,
+      aiSummary: 'Guest prefers vegetarian lunch and hotel lobby pickup.',
+    });
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
+
+    await expect(service.findOne('TW-20260501-SEED')).resolves.toMatchObject({
+      bookingCode: 'TW-20260501-SEED',
+      aiSummary: 'Guest prefers vegetarian lunch and hotel lobby pickup.',
+    });
+  });
+
   it('throws NotFoundException when booking is missing', async () => {
     const prisma = createPrismaMock();
     prisma.booking.findUnique.mockResolvedValue(null);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(service.findOne('TW-MISSING')).rejects.toBeInstanceOf(
       NotFoundException,
@@ -754,7 +1090,7 @@ describe('BookingsService', () => {
       status: 'completed',
       paymentStatus: 'paid',
     });
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.updateStatus('TW-20260501-SEED', {
@@ -774,7 +1110,7 @@ describe('BookingsService', () => {
   it('looks up a public booking by booking code and email', async () => {
     const prisma = createPrismaMock();
     prisma.booking.findUnique.mockResolvedValue(bookingRecord);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.lookupPublicBooking({
@@ -797,7 +1133,7 @@ describe('BookingsService', () => {
   it('looks up a public booking by booking code and normalized phone', async () => {
     const prisma = createPrismaMock();
     prisma.booking.findUnique.mockResolvedValue(bookingRecord);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.lookupPublicBooking({
@@ -816,7 +1152,7 @@ describe('BookingsService', () => {
       ...bookingRecord,
       internalNotes: 'VIP staff note',
     });
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     const response = await service.lookupPublicBooking({
       bookingCode: 'TW-20260501-SEED',
@@ -826,10 +1162,26 @@ describe('BookingsService', () => {
     expect(response.trip).not.toHaveProperty('internalNotes');
   });
 
+  it('does not expose AI summary in public booking lookup', async () => {
+    const prisma = createPrismaMock();
+    prisma.booking.findUnique.mockResolvedValue({
+      ...bookingRecord,
+      aiSummary: 'Internal AI summary for admin operators.',
+    });
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
+
+    const response = await service.lookupPublicBooking({
+      bookingCode: 'TW-20260501-SEED',
+      contact: 'mai.anh@example.com',
+    });
+
+    expect(response).not.toHaveProperty('aiSummary');
+  });
+
   it('does not expose a booking when contact does not match', async () => {
     const prisma = createPrismaMock();
     prisma.booking.findUnique.mockResolvedValue(bookingRecord);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.lookupPublicBooking({
@@ -842,7 +1194,7 @@ describe('BookingsService', () => {
   it('returns the same generic error when public lookup booking is missing', async () => {
     const prisma = createPrismaMock();
     prisma.booking.findUnique.mockResolvedValue(null);
-    const service = new BookingsService(prisma as never, createMailMock() as never);
+    const service = new BookingsService(prisma as never, createMailMock() as never, createAiSummaryMock() as never);
 
     await expect(
       service.lookupPublicBooking({

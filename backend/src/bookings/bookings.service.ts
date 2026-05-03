@@ -12,6 +12,10 @@ import {
   CreateBookingItemDto,
 } from './dto/create-booking.dto';
 import { isValidDateOnly } from '../tours/dto/is-valid-date-only.validator';
+import {
+  AiBookingSummaryInput,
+  AiBookingSummaryService,
+} from './ai-booking-summary.service';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
 type BookingRecord = Booking & { items: BookingItem[] };
@@ -55,6 +59,7 @@ export class BookingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
+    private readonly aiBookingSummaryService?: AiBookingSummaryService,
   ) {}
 
   async findAll(
@@ -155,11 +160,61 @@ export class BookingsService {
         include: { items: true },
       });
     });
-    const response = this.toResponse(booking);
+    const bookingWithSummary = await this.tryPersistAiSummary(booking);
+    const response = this.toResponse(bookingWithSummary);
 
     await this.sendBookingEmails(response);
 
     return response;
+  }
+
+  private async tryPersistAiSummary(booking: BookingRecord) {
+    if (!this.aiBookingSummaryService) {
+      return booking;
+    }
+
+    try {
+      const aiSummary = await this.aiBookingSummaryService.generate(
+        this.buildAiSummaryInput(booking),
+      );
+
+      if (!aiSummary) {
+        return booking;
+      }
+
+      return this.prisma.booking.update({
+        where: { id: booking.id },
+        data: { aiSummary },
+        include: { items: true },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to generate AI summary for ${booking.bookingCode}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      return booking;
+    }
+  }
+
+  private buildAiSummaryInput(booking: BookingRecord): AiBookingSummaryInput {
+    return {
+      bookingCode: booking.bookingCode,
+      travelers: booking.travelers,
+      paymentStatus: booking.paymentStatus,
+      startDate: booking.startDate?.toISOString(),
+      endDate: booking.endDate?.toISOString(),
+      specialRequests: booking.specialRequests,
+      items: booking.items.map((item) => ({
+        itemType: item.itemType as 'tour' | 'hotel',
+        title: item.snapshotTitle,
+        date: item.date,
+        checkIn: item.checkIn?.toISOString(),
+        checkOut: item.checkOut?.toISOString(),
+        guests: item.guests,
+        roomType: item.roomType,
+        quantity: item.quantity,
+      })),
+    };
   }
 
   async updateStatus(bookingCode: string, dto: UpdateBookingStatusDto) {
@@ -605,6 +660,7 @@ export class BookingsService {
       status: booking.status,
       paymentStatus: booking.paymentStatus,
       paymentMethod: booking.paymentMethod,
+      aiSummary: booking.aiSummary,
       customer: {
         fullName: booking.fullName,
         email: booking.email,
@@ -639,9 +695,10 @@ export class BookingsService {
   private toPublicResponse(booking: BookingRecord) {
     const response = this.toResponse(booking);
     const { internalNotes, ...trip } = response.trip;
+    const { aiSummary, ...publicResponse } = response;
 
     return {
-      ...response,
+      ...publicResponse,
       trip,
     };
   }

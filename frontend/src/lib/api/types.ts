@@ -204,12 +204,38 @@ export type LookupBookingInput = {
   readonly contact: string;
 };
 
+export type ApiAiProviderSettings = {
+  readonly provider: "openai-compatible";
+  readonly baseUrl: string;
+  readonly model: string;
+  readonly enabled: boolean;
+  readonly hasApiKey: boolean;
+  readonly apiKeyLast4: string | null;
+};
+
+export type UpdateAiProviderSettingsInput = {
+  readonly provider?: "openai-compatible";
+  readonly baseUrl?: string;
+  readonly model?: string;
+  readonly enabled?: boolean;
+  readonly apiKey?: string;
+  readonly clearApiKey?: boolean;
+};
+
+export type TestAiProviderSettingsInput = {
+  readonly provider: "openai-compatible";
+  readonly baseUrl: string;
+  readonly model: string;
+  readonly apiKey: string;
+};
+
 export type ApiBooking = {
   readonly id: string;
   readonly bookingCode: string;
   readonly status: string;
   readonly paymentStatus: string;
   readonly paymentMethod: string;
+  readonly aiSummary?: string | null;
   readonly customer: {
     readonly fullName: string;
     readonly email: string;

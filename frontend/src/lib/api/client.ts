@@ -3,7 +3,8 @@ type ApiFetchOptions = Omit<RequestInit, "body"> & {
   readonly query?: Record<string, string | number | undefined>;
 };
 
-const DEFAULT_API_BASE_URL = "http://localhost:8000";
+const DEFAULT_API_PORT = "8000";
+const DEFAULT_API_BASE_URL = `http://localhost:${DEFAULT_API_PORT}`;
 
 export class ApiError extends Error {
   constructor(
@@ -25,7 +26,17 @@ export function isApiNetworkError(error: unknown): error is ApiNetworkError {
 }
 
 function getApiBaseUrl() {
-  return (process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL).replace(/\/$/, "");
+  const configuredBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  if (configuredBaseUrl) {
+    return configuredBaseUrl.replace(/\/$/, "");
+  }
+
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:${DEFAULT_API_PORT}`;
+  }
+
+  return DEFAULT_API_BASE_URL;
 }
 
 function buildUrl(path: string, query?: ApiFetchOptions["query"]) {

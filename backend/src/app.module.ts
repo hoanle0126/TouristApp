@@ -6,6 +6,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { DestinationsModule } from './destinations/destinations.module';
 import { HotelsModule } from './hotels/hotels.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SettingsModule } from './settings/settings.module';
 import { ToursModule } from './tours/tours.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { ToursModule } from './tours/tours.module';
     HotelsModule,
     BlogsModule,
     BookingsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

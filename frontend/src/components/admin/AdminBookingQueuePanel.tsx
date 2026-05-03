@@ -132,6 +132,13 @@ function AdminBookingDetailModal({ booking, onClose }: { readonly booking: ApiBo
         </div>
 
         <div className="space-y-6 overflow-y-auto p-6 text-sm text-stone-600 sm:p-7">
+          <section className="rounded-2xl bg-emerald-50 p-4">
+            <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-800">AI booking summary</h4>
+            <p className="mt-3 text-sm leading-7 text-stone-700">
+              {booking.aiSummary ?? "No AI summary has been generated yet."}
+            </p>
+          </section>
+
           <section className="rounded-2xl bg-stone-100 p-4">
             <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-stone-400">Customer</h4>
             <div className="mt-3 space-y-2">

@@ -191,6 +191,7 @@ model Booking {
   arrivalFlight        String?
   specialRequests      String?
   internalNotes        String?
+  aiSummary            String?
   paymentMethod        String
   paymentStatus        String        @default("pending")
   status               String        @default("pending")
@@ -243,4 +244,16 @@ model BookingItem {
   @@index([tourDepartureId])
   @@index([hotelId])
   @@index([itemType])
+}
+
+model AiProviderConfig {
+  id              String   @id
+  provider        String
+  baseUrl         String
+  model           String
+  encryptedApiKey String?
+  apiKeyLast4     String?
+  enabled         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

@@ -1,13 +1,17 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
+  Compass,
   Mail,
   MapPin,
+  Newspaper,
   Phone,
   Search,
   Send,
+  Sparkles,
   Star,
   Users,
 } from "lucide-react";
@@ -85,6 +89,93 @@ function SectionHeading({ align = "left", eyebrow, subtitle, title }: Readonly<S
       ) : null}
     </div>
   );
+}
+
+function LandingEmptyState({
+  actionHref,
+  actionLabel,
+  description,
+  icon,
+  title,
+}: Readonly<{
+  actionHref: string;
+  actionLabel: string;
+  description: string;
+  icon: ReactNode;
+  title: string;
+}>) {
+  return (
+    <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+        {icon}
+      </div>
+      <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">{title}</h3>
+      <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+        {description}
+      </p>
+      <Button asChild className="mt-6 rounded-full px-6" variant="outline">
+        <Link href={actionHref}>
+          {actionLabel}
+          <ArrowRight className="size-4" />
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+function SuggestionEmptyState({ activeTab }: Readonly<{ activeTab: "all" | "hotel" | "tour" | "destination" }>) {
+  const labels = {
+    all: "new ideas",
+    destination: "destinations",
+    hotel: "stays",
+    tour: "experiences",
+  } as const;
+
+  return (
+    <LandingEmptyState
+      actionHref="/search"
+      actionLabel="Explore the catalog"
+      description={`We do not have any curated ${labels[activeTab]} to show for this filter yet. Try another tab or browse the full catalog for more options.`}
+      icon={<Sparkles className="size-7" />}
+      title="Fresh recommendations are on the way"
+    />
+  );
+}
+
+function BlogEmptyState() {
+  return (
+    <LandingEmptyState
+      actionHref="/blog"
+      actionLabel="Visit the journal"
+      description="Our editorial team has not published a featured story for this moment yet. Check the journal for the latest travel notes and destination essays."
+      icon={<Newspaper className="size-7" />}
+      title="No featured stories yet"
+    />
+  );
+}
+
+function DestinationEmptyState() {
+  return (
+    <LandingEmptyState
+      actionHref="/destinations"
+      actionLabel="Browse all destinations"
+      description="Curated escapes are being refreshed right now. Explore the full destination collection while the next featured journeys are prepared."
+      icon={<Compass className="size-7" />}
+      title="Featured escapes are being refreshed"
+    />
+  );
+}
+
+function SuggestionSectionEmptyState({ suggestions }: Readonly<{ suggestions: readonly SuggestionCard[] }>) {
+  return suggestions.length === 0 ? <SuggestionEmptyState activeTab="all" /> : null;
+}
+
+function BlogSectionEmptyState({ posts }: Readonly<{ posts: readonly BlogPost[] }>) {
+  return posts.length === 0 ? <BlogEmptyState /> : null;
+}
+
+function DestinationSectionEmptyState({ destinations }: Readonly<{ destinations: readonly DestinationCard[] }>) {
+  return destinations.length === 0 ? <DestinationEmptyState /> : null;
 }
 
 function HeroSection({ image }: Readonly<HeroSectionProps>) {
@@ -224,11 +315,15 @@ function DestinationSection({ destinations }: Readonly<DestinationSectionProps>)
             </Link>
           </Button>
         </div>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {destinations.map((destination) => (
-            <DestinationCardView destination={destination} key={destination.title} />
-          ))}
-        </div>
+        {destinations.length > 0 ? (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {destinations.map((destination) => (
+              <DestinationCardView destination={destination} key={destination.title} />
+            ))}
+          </div>
+        ) : (
+          <DestinationSectionEmptyState destinations={destinations} />
+        )}
       </div>
     </section>
   );
@@ -238,7 +333,7 @@ function SuggestionsSection({ suggestions }: Readonly<SuggestionsSectionProps>) 
   return (
     <section className="bg-stone-50 py-24">
       <div className="mx-auto max-w-screen-2xl px-8">
-        <SuggestionTabs suggestions={suggestions} />
+        {suggestions.length > 0 ? <SuggestionTabs suggestions={suggestions} /> : <SuggestionSectionEmptyState suggestions={suggestions} />}
       </div>
     </section>
   );
@@ -267,11 +362,15 @@ function BlogSection({ posts }: Readonly<BlogSectionProps>) {
         <div className="mb-16">
           <SectionHeading align="center" eyebrow="Editorial" title="Stories, Tips & Guides" />
         </div>
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-          {posts.map((post) => (
-            <BlogCard key={post.title} post={post} />
-          ))}
-        </div>
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+            {posts.map((post) => (
+              <BlogCard key={post.title} post={post} />
+            ))}
+          </div>
+        ) : (
+          <BlogSectionEmptyState posts={posts} />
+        )}
       </div>
     </section>
   );

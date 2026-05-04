@@ -1,0 +1,9 @@
+# Claude / local worktree artifacts
+.claude/
+.worktrees/
+
+# Local browser automation artifacts
+.playwright-mcp/
+
+# Local backup files
+*.pre-merge-backup

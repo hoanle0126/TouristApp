@@ -25,7 +25,29 @@ function BlogHero() {
   );
 }
 
-function FeaturedPost({ post }: Readonly<{ post: FeaturedJournalPost }>) {
+function FeaturedPost({ post }: Readonly<{ post: FeaturedJournalPost | null }>) {
+  if (!post) {
+    return (
+      <section className="mx-auto mb-28 max-w-screen-2xl px-8 lg:px-24">
+        <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+            <Sparkles className="size-7" />
+          </div>
+          <h2 className="mt-5 text-3xl font-black tracking-tight text-stone-950 md:text-4xl">No featured story is live yet</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+            The journal is being refreshed. Check back soon for curated narratives, destination essays, and slow-travel guides.
+          </p>
+          <Button asChild className="mt-6 rounded-full px-6" variant="outline">
+            <Link href="/contact">
+              Ask for a curated recommendation
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto mb-28 max-w-screen-2xl px-8 lg:px-24">
       <article className="group relative aspect-[21/10] min-h-[480px] overflow-hidden rounded-[2rem] bg-stone-200 shadow-[0_40px_90px_-55px_rgba(28,25,23,0.65)]">
@@ -39,6 +61,36 @@ function FeaturedPost({ post }: Readonly<{ post: FeaturedJournalPost }>) {
           <p className="max-w-2xl text-lg font-light leading-relaxed text-white/90 md:text-xl">{post.excerpt}</p>
         </div>
       </article>
+    </section>
+  );
+}
+
+function JournalEmptyState() {
+  return (
+    <section className="mx-auto mb-32 max-w-screen-2xl px-8 lg:px-24">
+      <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+          <Search className="size-7" />
+        </div>
+        <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No additional journal entries yet</h3>
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+          We do not have more stories to show right now. Explore again soon for fresh guides, interviews, and destination notes.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function JournalGrid({ posts }: Readonly<{ posts: readonly JournalPost[] }>) {
+  if (posts.length === 0) {
+    return <JournalEmptyState />;
+  }
+
+  return (
+    <section className="mx-auto mb-32 grid max-w-screen-2xl grid-cols-1 gap-x-12 gap-y-24 px-8 md:grid-cols-2 lg:grid-cols-3 lg:px-24">
+      {posts.map((post) => (
+        <JournalCard key={post.slug ?? post.title} post={post} />
+      ))}
     </section>
   );
 }
@@ -97,16 +149,6 @@ function JournalCard({ post }: Readonly<{ post: JournalPost }>) {
   );
 }
 
-function JournalGrid({ posts }: Readonly<{ posts: readonly JournalPost[] }>) {
-  return (
-    <section className="mx-auto mb-32 grid max-w-screen-2xl grid-cols-1 gap-x-12 gap-y-24 px-8 md:grid-cols-2 lg:grid-cols-3 lg:px-24">
-      {posts.map((post) => (
-        <JournalCard key={post.slug ?? post.title} post={post} />
-      ))}
-    </section>
-  );
-}
-
 function JournalNewsletter() {
   return (
     <section className="mx-auto max-w-screen-2xl px-8 pb-24 lg:px-24">
@@ -129,7 +171,7 @@ function JournalNewsletter() {
   );
 }
 
-export default function BlogListingPage({ featuredPost, posts }: Readonly<{ featuredPost: FeaturedJournalPost; posts: readonly JournalPost[] }>) {
+export default function BlogListingPage({ featuredPost, posts }: Readonly<{ featuredPost: FeaturedJournalPost | null; posts: readonly JournalPost[] }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Blog" />

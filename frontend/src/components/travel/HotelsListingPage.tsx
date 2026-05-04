@@ -129,11 +129,29 @@ function HotelsGrid({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
           Six handpicked properties where spatial drama, cultural context, and hospitality craft become the destination.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
-        {hotels.map((hotel, index) => (
-          <HotelCardView hotel={hotel} index={index} key={hotel.slug ?? hotel.name} />
-        ))}
-      </div>
+      {hotels.length > 0 ? (
+        <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
+          {hotels.map((hotel, index) => (
+            <HotelCardView hotel={hotel} index={index} key={hotel.slug ?? hotel.name} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+            <Search className="size-7" />
+          </div>
+          <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No curated stays are live right now</h3>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+            Our hotel index is being refreshed. Check back soon or browse destinations while new stays are being published.
+          </p>
+          <Button asChild className="mt-6 rounded-full px-6" variant="outline">
+            <Link href="/destinations">
+              Browse destinations
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

@@ -7,5 +7,5 @@ export default async function BlogPage() {
   const posts = await getJournalPosts();
   const [featuredPost, ...journalPosts] = posts;
 
-  return <BlogListingPage featuredPost={{ ...featuredPost, badge: "Featured Experience" }} posts={journalPosts} />;
+  return <BlogListingPage featuredPost={featuredPost ? { ...featuredPost, badge: "Featured Experience" } : null} posts={journalPosts} />;
 }

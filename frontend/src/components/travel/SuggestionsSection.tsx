@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/src/components/ui/button";
@@ -46,11 +47,12 @@ export function SuggestionTabs({ suggestions }: { readonly suggestions: readonly
   const [activeTab, setActiveTab] = useState<SuggestionTabValue>("all");
 
   const filteredSuggestions = useMemo(() => {
-    if (activeTab === "all") {
-      return suggestions;
-    }
+    const nextSuggestions =
+      activeTab === "all"
+        ? suggestions
+        : suggestions.filter((suggestion) => suggestion.category === activeTab);
 
-    return suggestions.filter((suggestion) => suggestion.category === activeTab);
+    return nextSuggestions.slice(0, 4);
   }, [activeTab, suggestions]);
 
   return (
@@ -76,11 +78,23 @@ export function SuggestionTabs({ suggestions }: { readonly suggestions: readonly
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
-        {filteredSuggestions.map((suggestion) => (
-          <SuggestionCardView key={`${suggestion.category}-${suggestion.title}`} suggestion={suggestion} />
-        ))}
-      </div>
+      {filteredSuggestions.length > 0 ? (
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
+          {filteredSuggestions.map((suggestion) => (
+            <SuggestionCardView key={`${suggestion.category}-${suggestion.title}`} suggestion={suggestion} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+            <Sparkles className="size-7" />
+          </div>
+          <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No matches in this tab yet</h3>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+            Try another category to explore more curated stays, tours, and destination ideas.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

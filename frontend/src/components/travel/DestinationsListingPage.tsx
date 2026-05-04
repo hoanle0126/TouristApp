@@ -132,11 +132,29 @@ function DestinationsGrid({ destinations }: Readonly<{ destinations: readonly De
           A compact destination index balancing scenic impact, cultural depth, and premium itinerary potential.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
-        {destinations.map((destination) => (
-          <DestinationCardView destination={destination} key={destination.href} />
-        ))}
-      </div>
+      {destinations.length > 0 ? (
+        <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
+          {destinations.map((destination) => (
+            <DestinationCardView destination={destination} key={destination.href} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+            <Compass className="size-7" />
+          </div>
+          <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No featured destinations are live yet</h3>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+            The editorial destination index is being refreshed. Check back shortly or explore other curated parts of the catalog.
+          </p>
+          <Button asChild className="mt-6 rounded-full px-6" variant="outline">
+            <Link href="/search">
+              Explore the catalog
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
     </section>
   );
 }
@@ -177,11 +195,29 @@ function PremiumExtensions({ suggestions }: Readonly<{ suggestions: readonly Tou
           Request Bespoke Plan
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
-        {suggestions.map((suggestion) => (
-          <SuggestionCardView key={suggestion.title} suggestion={suggestion} />
-        ))}
-      </div>
+      {suggestions.length > 0 ? (
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
+          {suggestions.map((suggestion) => (
+            <SuggestionCardView key={suggestion.title} suggestion={suggestion} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+            <Sparkles className="size-7" />
+          </div>
+          <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No private extensions to show yet</h3>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+            Bespoke add-on escapes are being updated. Start with a destination above or request a custom itinerary directly.
+          </p>
+          <Button asChild className="mt-6 rounded-full px-6" variant="outline">
+            <Link href="/contact">
+              Request a custom itinerary
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

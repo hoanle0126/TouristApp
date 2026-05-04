@@ -98,29 +98,49 @@ function ToursHero() {
 function ToursGrid({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
   return (
     <section className="mx-auto mb-24 max-w-screen-2xl px-8 lg:px-24">
-      <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-        {tours.map((tour) => (
-          <TourCardView key={tour.slug ?? tour.title} tour={tour} />
-        ))}
-      </div>
-      <div className="mt-24 flex flex-col items-center gap-8">
-        <Button className="px-12 py-4 text-xs uppercase tracking-widest" variant="outline">
-          Load More Journeys
-        </Button>
-        <div className="flex items-center gap-6">
-          <button aria-label="Previous page" className="text-stone-300 transition-colors hover:text-stone-950" type="button">
-            <ArrowLeft className="size-5" />
-          </button>
-          <div className="flex items-center gap-4 text-xs font-bold tracking-widest">
-            <span className="text-stone-950">01</span>
-            <span className="h-px w-8 bg-stone-300" />
-            <span className="text-stone-400">08</span>
+      {tours.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+            {tours.map((tour) => (
+              <TourCardView key={tour.slug ?? tour.title} tour={tour} />
+            ))}
           </div>
-          <button aria-label="Next page" className="text-stone-950 transition-colors hover:text-emerald-800" type="button">
-            <ArrowRight className="size-5" />
-          </button>
+          <div className="mt-24 flex flex-col items-center gap-8">
+            <Button className="px-12 py-4 text-xs uppercase tracking-widest" variant="outline">
+              Load More Journeys
+            </Button>
+            <div className="flex items-center gap-6">
+              <button aria-label="Previous page" className="text-stone-300 transition-colors hover:text-stone-950" type="button">
+                <ArrowLeft className="size-5" />
+              </button>
+              <div className="flex items-center gap-4 text-xs font-bold tracking-widest">
+                <span className="text-stone-950">01</span>
+                <span className="h-px w-8 bg-stone-300" />
+                <span className="text-stone-400">08</span>
+              </div>
+              <button aria-label="Next page" className="text-stone-950 transition-colors hover:text-emerald-800" type="button">
+                <ArrowRight className="size-5" />
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+            <Filter className="size-7" />
+          </div>
+          <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No journeys are available right now</h3>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+            Our curated collection is being refreshed. Try again soon or browse other parts of the catalog for inspiration.
+          </p>
+          <Button asChild className="mt-6 rounded-full px-6" variant="outline">
+            <Link href="/search">
+              Explore the catalog
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
         </div>
-      </div>
+      )}
     </section>
   );
 }

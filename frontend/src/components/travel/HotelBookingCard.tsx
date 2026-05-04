@@ -2,7 +2,7 @@
 
 import { startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, MessageCircle, ShoppingBag, Star } from "lucide-react";
+import { BedDouble, CalendarSearch, Check, MessageCircle, ShoppingBag, Star } from "lucide-react";
 
 import { useCart } from "@/src/components/travel/CartProvider";
 import { Button } from "@/src/components/ui/button";
@@ -32,6 +32,16 @@ interface AvailabilityOption {
   readonly total: string;
 }
 
+interface NextAvailableStay {
+  readonly checkIn: string;
+  readonly checkOut: string;
+}
+
+interface AvailabilityFeedback {
+  readonly blockedNight: string;
+  readonly nextAvailableStay: NextAvailableStay | null;
+}
+
 function parseCurrency(value: string) {
   return Number(value.replace(/[^0-9.]/g, ""));
 }
@@ -50,6 +60,10 @@ function formatDate(value: string) {
     timeZone: "UTC",
     year: "numeric",
   }).format(parsedDate);
+}
+
+function formatStayWindow(checkIn: string, checkOut: string) {
+  return `${formatDate(checkIn)} - ${formatDate(checkOut)}`;
 }
 
 function calculateNights(checkIn: string, checkOut: string) {
@@ -77,16 +91,6 @@ function roomsFromTravelers(travelers: string) {
   return match ? Number(match[1]) : 1;
 }
 
-function unavailableNight(hotel: HotelDetail, checkIn: string, checkOut: string, quantity: number) {
-  const inventoryByDate = new Map(hotel.inventory.map((day) => [day.date, day]));
-
-  return dateOnlyRange(checkIn, checkOut).find((date) => {
-    const day = inventoryByDate.get(date);
-
-    return !day || day.status !== "open" || day.remaining < quantity;
-  });
-}
-
 function addDays(value: string, days: number) {
   const date = parseDateOnlyUtc(value);
   date.setUTCDate(date.getUTCDate() + days);
@@ -109,6 +113,89 @@ function getInitialStayDates(hotel: HotelDetail) {
   }
 
   return { checkIn: "", checkOut: "" };
+}
+
+function hasOpenInventory(hotel: HotelDetail) {
+  return hotel.inventory.some((day) => day.status === "open" && day.remaining > 0);
+}
+
+function nextOpenInventoryDay(hotel: HotelDetail) {
+  return hotel.inventory
+    .filter((day) => day.status === "open" && day.remaining > 0)
+    .map((day) => day.date)
+    .sort((left, right) => left.localeCompare(right))[0] ?? null;
+}
+
+function findBlockedNight(hotel: HotelDetail, checkIn: string, checkOut: string, quantity: number) {
+  const inventoryByDate = new Map(hotel.inventory.map((day) => [day.date, day]));
+
+  return dateOnlyRange(checkIn, checkOut).find((date) => {
+    const day = inventoryByDate.get(date);
+
+    return !day || day.status !== "open" || day.remaining < quantity;
+  });
+}
+
+function findNextAvailableStay(
+  hotel: HotelDetail,
+  requestedCheckIn: string,
+  nights: number,
+  quantity: number,
+): NextAvailableStay | null {
+  if (nights <= 0) {
+    return null;
+  }
+
+  const candidateDates = hotel.inventory
+    .filter((day) => day.status === "open" && day.remaining >= quantity)
+    .map((day) => day.date)
+    .sort((left, right) => left.localeCompare(right));
+
+  for (const candidateCheckIn of candidateDates) {
+    if (candidateCheckIn < requestedCheckIn) {
+      continue;
+    }
+
+    const candidateCheckOut = addDays(candidateCheckIn, nights);
+    const blockedNight = findBlockedNight(
+      hotel,
+      candidateCheckIn,
+      candidateCheckOut,
+      quantity,
+    );
+
+    if (!blockedNight) {
+      return {
+        checkIn: candidateCheckIn,
+        checkOut: candidateCheckOut,
+      };
+    }
+  }
+
+  return null;
+}
+
+function getAvailabilityFeedback(
+  hotel: HotelDetail,
+  checkIn: string,
+  checkOut: string,
+  quantity: number,
+): AvailabilityFeedback | null {
+  const blockedNight = findBlockedNight(hotel, checkIn, checkOut, quantity);
+
+  if (!blockedNight) {
+    return null;
+  }
+
+  return {
+    blockedNight,
+    nextAvailableStay: findNextAvailableStay(
+      hotel,
+      checkIn,
+      calculateNights(checkIn, checkOut),
+      quantity,
+    ),
+  };
 }
 
 function availabilityStatusForSuite(
@@ -212,16 +299,21 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   const [checkIn, setCheckIn] = useState(initialStayDates.checkIn);
   const [checkOut, setCheckOut] = useState(initialStayDates.checkOut);
   const [travelers, setTravelers] = useState<(typeof travelerOptions)[number]>("2 Adults, 1 Room");
-  const [hasCheckedAvailability, setHasCheckedAvailability] = useState(false);
   const [selectedSuiteName, setSelectedSuiteName] = useState<string | null>(null);
 
   const quantity = roomsFromTravelers(travelers);
   const nights = calculateNights(checkIn, checkOut);
-  const blockedNight = nights > 0 ? unavailableNight(hotel, checkIn, checkOut, quantity) : undefined;
-  const stayLabel =
-    nights > 0 ? `${formatDate(checkIn)} - ${formatDate(checkOut)}` : "";
+  const inventoryOpen = hasOpenInventory(hotel);
+  const nextOpenDay = nextOpenInventoryDay(hotel);
+  const availabilityFeedback =
+    nights > 0
+      ? getAvailabilityFeedback(hotel, checkIn, checkOut, quantity)
+      : null;
+  const stayLabel = nights > 0 ? `${formatDate(checkIn)} - ${formatDate(checkOut)}` : "";
   const availabilityOptions =
-    nights > 0 && !blockedNight ? buildAvailabilityOptions(hotel, travelers, nights, quantity) : [];
+    nights > 0 && !availabilityFeedback
+      ? buildAvailabilityOptions(hotel, travelers, nights, quantity)
+      : [];
   const selectedOption = availabilityOptions.find(
     (option) => option.suite.name === selectedSuiteName,
   );
@@ -256,7 +348,6 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                 min={new Date().toISOString().split("T")[0]}
                 onChange={(event) => {
                   setCheckIn(event.target.value);
-                  setHasCheckedAvailability(false);
                   setSelectedSuiteName(null);
                 }}
                 type="date"
@@ -270,10 +361,9 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
               <Input
                 className="mt-2 h-11 w-full min-w-0 rounded-xl border border-stone-200 bg-white px-3 text-xs font-bold shadow-none focus-visible:ring-0 sm:text-sm"
                 id="hotel-check-out"
-                min={checkIn}
+                min={checkIn || new Date().toISOString().split("T")[0]}
                 onChange={(event) => {
                   setCheckOut(event.target.value);
-                  setHasCheckedAvailability(false);
                   setSelectedSuiteName(null);
                 }}
                 type="date"
@@ -289,7 +379,6 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
             <Select
               onValueChange={(value) => {
                 setTravelers(value as (typeof travelerOptions)[number]);
-                setHasCheckedAvailability(false);
                 setSelectedSuiteName(null);
               }}
               value={travelers}
@@ -310,24 +399,79 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
             </Select>
           </div>
 
-          <Button
-            className="mt-2 w-full py-6 text-lg font-black"
-            disabled={nights === 0}
-            onClick={() => {
-              setSelectedSuiteName(null);
-              setHasCheckedAvailability(true);
-            }}
-            size="lg"
-            type="button"
-          >
-            Check Availability
-          </Button>
+          <div className="rounded-[1.5rem] border border-stone-200 bg-stone-50 px-5 py-4 text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Live Availability</p>
+            <p className="mt-2 text-sm font-semibold text-stone-950">
+              {nights > 0 ? `${stayLabel} • ${nights} nights` : "Select check-in and check-out dates to see available rooms."}
+            </p>
+            <p className="mt-2 text-xs text-stone-500">Availability updates automatically as you change dates or travelers.</p>
+            {nights > 0 ? (
+              <span className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">
+                {travelers}
+              </span>
+            ) : null}
+          </div>
           <p className="text-center text-xs text-stone-500">You won&apos;t be charged yet</p>
-          {hasCheckedAvailability && blockedNight ? (
-            <p className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">This hotel is unavailable on {blockedNight}.</p>
+
+          {inventoryOpen && nights === 0 ? (
+            <div className="rounded-[1.5rem] border border-dashed border-stone-200 bg-white px-5 py-6 text-center">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50">
+                <CalendarSearch className="size-6 text-emerald-800" />
+              </div>
+              <p className="mt-4 text-lg font-black tracking-tight text-stone-950">Choose your stay to reveal room options</p>
+              <p className="mt-2 text-sm leading-relaxed text-stone-500">
+                Pick valid check-in and check-out dates to see which suites are available right away.
+              </p>
+            </div>
           ) : null}
 
-          {hasCheckedAvailability ? (
+          {inventoryOpen && nights > 0 && availabilityOptions.length === 0 && !availabilityFeedback ? (
+            <div className="rounded-[1.5rem] border border-dashed border-stone-200 bg-white px-5 py-6 text-center">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50">
+                <CalendarSearch className="size-6 text-emerald-800" />
+              </div>
+              <p className="mt-4 text-lg font-black tracking-tight text-stone-950">No room matches this stay yet</p>
+              <p className="mt-2 text-sm leading-relaxed text-stone-500">
+                Try shorter dates, fewer rooms, or a different traveler setup to see available suite options.
+              </p>
+            </div>
+          ) : null}
+
+          {availabilityFeedback ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-950">
+              <p className="font-semibold">
+                This hotel is unavailable on {availabilityFeedback.blockedNight}.
+              </p>
+              {availabilityFeedback.nextAvailableStay ? (
+                <>
+                  <p className="mt-2">
+                    The next available stay for the same trip length is {formatStayWindow(availabilityFeedback.nextAvailableStay.checkIn, availabilityFeedback.nextAvailableStay.checkOut)}.
+                  </p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-800">
+                    {quantity === 1 ? "1 room" : `${quantity} rooms`} available for this alternative.
+                  </p>
+                  <Button
+                    className="mt-3 w-full rounded-xl border border-emerald-200 bg-white text-sm font-bold text-emerald-950 hover:bg-emerald-50"
+                    onClick={() => {
+                      setCheckIn(availabilityFeedback.nextAvailableStay!.checkIn);
+                      setCheckOut(availabilityFeedback.nextAvailableStay!.checkOut);
+                      setSelectedSuiteName(null);
+                    }}
+                    type="button"
+                    variant="outline"
+                  >
+                    Use {formatStayWindow(availabilityFeedback.nextAvailableStay.checkIn, availabilityFeedback.nextAvailableStay.checkOut)}
+                  </Button>
+                </>
+              ) : (
+                <p className="mt-2 text-sm font-medium text-amber-900">
+                  No alternative stay was found for the same trip length. Try different dates or reduce the number of rooms.
+                </p>
+              )}
+            </div>
+          ) : null}
+
+          {nights > 0 ? (
             <div className="space-y-4 rounded-[1.5rem] border border-stone-200 bg-stone-50 p-4">
               <div>
                 <div>
@@ -341,54 +485,74 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                 </span>
               </div>
 
-              <div className="space-y-3">
-                {availabilityOptions.map((option) => {
-                  const selected = selectedSuiteName === option.suite.name;
-                  const disabled = option.status === "sold-out";
+              {availabilityOptions.length > 0 ? (
+                <div className="space-y-3">
+                  {availabilityOptions.map((option) => {
+                    const selected = selectedSuiteName === option.suite.name;
+                    const disabled = option.status === "sold-out";
 
-                  return (
-                    <button
-                      className={
-                        selected
-                          ? "w-full rounded-[1.25rem] border border-emerald-800 bg-white p-4 text-left shadow-[0_18px_40px_-30px_rgba(6,78,59,0.35)]"
-                          : "w-full rounded-[1.25rem] border border-stone-200 bg-white p-4 text-left transition-colors hover:border-stone-300"
-                      }
-                      disabled={disabled}
-                      key={option.suite.name}
-                      onClick={() => setSelectedSuiteName(option.suite.name)}
-                      type="button"
-                    >
-                      <div>
-                        <p className="font-bold text-stone-950">{option.suite.name}</p>
-                        <span
-                          className={`mt-3 inline-flex rounded-full px-3 py-2 text-center text-[10px] font-black uppercase tracking-[0.18em] ${statusClasses(option.status)}`}
-                        >
-                          {statusLabel(option.status)}
-                        </span>
-                        <p className="mt-3 text-sm leading-relaxed text-stone-500">
-                          {option.suite.description}
-                        </p>
-                      </div>
-                      <div className="mt-4 flex items-end justify-between gap-4">
+                    return (
+                      <button
+                        className={
+                          selected
+                            ? "w-full rounded-[1.25rem] border border-emerald-800 bg-white p-4 text-left shadow-[0_18px_40px_-30px_rgba(6,78,59,0.35)]"
+                            : "w-full rounded-[1.25rem] border border-stone-200 bg-white p-4 text-left transition-colors hover:border-stone-300"
+                        }
+                        disabled={disabled}
+                        key={option.suite.name}
+                        onClick={() => setSelectedSuiteName(option.suite.name)}
+                        type="button"
+                      >
                         <div>
-                          <p className="text-sm font-semibold text-stone-950">
-                            {option.nightlyRate}
-                            <span className="ml-1 font-normal text-stone-500">/ night</span>
-                          </p>
-                          <p className="mt-1 text-xs text-stone-500">
-                            Total stay {option.total}
+                          <p className="font-bold text-stone-950">{option.suite.name}</p>
+                          <span
+                            className={`mt-3 inline-flex rounded-full px-3 py-2 text-center text-[10px] font-black uppercase tracking-[0.18em] ${statusClasses(option.status)}`}
+                          >
+                            {statusLabel(option.status)}
+                          </span>
+                          <p className="mt-3 text-sm leading-relaxed text-stone-500">
+                            {option.suite.description}
                           </p>
                         </div>
-                        <span className={selected ? "text-xs font-black uppercase tracking-[0.18em] text-emerald-800" : "text-xs font-black uppercase tracking-[0.18em] text-stone-400"}>
-                          {selected ? "Selected" : disabled ? "Unavailable" : "Select room"}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                        <div className="mt-4 flex items-end justify-between gap-4">
+                          <div>
+                            <p className="text-sm font-semibold text-stone-950">
+                              {option.nightlyRate}
+                              <span className="ml-1 font-normal text-stone-500">/ night</span>
+                            </p>
+                            <p className="mt-1 text-xs text-stone-500">
+                              Total stay {option.total}
+                            </p>
+                          </div>
+                          <span className={selected ? "text-xs font-black uppercase tracking-[0.18em] text-emerald-800" : disabled ? "text-xs font-black uppercase tracking-[0.18em] text-stone-400" : "text-xs font-black uppercase tracking-[0.18em] text-stone-400"}>
+                            {selected ? "Selected" : disabled ? "Unavailable" : "Select room"}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
           ) : null}
+
+          {!inventoryOpen ? (
+            <div className="rounded-[1.5rem] border border-dashed border-stone-200 bg-stone-50 px-5 py-6 text-center">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-white shadow-sm shadow-stone-950/5">
+                <BedDouble className="size-6 text-emerald-800" />
+              </div>
+              <p className="mt-4 text-lg font-black tracking-tight text-stone-950">No stay inventory is open right now</p>
+              <p className="mt-2 text-sm leading-relaxed text-stone-500">
+                This property has no bookable room dates available yet. Check back soon or contact the travel desk for upcoming openings.
+              </p>
+              {nextOpenDay ? (
+                <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-emerald-800">
+                  Next open date: {formatDate(nextOpenDay)}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
 
           <div className="space-y-4 border-t border-stone-200 pt-8">
             <div className="flex justify-between text-stone-500">
@@ -420,34 +584,25 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
             variant="outline"
           >
             {inCart ? <Check className="size-5" /> : <ShoppingBag className="size-5" />}
-            {inCart ? "Added to Cart" : "Add to Cart"}
+            {inCart ? "Added to itinerary" : "Add to itinerary"}
           </Button>
 
           <Button
             className="w-full py-6 text-lg font-black uppercase tracking-widest"
-            disabled={!selectedOption}
             onClick={() => {
-              if (!cartItem) {
-                return;
+              if (cartItem && !inCart) {
+                addItem(cartItem);
               }
-
-              addItem(cartItem);
               startTransition(() => {
-                router.push("/checkout");
+                router.push("/cart");
               });
             }}
             size="lg"
             type="button"
           >
-            Reserve Stay
+            <MessageCircle className="size-5" />
+            Reserve via curator
           </Button>
-
-          <div className="border-t border-stone-200 pt-8">
-            <Button className="w-full gap-2 text-xs uppercase tracking-widest" variant="outline">
-              <MessageCircle className="size-4" />
-              Ask a Curator
-            </Button>
-          </div>
         </div>
       </div>
     </aside>

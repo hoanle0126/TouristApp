@@ -1,9 +1,16 @@
+# IDE artifacts
+.idea/
+
 # Claude / local worktree artifacts
 .claude/
 .worktrees/
 
 # Local browser automation artifacts
 .playwright-mcp/
+
+# Design and docs artifacts
+.stitch/designs/
+docs/superpowers/
 
 # Local backup files
 *.pre-merge-backup

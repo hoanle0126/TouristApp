@@ -209,7 +209,9 @@ export default async function AdminToursPage() {
 
       <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.6fr)_420px]">
         <AdminTourCatalogPreview tours={tours} />
-        <InsightsPanel />
+        <div className="2xl:sticky 2xl:top-6 2xl:self-start">
+          <InsightsPanel />
+        </div>
       </section>
 
       <DeparturesPanel />

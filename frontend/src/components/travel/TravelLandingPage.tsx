@@ -219,6 +219,7 @@ function HeroSection({ image }: Readonly<HeroSectionProps>) {
                 <Input
                   className="h-10 border-none bg-transparent px-0 py-0 shadow-none focus-visible:ring-0"
                   id="check-in"
+                  name="checkIn"
                   type="date"
                 />
               </div>
@@ -230,6 +231,7 @@ function HeroSection({ image }: Readonly<HeroSectionProps>) {
                 <Input
                   className="h-10 border-none bg-transparent px-0 py-0 shadow-none focus-visible:ring-0"
                   id="check-out"
+                  name="checkOut"
                   type="date"
                 />
               </div>
@@ -238,7 +240,7 @@ function HeroSection({ image }: Readonly<HeroSectionProps>) {
                   <Users className="size-3.5 text-emerald-700" />
                   Guests
                 </Label>
-                <Select defaultValue="2-adults">
+                <Select defaultValue="2-adults" name="guests">
                   <SelectTrigger className="h-10 border-none bg-transparent px-0 py-0 shadow-none focus:ring-0 focus-visible:ring-0">
                     <SelectValue placeholder="Select guests" />
                   </SelectTrigger>

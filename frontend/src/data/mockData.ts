@@ -101,8 +101,7 @@ export const navigationItems = [
   "Contact",
 ] as const;
 
-export const heroImage =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCg0tkFvUSRvjjSmOt_subHDKhJnyXcL3rlIfQE3Jb5M_r5QYZLt7YYVGblQ7SEn7DyHzD4lbE6dP-rLtymSWNVTb0BpjBaHzyBqDsgcK-23bpxaciOe89sOtBNSKUn8lvUDT0keX8HCxGIi5aDbQ6b--KeiIEO92PDpg-4lohkr4kdYn1MW_cz2p-zxMbsbB2rGLdjzfEf0S4Oa_d2I-vbwJoUtJ380bcKXWIVhiBfVp113dBGZJGald2rtFVCwcGcFuIxB1KSxG94";
+export const heroImage = "/banner.webp";
 
 export const visualDiaryItems: readonly VisualDiaryItem[] = [
   {

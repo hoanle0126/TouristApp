@@ -26,10 +26,20 @@ type TourRecord = Prisma.TourGetPayload<{
 export class ToursService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(filters: { search?: string } = {}) {
     const tours = await this.prisma.tour.findMany({
       include: { destinations: true, hotels: true },
       orderBy: { createdAt: 'desc' },
+      where: filters.search
+        ? {
+            OR: [
+              { title: { contains: filters.search, mode: 'insensitive' } },
+              { shortDescription: { contains: filters.search, mode: 'insensitive' } },
+              { duration: { contains: filters.search, mode: 'insensitive' } },
+              { type: { contains: filters.search, mode: 'insensitive' } },
+            ],
+          }
+        : undefined,
     });
     return tours.map((tour) => this.toCardResponse(tour));
   }

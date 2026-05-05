@@ -34,8 +34,14 @@ export type SaveTourInput = {
   readonly exclusions: readonly string[];
 };
 
-export async function getTours() {
-  const tours = await apiFetch<ApiTourCard[]>("/tours", { cache: "no-store" });
+export async function getTours(query: { readonly search?: string; readonly perPage?: number } = {}) {
+  const tours = await apiFetch<ApiTourCard[]>("/tours", {
+    cache: "no-store",
+    query: {
+      search: query.search,
+      per_page: query.perPage,
+    },
+  });
   return tours.map(toTourCard);
 }
 

@@ -229,6 +229,15 @@ export type TestAiProviderSettingsInput = {
   readonly apiKey: string;
 };
 
+export type ApiChatbotResponse = {
+  readonly answer: string;
+  readonly sources: readonly {
+    readonly kind: "tour" | "hotel" | "blog" | "booking" | "destination";
+    readonly label: string;
+    readonly slug: string;
+  }[];
+};
+
 export type ApiBooking = {
   readonly id: string;
   readonly bookingCode: string;

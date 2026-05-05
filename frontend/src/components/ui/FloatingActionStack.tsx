@@ -5,6 +5,7 @@ import { ArrowUp, MessageCircleMore, Send, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
+import { sendChatbotMessage } from "@/src/lib/api/chatbot";
 import { cn } from "@/src/lib/utils";
 
 const quickPrompts = [
@@ -13,21 +14,56 @@ const quickPrompts = [
   "Suggest a nature-focused itinerary",
 ] as const;
 
-const cannedResponses = [
-  "I can help narrow this down. Share your destination, dates, and whether you prefer tours, hotels, or a mixed itinerary.",
-  "For a stronger recommendation, tell me your budget range and how structured you want the journey to be.",
-  "A good next step is to start from destination and duration, then I can map that to the closest curated journey in this site.",
-] as const;
-
 interface ChatMessage {
   readonly content: string;
   readonly role: "assistant" | "user";
+}
+
+function renderInlineMarkdown(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+
+    return part;
+  });
+}
+
+function ChatMessageContent({ message }: { readonly message: ChatMessage }) {
+  if (message.role === "user") {
+    return message.content;
+  }
+
+  const lines = message.content
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const bulletLines = lines.filter((line) => /^[-*]\s+/.test(line));
+
+  if (bulletLines.length === lines.length && lines.length > 0) {
+    return (
+      <ul className="list-disc space-y-1 pl-5">
+        {lines.map((line, index) => (
+          <li key={index}>{renderInlineMarkdown(line.replace(/^[-*]\s+/, ""))}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {lines.map((line, index) => (
+        <p key={index}>{renderInlineMarkdown(line.replace(/^[-*]\s+/, ""))}</p>
+      ))}
+    </div>
+  );
 }
 
 export function FloatingActionStack() {
   const [draft, setDraft] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isScrollVisible, setIsScrollVisible] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState<readonly ChatMessage[]>([
     {
       content:
@@ -92,23 +128,38 @@ export function FloatingActionStack() {
     return isScrollVisible ? "bottom-40 md:bottom-44" : "bottom-22 md:bottom-24";
   }, [isScrollVisible]);
 
-  const sendMessage = (message: string) => {
+  const sendMessage = async (message: string) => {
     const trimmedMessage = message.trim();
 
-    if (!trimmedMessage) {
+    if (!trimmedMessage || isSending) {
       return;
     }
 
     setMessages((currentMessages) => [
       ...currentMessages,
       { content: trimmedMessage, role: "user" },
-      {
-        content:
-          cannedResponses[currentMessages.length % cannedResponses.length],
-        role: "assistant",
-      },
     ]);
     setDraft("");
+    setIsSending(true);
+
+    try {
+      const response = await sendChatbotMessage({ message: trimmedMessage });
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        { content: response.answer, role: "assistant" },
+      ]);
+    } catch {
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          content:
+            "I could not reach the travel assistant right now. Please try again in a moment.",
+          role: "assistant",
+        },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -153,6 +204,7 @@ export function FloatingActionStack() {
             {quickPrompts.map((prompt) => (
               <Button
                 className="h-auto rounded-full border border-stone-200 bg-white px-4 py-2 text-left text-xs font-medium text-stone-600 hover:border-emerald-800/30 hover:bg-emerald-50 hover:text-emerald-900"
+                disabled={isSending}
                 key={prompt}
                 onClick={() => sendMessage(prompt)}
                 size={null}
@@ -175,9 +227,14 @@ export function FloatingActionStack() {
                 )}
                 key={`${message.role}-${index}`}
               >
-                {message.content}
+                <ChatMessageContent message={message} />
               </div>
             ))}
+            {isSending ? (
+              <div className="max-w-[88%] rounded-2xl bg-stone-100 px-4 py-3 text-sm leading-6 text-stone-500 shadow-sm">
+                Thinking through the website context...
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -191,11 +248,12 @@ export function FloatingActionStack() {
           >
             <Input
               className="flex-1"
+              disabled={isSending}
               onChange={(event) => setDraft(event.target.value)}
               placeholder="Ask about your next journey"
               value={draft}
             />
-            <Button aria-label="Send message" size="icon" type="submit">
+            <Button aria-label="Send message" disabled={isSending} size="icon" type="submit">
               <Send className="size-4" />
             </Button>
           </form>

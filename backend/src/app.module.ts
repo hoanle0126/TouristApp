@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { BlogsModule } from './blogs/blogs.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { DestinationsModule } from './destinations/destinations.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 import { HotelsModule } from './hotels/hotels.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
@@ -17,6 +18,7 @@ import { ToursModule } from './tours/tours.module';
     HotelsModule,
     BlogsModule,
     BookingsModule,
+    ChatbotModule,
     SettingsModule,
   ],
   controllers: [AppController],

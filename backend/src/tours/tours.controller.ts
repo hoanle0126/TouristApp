@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
@@ -18,8 +17,8 @@ export class ToursController {
   constructor(private readonly toursService: ToursService) {}
 
   @Get()
-  findAll(@Query('search') search?: string) {
-    return this.toursService.findAll({ search });
+  findAll() {
+    return this.toursService.findAll();
   }
 
   @Get(':slug')

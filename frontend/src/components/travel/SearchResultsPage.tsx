@@ -1,21 +1,10 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 import { Heart, Search } from "lucide-react";
 
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
 
 export interface SearchResult {
   readonly alt: string;
@@ -24,7 +13,6 @@ export interface SearchResult {
   readonly description: string;
   readonly href: string;
   readonly image: string;
-  readonly meta?: string;
   readonly price: string;
   readonly title: string;
 }
@@ -36,14 +24,13 @@ const sortOptions = [
   "Newest",
 ] as const;
 
-const categoryFilters = ["Tour", "Hotel", "Destination"] as const;
-
-const durationFilters = [
-  { label: "1-3 Days", value: "1-3" },
-  { label: "4-7 Days", value: "4-7" },
-  { label: "8-14 Days", value: "8-14" },
-  { label: "14+ Days", value: "14+" },
+const categoryFilters = [
+  { checked: true, label: "Tours" },
+  { checked: false, label: "Hotels" },
+  { checked: false, label: "Experiences" },
 ] as const;
+
+const durationFilters = ["1-3 Days", "4-7 Days", "8-14 Days", "14+ Days"] as const;
 
 function SearchResultCard({
   result,
@@ -93,99 +80,12 @@ function SearchResultCard({
   );
 }
 
-interface SearchResponse {
-  readonly results: SearchResult[];
-}
-
 interface SearchResultsPageProps {
-  readonly initialQuery: string;
-  readonly initialResults: readonly SearchResult[];
+  readonly query: string;
+  readonly results: readonly SearchResult[];
 }
 
-export default function SearchResultsPage({ initialQuery, initialResults }: Readonly<SearchResultsPageProps>) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState<readonly SearchResult[]>(initialResults);
-  const [selectedCategories, setSelectedCategories] = useState<readonly string[]>(["Tour", "Hotel", "Destination"]);
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(10000);
-  const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
-  const [sort, setSort] = useState<(typeof sortOptions)[number]>("Recommended");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const searchParams = useMemo(() => {
-    const params = new URLSearchParams();
-    if (query.trim()) {
-      params.set("q", query.trim());
-    }
-    selectedCategories.forEach((category) => params.append("category", category));
-    if (minPrice > 0) {
-      params.set("minPrice", String(minPrice));
-    }
-    if (maxPrice < 10000) {
-      params.set("maxPrice", String(maxPrice));
-    }
-    if (selectedDuration) {
-      params.set("duration", selectedDuration);
-    }
-    if (sort !== "Recommended") {
-      params.set("sort", sort);
-    }
-    return params;
-  }, [maxPrice, minPrice, query, selectedCategories, selectedDuration, sort]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(async () => {
-      const serializedParams = searchParams.toString();
-      router.replace(serializedParams ? `${pathname}?${serializedParams}` : pathname, { scroll: false });
-
-      setIsSearching(true);
-      setSearchError(null);
-      try {
-        const response = await fetch(`/api/search?${serializedParams}`, {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Unable to search right now.");
-        }
-
-        const payload = (await response.json()) as SearchResponse;
-        setResults(payload.results);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-        setSearchError(error instanceof Error ? error.message : "Unable to search right now.");
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsSearching(false);
-        }
-      }
-    }, 500);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [pathname, router, searchParams]);
-
-  function toggleCategory(category: string) {
-    setSelectedCategories((current) => current.includes(category)
-      ? current.filter((item) => item !== category)
-      : [...current, category]);
-  }
-
-  function updateMinPrice(value: number) {
-    setMinPrice(Math.min(value, maxPrice - 100));
-  }
-
-  function updateMaxPrice(value: number) {
-    setMaxPrice(Math.max(value, minPrice + 100));
-  }
-
+export default function SearchResultsPage({ query, results }: Readonly<SearchResultsPageProps>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Tours" />
@@ -193,22 +93,21 @@ export default function SearchResultsPage({ initialQuery, initialResults }: Read
       <section className="mx-auto w-full max-w-screen-2xl px-8 pb-24 pt-32">
         <header className="mb-16">
           <h1 className="mb-4 text-5xl font-bold leading-tight tracking-tight text-stone-950 md:text-[3.5rem]">
-            {results.length} Journeys Found for{" "}
-            <span className="font-normal italic text-emerald-800">&quot;{query || "all trips"}&quot;</span>
+            24 Journeys Found for{" "}
+            <span className="font-normal italic text-emerald-800">&quot;{query}&quot;</span>
           </h1>
           <div className="mt-8 max-w-2xl">
-            <form className="flex items-center rounded-xl bg-stone-100 px-4 py-3 ring-1 ring-transparent transition-colors focus-within:ring-emerald-800" onSubmit={(event) => event.preventDefault()}>
+            <form action="/search" className="flex items-center rounded-xl bg-stone-100 px-4 py-3 ring-1 ring-transparent transition-colors focus-within:ring-emerald-800">
               <Search className="mr-3 size-5 text-stone-400" />
               <Input
                 className="h-auto border-none bg-transparent p-0 text-lg font-normal shadow-none focus-visible:ring-0"
+                defaultValue={query}
                 name="q"
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search tours, hotels, destinations..."
-                value={query}
               />
-              {isSearching ? <span className="ml-3 text-sm font-medium text-emerald-800">Searching...</span> : null}
+              <Button className="ml-3 h-auto py-0 font-medium text-emerald-800 hover:bg-transparent hover:text-emerald-900" size={null} type="submit" variant="ghost">
+                Update
+              </Button>
             </form>
-            {searchError ? <p className="mt-3 text-sm font-semibold text-rose-700">{searchError}</p> : null}
           </div>
         </header>
 
@@ -218,16 +117,11 @@ export default function SearchResultsPage({ initialQuery, initialResults }: Read
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-stone-950">
                 Sort By
               </h3>
-              <Select onValueChange={(value: (typeof sortOptions)[number]) => setSort(value)} value={sort}>
-                <SelectTrigger className="w-full rounded-xl border-none bg-stone-100 p-3 text-stone-950 shadow-none focus:ring-0">
-                  <SelectValue placeholder="Sort results" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map((option) => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select className="w-full rounded-xl border-none bg-stone-100 p-3 text-stone-950 outline-none ring-0">
+                {sortOptions.map((option) => (
+                  <option key={option}>{option}</option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -236,15 +130,14 @@ export default function SearchResultsPage({ initialQuery, initialResults }: Read
               </h3>
               <div className="space-y-3">
                 {categoryFilters.map((filter) => (
-                  <label className="group flex cursor-pointer items-center gap-3" key={filter}>
+                  <label className="group flex cursor-pointer items-center gap-3" key={filter.label}>
                     <input
-                      checked={selectedCategories.includes(filter)}
                       className="size-4 rounded border-stone-400 accent-emerald-800"
-                      onChange={() => toggleCategory(filter)}
+                      defaultChecked={filter.checked}
                       type="checkbox"
                     />
                     <span className="text-stone-600 transition-colors group-hover:text-stone-950">
-                      {filter === "Destination" ? "Destinations" : `${filter}s`}
+                      {filter.label}
                     </span>
                   </label>
                 ))}
@@ -256,36 +149,15 @@ export default function SearchResultsPage({ initialQuery, initialResults }: Read
                 Price Range
               </h3>
               <div className="space-y-4">
-                <div className="relative h-6">
-                  <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-stone-200" />
-                  <div
-                    className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-emerald-800"
-                    style={{ left: `${minPrice / 100}%`, right: `${100 - maxPrice / 100}%` }}
-                  />
-                  <input
-                    aria-label="Minimum price"
-                    className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent accent-emerald-800 [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto"
-                    max="10000"
-                    min="0"
-                    onChange={(event) => updateMinPrice(Number(event.target.value))}
-                    step="100"
-                    type="range"
-                    value={minPrice}
-                  />
-                  <input
-                    aria-label="Maximum price"
-                    className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent accent-emerald-800 [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto"
-                    max="10000"
-                    min="0"
-                    onChange={(event) => updateMaxPrice(Number(event.target.value))}
-                    step="100"
-                    type="range"
-                    value={maxPrice}
-                  />
-                </div>
+                <input
+                  className="w-full accent-emerald-800"
+                  max="10000"
+                  min="0"
+                  type="range"
+                />
                 <div className="flex justify-between text-sm text-stone-500">
-                  <span>${minPrice.toLocaleString()}</span>
-                  <span>{maxPrice >= 10000 ? "$10,000+" : `$${maxPrice.toLocaleString()}`}</span>
+                  <span>$0</span>
+                  <span>$10,000+</span>
                 </div>
               </div>
             </div>
@@ -295,62 +167,50 @@ export default function SearchResultsPage({ initialQuery, initialResults }: Read
                 Duration
               </h3>
               <div className="flex flex-wrap gap-2">
-                {durationFilters.map((filter) => {
-                  const active = selectedDuration === filter.value;
-
-                  return (
-                    <Button
-                      className={
-                        active
-                          ? "rounded-xl bg-emerald-100 text-stone-950 hover:bg-emerald-200"
-                          : "rounded-xl border border-stone-200 bg-stone-100 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50"
-                      }
-                      key={filter.value}
-                      onClick={() => setSelectedDuration(active ? null : filter.value)}
-                      size="sm"
-                      type="button"
-                      variant="ghost"
-                    >
-                      {filter.label}
-                    </Button>
-                  );
-                })}
+                {durationFilters.map((filter, index) => (
+                  <Button
+                    className={
+                      index === 0
+                        ? "rounded-xl bg-emerald-100 text-stone-950 hover:bg-emerald-200"
+                        : "rounded-xl border border-stone-200 bg-stone-100 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50"
+                    }
+                    key={filter}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    {filter}
+                  </Button>
+                ))}
               </div>
             </div>
           </aside>
 
           <div className="flex-grow">
             <div className="mb-8 hidden items-center justify-between border-b border-stone-200 pb-4 lg:flex">
-              <p className="text-sm text-stone-500">Showing {results.length} results</p>
+              <p className="text-sm text-stone-500">Showing 1-12 of 24 results</p>
               <div className="flex items-center gap-3">
                 <span className="text-xs uppercase tracking-[0.18em] text-stone-500">
                   Sort:
                 </span>
-                <Select onValueChange={(value: (typeof sortOptions)[number]) => setSort(value)} value={sort}>
-                  <SelectTrigger className="h-auto w-52 border-none bg-transparent p-0 font-medium text-stone-950 shadow-none focus:ring-0">
-                    <SelectValue placeholder="Sort results" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sortOptions.map((option) => (
-                      <SelectItem key={option} value={option}>{option}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select className="cursor-pointer border-none bg-transparent p-0 pr-6 font-medium text-stone-950 outline-none">
+                  {sortOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            {results.length > 0 ? (
-              <div className="grid grid-cols-1 gap-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-                {results.map((result) => (
-                  <SearchResultCard key={`${result.category}-${result.href}`} result={result} />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-3xl bg-stone-100 p-8 text-center">
-                <p className="text-lg font-semibold text-stone-950">No journeys found</p>
-                <p className="mt-2 text-sm text-stone-500">Try searching for another tour, hotel, or destination.</p>
-              </div>
-            )}
+            <div className="grid grid-cols-1 gap-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+              {results.map((result) => (
+                <SearchResultCard key={result.title} result={result} />
+              ))}
+            </div>
+
+            <div className="mt-20 flex justify-center">
+              <Button className="rounded-xl border border-stone-200 bg-stone-100 px-8 py-4 text-sm font-medium text-stone-950 hover:bg-stone-200" size={null} variant="ghost">
+                Load More Results
+              </Button>
+            </div>
           </div>
         </div>
       </section>

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { FormEvent, type ReactNode, useMemo, useState } from "react";
 import {
   BadgeCheck,
@@ -12,7 +11,6 @@ import {
   Save,
   Sparkles,
   Trash2,
-  Upload,
 } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
@@ -37,7 +35,6 @@ import {
   type ItineraryItem,
   type OperationalStatus,
   type TourBadge,
-  slugifyTourTitle,
   type TourFormState,
 } from "@/src/components/admin/adminTourFormData";
 import { createTour, updateTour, updateTourDepartures, type SaveTourInput, type UpdateTourDeparturesInput } from "@/src/lib/api/tours";
@@ -72,28 +69,6 @@ interface FormErrors {
 interface InventoryValidationResult {
   readonly errors: readonly string[];
   readonly payload: UpdateTourDeparturesInput;
-}
-
-interface LocalUploadResult {
-  readonly url?: string;
-  readonly error?: string;
-}
-
-async function uploadImageToProject(file: File) {
-  const data = new FormData();
-  data.append("file", file);
-
-  const response = await fetch("/api/admin/uploads/tours", {
-    method: "POST",
-    body: data,
-  });
-  const result = (await response.json()) as LocalUploadResult;
-
-  if (!response.ok || !result.url) {
-    throw new Error(result.error ?? "Unable to upload image.");
-  }
-
-  return result.url;
 }
 
 function updateItem<T extends { readonly id: string }>(
@@ -489,12 +464,10 @@ function TourDraftSidebar({
         </Card>
       ) : null}
 
-      <div className="sticky bottom-4 z-20 pr-16 sm:pr-20">
-        <Button className="w-full shadow-[0_18px_35px_-18px_rgba(6,95,70,0.85)]" disabled={isSubmitting} size="lg" type="submit">
-          <Save className="size-4" />
-          {isSubmitting ? "Saving..." : saved ? copy.savedSubmitLabel : copy.submitLabel}
-        </Button>
-      </div>
+      <Button className="w-full" disabled={isSubmitting} size="lg" type="submit">
+        <Save className="size-4" />
+        {isSubmitting ? "Saving..." : saved ? copy.savedSubmitLabel : copy.submitLabel}
+      </Button>
     </aside>
   );
 }
@@ -532,15 +505,13 @@ function TextField({
   label,
   onChange,
   placeholder,
-  readOnly = false,
   value,
 }: Readonly<{
   error?: string;
   id: string;
   label: string;
-  onChange?: (value: string) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
-  readOnly?: boolean;
   value: string;
 }>) {
   const errorId = error ? `${id}-error` : undefined;
@@ -551,93 +522,12 @@ function TextField({
       <Input
         aria-describedby={errorId}
         aria-invalid={Boolean(error)}
-        className={readOnly ? "bg-stone-50 text-stone-500" : undefined}
         id={id}
-        onChange={(event) => onChange?.(event.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        readOnly={readOnly}
         value={value}
       />
       <FieldError id={errorId} message={error} />
-    </div>
-  );
-}
-
-function ProjectImageField({
-  error,
-  id,
-  label,
-  onChange,
-  value,
-}: Readonly<{
-  error?: string;
-  id: string;
-  label: string;
-  onChange: (value: string) => void;
-  value: string;
-}>) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const errorId = error ? `${id}-error` : undefined;
-  const uploadErrorId = uploadError ? `${id}-upload-error` : undefined;
-
-  async function handleFileChange(file: File | undefined) {
-    if (!file) {
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadError(null);
-    try {
-      onChange(await uploadImageToProject(file));
-    } catch (uploadFailure) {
-      setUploadError(uploadFailure instanceof Error ? uploadFailure.message : "Unable to upload image.");
-    } finally {
-      setIsUploading(false);
-    }
-  }
-
-  return (
-    <div>
-      <Label htmlFor={id}>{label}</Label>
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-        <Input
-          aria-describedby={[errorId, uploadErrorId].filter(Boolean).join(" ") || undefined}
-          aria-invalid={Boolean(error || uploadError)}
-          id={id}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="Paste image URL or upload into project"
-          value={value}
-        />
-        <Button asChild disabled={isUploading} type="button" variant="outline">
-          <Label className="cursor-pointer justify-center whitespace-nowrap" htmlFor={`${id}-upload`}>
-            <Upload className="size-4" />
-            {isUploading ? "Uploading..." : "Upload"}
-          </Label>
-        </Button>
-        <input
-          accept="image/*"
-          className="sr-only"
-          disabled={isUploading}
-          id={`${id}-upload`}
-          onChange={(event) => void handleFileChange(event.target.files?.[0])}
-          type="file"
-        />
-      </div>
-      {value ? (
-        <div className="mt-3 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
-          <Image
-            alt={`${label} preview`}
-            className="h-36 w-full object-cover"
-            height={180}
-            src={value}
-            unoptimized={value.startsWith("http")}
-            width={360}
-          />
-        </div>
-      ) : null}
-      <FieldError id={errorId} message={error} />
-      <FieldError id={uploadErrorId} message={uploadError ?? undefined} />
     </div>
   );
 }
@@ -660,11 +550,8 @@ function EssentialsSection({
           title="Core tour information"
         />
         <div className="grid gap-4 md:grid-cols-2">
-          <TextField error={errors.title} id="tour-title" label="Title" onChange={(value) => {
-            updateField("title", value);
-            updateField("slug", slugifyTourTitle(value));
-          }} placeholder="Bay Mau Coconut Forest Discovery" value={form.title} />
-          <TextField id="tour-slug" label="Slug" placeholder="Auto-generated from title" readOnly value={form.slug} />
+          <TextField error={errors.title} id="tour-title" label="Title" onChange={(value) => updateField("title", value)} value={form.title} />
+          <TextField id="tour-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
           <div>
             <Label htmlFor="tour-badge">Badge</Label>
             <Select value={form.badge} onValueChange={(value: TourBadge) => updateField("badge", value)}>
@@ -678,11 +565,11 @@ function EssentialsSection({
               </SelectContent>
             </Select>
           </div>
-          <TextField id="tour-type" label="Type" onChange={(value) => updateField("type", value)} placeholder="Small Group" value={form.type} />
-          <TextField error={errors.duration} id="tour-duration" label="Duration" onChange={(value) => updateField("duration", value)} placeholder="4.5 Hours" value={form.duration} />
-          <TextField error={errors.guests} id="tour-guests" label="Guests / capacity label" onChange={(value) => updateField("guests", value)} placeholder="Max 12 Guests" value={form.guests} />
-          <TextField error={errors.price} id="tour-price" label="Price" onChange={(value) => updateField("price", value)} placeholder="$45" value={form.price} />
-          <TextField id="tour-availability" label="Availability" onChange={(value) => updateField("availability", value)} placeholder="Daily" value={form.availability} />
+          <TextField id="tour-type" label="Type" onChange={(value) => updateField("type", value)} value={form.type} />
+          <TextField error={errors.duration} id="tour-duration" label="Duration" onChange={(value) => updateField("duration", value)} value={form.duration} />
+          <TextField error={errors.guests} id="tour-guests" label="Guests / capacity label" onChange={(value) => updateField("guests", value)} value={form.guests} />
+          <TextField error={errors.price} id="tour-price" label="Price" onChange={(value) => updateField("price", value)} value={form.price} />
+          <TextField id="tour-availability" label="Availability" onChange={(value) => updateField("availability", value)} value={form.availability} />
         </div>
         <div>
           <Label htmlFor="tour-short-description">Short description</Label>
@@ -691,7 +578,6 @@ function EssentialsSection({
             aria-invalid={Boolean(errors.shortDescription)}
             id="tour-short-description"
             onChange={(event) => updateField("shortDescription", event.target.value)}
-            placeholder="Write a short listing summary for the tour card."
             value={form.shortDescription}
           />
           <FieldError id="tour-short-description-error" message={errors.shortDescription} />
@@ -727,13 +613,12 @@ function ClientDetailSection({
           eyebrow="Client detail"
           title="Experience, journey, and inclusions"
         />
-        <TextField id="tour-subtitle" label="Subtitle" onChange={(value) => updateField("subtitle", value)} placeholder="A one-line promise for the detail page hero." value={form.subtitle} />
+        <TextField id="tour-subtitle" label="Subtitle" onChange={(value) => updateField("subtitle", value)} value={form.subtitle} />
         <div>
           <Label htmlFor="description-paragraphs">Description paragraphs</Label>
           <Textarea
             id="description-paragraphs"
             onChange={(event) => updateField("descriptionParagraphs", event.target.value)}
-            placeholder="Each line becomes one paragraph."
             value={form.descriptionParagraphs}
           />
           <p className="mt-2 text-xs font-medium text-stone-500">Each line becomes one paragraph.</p>
@@ -838,12 +723,12 @@ function ClientDetailSection({
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label htmlFor="tour-inclusions">Inclusions</Label>
-            <Textarea id="tour-inclusions" onChange={(event) => updateField("inclusions", event.target.value)} placeholder="One included item per line." value={form.inclusions} />
+            <Textarea id="tour-inclusions" onChange={(event) => updateField("inclusions", event.target.value)} value={form.inclusions} />
             <p className="mt-2 text-xs font-medium text-stone-500">{inclusions.length} inclusion items</p>
           </div>
           <div>
             <Label htmlFor="tour-exclusions">Exclusions</Label>
-            <Textarea id="tour-exclusions" onChange={(event) => updateField("exclusions", event.target.value)} placeholder="One excluded item per line." value={form.exclusions} />
+            <Textarea id="tour-exclusions" onChange={(event) => updateField("exclusions", event.target.value)} value={form.exclusions} />
             <p className="mt-2 text-xs font-medium text-stone-500">{exclusions.length} exclusion items</p>
           </div>
         </div>
@@ -868,10 +753,10 @@ function OperationsSection({
           title="Departure and sales posture"
         />
         <div className="grid gap-4 md:grid-cols-2">
-          <TextField id="departure-date" label="Departure date" onChange={(value) => updateField("departureDate", value)} placeholder="May 02, 2026" value={form.departureDate} />
-          <TextField id="tour-guide" label="Guide" onChange={(value) => updateField("guide", value)} placeholder="Lan Pham" value={form.guide} />
-          <TextField id="booked-seats" label="Booked seats" onChange={(value) => updateField("bookedSeats", value)} placeholder="0" value={form.bookedSeats} />
-          <TextField id="capacity-seats" label="Capacity seats" onChange={(value) => updateField("capacitySeats", value)} placeholder="12" value={form.capacitySeats} />
+          <TextField id="departure-date" label="Departure date" onChange={(value) => updateField("departureDate", value)} value={form.departureDate} />
+          <TextField id="tour-guide" label="Guide" onChange={(value) => updateField("guide", value)} value={form.guide} />
+          <TextField id="booked-seats" label="Booked seats" onChange={(value) => updateField("bookedSeats", value)} value={form.bookedSeats} />
+          <TextField id="capacity-seats" label="Capacity seats" onChange={(value) => updateField("capacitySeats", value)} value={form.capacitySeats} />
           <div className="md:col-span-2">
             <Label htmlFor="operational-status">Operational status</Label>
             <Select value={form.operationalStatus} onValueChange={(value: OperationalStatus) => updateField("operationalStatus", value)}>
@@ -891,7 +776,6 @@ function OperationsSection({
           <Textarea
             id="merchandising-note"
             onChange={(event) => updateField("merchandisingNote", event.target.value)}
-            placeholder="Internal merchandising note for admin operators."
             value={form.merchandisingNote}
           />
         </div>
@@ -994,11 +878,11 @@ function MediaSection({
           title="Tour imagery"
         />
         <div className="grid gap-4 md:grid-cols-2">
-          <ProjectImageField error={errors.cardImage} id="card-image" label="Card image URL" onChange={(value) => updateField("cardImage", value)} value={form.cardImage} />
+          <TextField error={errors.cardImage} id="card-image" label="Card image URL" onChange={(value) => updateField("cardImage", value)} value={form.cardImage} />
           <TextField id="card-alt" label="Card image alt text" onChange={(value) => updateField("cardAlt", value)} value={form.cardAlt} />
-          <ProjectImageField error={errors.heroImage} id="hero-image" label="Hero image URL" onChange={(value) => updateField("heroImage", value)} value={form.heroImage} />
+          <TextField error={errors.heroImage} id="hero-image" label="Hero image URL" onChange={(value) => updateField("heroImage", value)} value={form.heroImage} />
           <TextField id="hero-alt" label="Hero image alt text" onChange={(value) => updateField("heroAlt", value)} value={form.heroAlt} />
-          <ProjectImageField id="curator-image" label="Curator image URL" onChange={(value) => updateField("curatorImage", value)} value={form.curatorImage} />
+          <TextField id="curator-image" label="Curator image URL" onChange={(value) => updateField("curatorImage", value)} value={form.curatorImage} />
           <TextField id="curator-alt" label="Curator image alt text" onChange={(value) => updateField("curatorAlt", value)} value={form.curatorAlt} />
         </div>
         <RepeatableHeader
@@ -1029,7 +913,7 @@ function MediaSection({
                 </Button>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
-                <ProjectImageField id={`${item.id}-image`} label="Image URL" onChange={(value) => setGallery(updateItem(gallery, item.id, { image: value }))} value={item.image} />
+                <TextField id={`${item.id}-image`} label="Image URL" onChange={(value) => setGallery(updateItem(gallery, item.id, { image: value }))} value={item.image} />
                 <TextField id={`${item.id}-alt`} label="Alt text" onChange={(value) => setGallery(updateItem(gallery, item.id, { alt: value }))} value={item.alt} />
                 <div className="md:col-span-2">
                   <Label htmlFor={`${item.id}-layout`}>Layout</Label>

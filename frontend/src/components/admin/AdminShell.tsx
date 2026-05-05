@@ -80,7 +80,7 @@ export function AdminShell({
   return (
     <main className="min-h-screen bg-[#ecefe5] text-stone-950">
       <div className="grid min-h-screen xl:grid-cols-[288px_minmax(0,1fr)]">
-        <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-stone-200/80 bg-[#f3f4ee] xl:flex xl:w-72 xl:flex-col">
+        <aside className="hidden border-r border-stone-200/80 bg-[#f3f4ee] xl:flex xl:w-72 xl:flex-col">
           <AdminSidebarContent activePath={activePath} />
         </aside>
 

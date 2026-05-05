@@ -1,76 +1,40 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, LoaderCircle, MessageCircleMore, Send, Sparkles, X } from "lucide-react";
+import { ArrowUp, MessageCircleMore, Send, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
-import { sendChatbotMessage } from "@/src/lib/api/chatbot";
-import { ApiError, ApiNetworkError } from "@/src/lib/api/client";
-import type { ApiChatbotSource } from "@/src/lib/api/types";
 import { cn } from "@/src/lib/utils";
 
-type ChatMessage = {
+const quickPrompts = [
+  "Help me plan a 5-day Kyoto trip",
+  "Find a quiet luxury hotel in Hoi An",
+  "Suggest a nature-focused itinerary",
+] as const;
+
+const cannedResponses = [
+  "I can help narrow this down. Share your destination, dates, and whether you prefer tours, hotels, or a mixed itinerary.",
+  "For a stronger recommendation, tell me your budget range and how structured you want the journey to be.",
+  "A good next step is to start from destination and duration, then I can map that to the closest curated journey in this site.",
+] as const;
+
+interface ChatMessage {
   readonly content: string;
   readonly role: "assistant" | "user";
-  readonly sources?: readonly ApiChatbotSource[];
-};
-
-function ChatMarkdown({ content }: { readonly content: string }) {
-  const blocks = content.split(/\n{2,}/).map((block) => block.trim()).filter(Boolean);
-
-  return (
-    <div className="space-y-3">
-      {blocks.map((block, blockIndex) => {
-        const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
-        const listItems = lines
-          .map((line) => line.match(/^(?:[-*]|\d+[.)])\s+(.+)$/)?.[1])
-          .filter((line): line is string => Boolean(line));
-
-        if (listItems.length === lines.length && listItems.length > 0) {
-          return (
-            <ul className="ml-4 list-disc space-y-1" key={`list-${blockIndex}`}>
-              {listItems.map((item, itemIndex) => (
-                <li key={`${blockIndex}-${itemIndex}`}>
-                  <InlineMarkdown content={item} />
-                </li>
-              ))}
-            </ul>
-          );
-        }
-
-        return (
-          <div className="space-y-1" key={`paragraph-${blockIndex}`}>
-            {lines.map((line, lineIndex) => (
-              <p key={`${blockIndex}-${lineIndex}`}>
-                <InlineMarkdown content={line} />
-              </p>
-            ))}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function InlineMarkdown({ content }: { readonly content: string }) {
-  const parts = content.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
-
-  return parts.map((part, index) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={index}>{part.slice(2, -2)}</strong>;
-    }
-
-    return part;
-  });
 }
 
 export function FloatingActionStack() {
   const [draft, setDraft] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isScrollVisible, setIsScrollVisible] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [messages, setMessages] = useState<readonly ChatMessage[]>([]);
+  const [messages, setMessages] = useState<readonly ChatMessage[]>([
+    {
+      content:
+        "Ask about destinations, stays, or how to move through the curated booking flow.",
+      role: "assistant",
+    },
+  ]);
   const popupRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -128,52 +92,23 @@ export function FloatingActionStack() {
     return isScrollVisible ? "bottom-40 md:bottom-44" : "bottom-22 md:bottom-24";
   }, [isScrollVisible]);
 
-  const sendMessage = async (message: string) => {
+  const sendMessage = (message: string) => {
     const trimmedMessage = message.trim();
 
-    if (!trimmedMessage || isSending) {
+    if (!trimmedMessage) {
       return;
     }
 
-    setIsSending(true);
     setMessages((currentMessages) => [
       ...currentMessages,
       { content: trimmedMessage, role: "user" },
+      {
+        content:
+          cannedResponses[currentMessages.length % cannedResponses.length],
+        role: "assistant",
+      },
     ]);
     setDraft("");
-
-    try {
-      const response = await sendChatbotMessage({
-        message: trimmedMessage,
-      });
-
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          content: response.answer,
-          role: "assistant",
-          sources: response.sources,
-        },
-      ]);
-    } catch (error) {
-      const message =
-        error instanceof ApiNetworkError
-          ? "The support service is currently unavailable. Please try again in a moment."
-          : error instanceof ApiError
-            ? error.message
-            : "Something went wrong while processing your question. Please try again.";
-
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          content: message,
-          role: "assistant",
-          sources: [],
-        },
-      ]);
-    } finally {
-      setIsSending(false);
-    }
   };
 
   return (
@@ -214,6 +149,21 @@ export function FloatingActionStack() {
         </div>
 
         <div className="max-h-[min(30rem,calc(100vh-12rem))] overflow-y-auto px-6 py-6">
+          <div className="mb-6 flex flex-wrap gap-2">
+            {quickPrompts.map((prompt) => (
+              <Button
+                className="h-auto rounded-full border border-stone-200 bg-white px-4 py-2 text-left text-xs font-medium text-stone-600 hover:border-emerald-800/30 hover:bg-emerald-50 hover:text-emerald-900"
+                key={prompt}
+                onClick={() => sendMessage(prompt)}
+                size={null}
+                type="button"
+                variant="ghost"
+              >
+                {prompt}
+              </Button>
+            ))}
+          </div>
+
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
@@ -225,33 +175,9 @@ export function FloatingActionStack() {
                 )}
                 key={`${message.role}-${index}`}
               >
-                {message.role === "assistant" ? (
-                  <ChatMarkdown content={message.content} />
-                ) : (
-                  <p>{message.content}</p>
-                )}
-                {message.role === "assistant" && message.sources?.length ? (
-                  <div className="mt-3 border-t border-stone-200/80 pt-3 text-xs text-stone-500">
-                    <p className="font-semibold uppercase tracking-[0.16em] text-stone-400">
-                      Sources
-                    </p>
-                    <ul className="mt-2 space-y-1">
-                      {message.sources.map((source) => (
-                        <li key={`${source.kind}-${source.slug}`}>{source.label}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
+                {message.content}
               </div>
             ))}
-            {isSending ? (
-              <div className="max-w-[88%] rounded-2xl bg-stone-100 px-4 py-3 text-sm text-stone-700 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <LoaderCircle className="size-4 animate-spin" />
-                  Looking up grounded website information...
-                </div>
-              </div>
-            ) : null}
           </div>
         </div>
 
@@ -260,17 +186,16 @@ export function FloatingActionStack() {
             className="flex items-center gap-3"
             onSubmit={(event) => {
               event.preventDefault();
-              void sendMessage(draft);
+              sendMessage(draft);
             }}
           >
             <Input
               className="flex-1"
-              disabled={isSending}
               onChange={(event) => setDraft(event.target.value)}
-              placeholder="Ask about tours, hotels, or availability"
+              placeholder="Ask about your next journey"
               value={draft}
             />
-            <Button aria-label="Send message" disabled={isSending} size="icon" type="submit">
+            <Button aria-label="Send message" size="icon" type="submit">
               <Send className="size-4" />
             </Button>
           </form>

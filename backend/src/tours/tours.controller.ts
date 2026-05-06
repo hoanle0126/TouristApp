@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
@@ -17,8 +18,22 @@ export class ToursController {
   constructor(private readonly toursService: ToursService) {}
 
   @Get()
-  findAll() {
-    return this.toursService.findAll();
+  findAll(
+    @Query('destination') destination?: string,
+    @Query('hotel') hotel?: string,
+    @Query('type') type?: string,
+    @Query('duration') duration?: string,
+    @Query('search') search?: string,
+    @Query('per_page') perPage?: string,
+  ) {
+    return this.toursService.findAll({
+      destination,
+      duration,
+      hotel,
+      perPage: this.parsePerPage(perPage),
+      search,
+      type,
+    });
   }
 
   @Get(':slug')
@@ -47,5 +62,19 @@ export class ToursController {
   @Delete(':slug')
   remove(@Param('slug') slug: string) {
     return this.toursService.remove(slug);
+  }
+
+  private parsePerPage(perPage?: string) {
+    if (!perPage) {
+      return undefined;
+    }
+
+    const parsed = Number(perPage);
+
+    if (!Number.isInteger(parsed) || parsed < 1) {
+      return undefined;
+    }
+
+    return Math.min(parsed, 50);
   }
 }

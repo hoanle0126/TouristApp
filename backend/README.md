@@ -2,7 +2,7 @@
 
 Backend của TouristWeb dùng NestJS, Prisma và PostgreSQL. Tài liệu này hướng dẫn chạy backend local và test API bằng Postman.
 
-Backend không seed sẵn dữ liệu tour, destination, hotel, blog hay booking. Dữ liệu thật sẽ do khách hàng nhập qua API hoặc admin UI.
+Repo hiện có seed data cho destination, hotel, tour và blog để đồng bộ local nhanh với frontend. Booking thật vẫn được tạo qua flow checkout hoặc API.
 
 ## 1. Chuẩn bị môi trường
 
@@ -22,6 +22,19 @@ DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/touristweb?schema=public
 
 ## 2. Khởi tạo database
 
+Lệnh an toàn nhất để đồng bộ schema + seed local là:
+
+```bash
+npm run db:sync
+```
+
+Lệnh này sẽ:
+
+- apply toàn bộ Prisma migrations đang có trong repo
+- chạy seed hiện tại để upsert dữ liệu mẫu/local đang dùng ở frontend
+
+Nếu muốn chạy thủ công từng bước:
+
 Generate Prisma Client:
 
 ```bash
@@ -31,10 +44,10 @@ npm run prisma:generate
 Apply migrations:
 
 ```bash
-npx prisma migrate deploy
+npm run prisma:deploy
 ```
 
-Seed hiện tại chỉ kiểm tra kết nối database, không tạo dữ liệu mẫu:
+Seed hiện tại sẽ upsert dữ liệu destination, hotel, tour và blog:
 
 ```bash
 npm run prisma:seed
@@ -49,7 +62,7 @@ npm run start:dev
 Base URL mặc định:
 
 ```text
-http://localhost:3000
+http://localhost:8000
 ```
 
 ## 4. Kiểm tra backend
@@ -71,7 +84,7 @@ npm run build
 Trong Postman, dùng base URL:
 
 ```text
-http://localhost:3000
+http://localhost:8000
 ```
 
 Với request `POST` hoặc `PATCH`, thêm header:
@@ -89,7 +102,7 @@ Các endpoint `GET /:slug` chỉ test được sau khi bạn đã tạo dữ li�
 ## Tạo tour
 
 ```http
-POST http://localhost:3000/tours
+POST http://localhost:8000/tours
 Content-Type: application/json
 ```
 
@@ -125,19 +138,19 @@ Body mẫu, thay nội dung bằng dữ liệu thật của khách hàng:
 ## Lấy danh sách tours
 
 ```http
-GET http://localhost:3000/tours
+GET http://localhost:8000/tours
 ```
 
 ## Lấy chi tiết tour
 
 ```http
-GET http://localhost:3000/tours/<tour-slug>
+GET http://localhost:8000/tours/<tour-slug>
 ```
 
 ## Cập nhật tour
 
 ```http
-PATCH http://localhost:3000/tours/<tour-slug>
+PATCH http://localhost:8000/tours/<tour-slug>
 Content-Type: application/json
 ```
 
@@ -151,7 +164,7 @@ Content-Type: application/json
 ## Xóa tour
 
 ```http
-DELETE http://localhost:3000/tours/<tour-slug>
+DELETE http://localhost:8000/tours/<tour-slug>
 ```
 
 ---
@@ -161,7 +174,7 @@ DELETE http://localhost:3000/tours/<tour-slug>
 ## Tạo destination
 
 ```http
-POST http://localhost:3000/destinations
+POST http://localhost:8000/destinations
 Content-Type: application/json
 ```
 

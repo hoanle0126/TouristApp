@@ -7,8 +7,8 @@ datasource db {
 }
 
 model Tour {
-  id               String   @id @default(cuid())
-  slug             String   @unique
+  id               String          @id @default(cuid())
+  slug             String          @unique
   title            String
   badge            String?
   type             String
@@ -30,13 +30,16 @@ model Tour {
   gallery          Json
   inclusions       Json
   exclusions       Json
-  destinations     Destination[]
+  destinationId    String
+  destination      Destination     @relation(fields: [destinationId], references: [id])
   hotels           Hotel[]
   departures       TourDeparture[]
-  mentionedInPosts BlogPost[]    @relation("BlogMentionedTours")
+  mentionedInPosts BlogPost[]      @relation("BlogMentionedTours")
   bookingItems     BookingItem[]
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([destinationId])
 }
 
 model TourDeparture {
@@ -57,38 +60,38 @@ model TourDeparture {
 }
 
 model Destination {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  title         String
-  description   String
-  href          String
-  image         String
-  alt           String
-  price         String
-  rating        Float
-  market        String
-  status        String   @default("published")
-  heroImage     String
-  heroAlt       String
-  summary       String
-  intro         Json
-  facts         Json
-  spotlight     Json
-  relatedTours  Json
-  relatedHotels Json
-  tours         Tour[]
-  hotels        Hotel[]
+  id               String     @id @default(cuid())
+  slug             String     @unique
+  title            String
+  description      String
+  href             String
+  image            String
+  alt              String
+  price            String
+  rating           Float
+  market           String
+  status           String     @default("published")
+  heroImage        String
+  heroAlt          String
+  summary          String
+  intro            Json
+  facts            Json
+  spotlight        Json
+  relatedTours     Json
+  relatedHotels    Json
+  tours            Tour[]
+  hotels           Hotel[]
   mentionedInPosts BlogPost[] @relation("BlogMentionedDestinations")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
   @@index([market])
   @@index([status])
 }
 
 model Hotel {
-  id               String     @id @default(cuid())
-  slug             String     @unique
+  id               String              @id @default(cuid())
+  slug             String              @unique
   name             String
   location         String
   address          String
@@ -97,7 +100,7 @@ model Hotel {
   score            Float
   scoreLabel       String
   scoreSummary     String
-  status           String     @default("published")
+  status           String              @default("published")
   listingImage     String
   listingAlt       String
   heroImage        String
@@ -112,10 +115,10 @@ model Hotel {
   destinations     Destination[]
   tours            Tour[]
   inventoryDays    HotelInventoryDay[]
-  mentionedInPosts BlogPost[] @relation("BlogMentionedHotels")
+  mentionedInPosts BlogPost[]          @relation("BlogMentionedHotels")
   bookingItems     BookingItem[]
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
   @@index([location])
   @@index([status])
@@ -210,16 +213,16 @@ model Booking {
 }
 
 model BookingItem {
-  id                 String   @id @default(cuid())
+  id                 String         @id @default(cuid())
   bookingId          String
-  booking            Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking            Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   itemType           String
   tourId             String?
-  tour               Tour?           @relation(fields: [tourId], references: [id], onDelete: SetNull)
+  tour               Tour?          @relation(fields: [tourId], references: [id], onDelete: SetNull)
   tourDepartureId    String?
-  tourDeparture      TourDeparture?  @relation(fields: [tourDepartureId], references: [id], onDelete: SetNull)
+  tourDeparture      TourDeparture? @relation(fields: [tourDepartureId], references: [id], onDelete: SetNull)
   hotelId            String?
-  hotel              Hotel?          @relation(fields: [hotelId], references: [id], onDelete: SetNull)
+  hotel              Hotel?         @relation(fields: [hotelId], references: [id], onDelete: SetNull)
   snapshotSlug       String
   snapshotTitle      String
   snapshotImage      String?
@@ -233,11 +236,11 @@ model BookingItem {
   nights             Int?
   roomType           String?
   quantity           Int
-  unitPrice          Decimal  @db.Decimal(10, 2)
-  lineTotal          Decimal  @db.Decimal(10, 2)
-  currency           String   @default("USD")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  unitPrice          Decimal        @db.Decimal(10, 2)
+  lineTotal          Decimal        @db.Decimal(10, 2)
+  currency           String         @default("USD")
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
   @@index([bookingId])
   @@index([tourId])

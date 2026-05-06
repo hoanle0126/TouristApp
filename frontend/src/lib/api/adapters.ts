@@ -10,7 +10,16 @@ import type {
   TourDetail,
   TourDetailHighlight,
 } from "@/src/types/travel";
-import type { ApiBlogCard, ApiBlogDetail, ApiDestinationDetail, ApiHotelCard, ApiHotelDetail, ApiTourCard, ApiTourDetail } from "@/src/lib/api/types";
+import type { ApiBlogCard, ApiBlogDetail, ApiDestinationDetail, ApiHotelCard, ApiHotelDetail, ApiTourCard, ApiTourDetail, ApiDestinationLink } from "@/src/lib/api/types";
+
+function resolveTourDestination(tour: ApiTourCard | ApiTourDetail): ApiDestinationLink {
+  const legacyDestination = (tour as ApiTourCard & { readonly destinations?: readonly ApiDestinationLink[] }).destinations?.[0];
+  return tour.destination ?? legacyDestination ?? { slug: "", title: "" };
+}
+
+function resolveTourDescription(tour: ApiTourCard | ApiTourDetail) {
+  return Array.isArray(tour.description) ? tour.description : [tour.description];
+}
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en", {
@@ -32,7 +41,8 @@ export function toTourCard(tour: ApiTourCard): TourCard {
   return {
     alt: tour.alt,
     badge: tour.badge,
-    description: tour.description,
+    description: Array.isArray(tour.description) ? tour.description[0] ?? "" : tour.description,
+    destination: resolveTourDestination(tour),
     duration: tour.duration,
     guests: tour.guests,
     image: tour.image,
@@ -47,8 +57,9 @@ export function toTourDetail(tour: ApiTourDetail): TourDetail {
     availability: tour.availability,
     curatorImage: tour.curatorImage,
     curatorImageAlt: tour.curatorImageAlt,
-    description: tour.description,
+    description: resolveTourDescription(tour),
     departures: tour.departures ?? [],
+    destination: resolveTourDestination(tour),
     duration: tour.duration,
     exclusions: tour.exclusions,
     gallery: tour.gallery.map((image) => ({ ...image, layout: image.layout ?? "landscape" })),

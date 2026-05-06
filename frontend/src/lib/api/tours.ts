@@ -32,6 +32,7 @@ export type SaveTourInput = {
   readonly gallery: readonly { readonly image: string; readonly alt: string; readonly layout: "portrait" | "landscape" }[];
   readonly inclusions: readonly string[];
   readonly exclusions: readonly string[];
+  readonly destinationSlug: string;
 };
 
 export async function getTours() {

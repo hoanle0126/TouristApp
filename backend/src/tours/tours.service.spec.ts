@@ -22,50 +22,35 @@ const tourRecord = {
   curatorImage: 'https://images.unsplash.com/photo-3',
   curatorImageAlt: 'Local tour curator',
   subtitle: 'Discover Hoi An hidden water world.',
-  highlights: [
-    {
-      icon: 'boat',
-      title: 'Bamboo Basket Boat',
-      description: 'Navigate waterways.',
-    },
-  ],
-  itinerary: [
-    { title: 'Pick-up & Arrival', description: 'Depart from hotel.' },
-  ],
-  gallery: [
-    {
-      image: 'https://images.unsplash.com/photo-4',
-      alt: 'Fisherman',
-      layout: 'portrait',
-    },
-  ],
+  highlights: [{ icon: 'boat', title: 'Bamboo Basket Boat', description: 'Navigate waterways.' }],
+  itinerary: [{ title: 'Pick-up & Arrival', description: 'Depart from hotel.' }],
+  gallery: [{ image: 'https://images.unsplash.com/photo-4', alt: 'Fisherman', layout: 'portrait' }],
   inclusions: ['Guide'],
   exclusions: ['Personal expenses'],
-  destinations: [
-    {
-      id: 'destination_1',
-      slug: 'hoi-an',
-      title: 'Hoi An Ancient Town',
-      description: 'Lantern-lit lanes and riverside cafes.',
-      href: '/destinations/hoi-an',
-      image: 'https://images.unsplash.com/photo-5',
-      alt: 'Lanterns glowing in Hoi An Ancient Town',
-      price: 'From $75',
-      rating: 4.9,
-      market: 'Vietnam',
-      status: 'published',
-      heroImage: 'https://images.unsplash.com/photo-6',
-      heroAlt: 'Hoi An riverside at golden hour',
-      summary: 'A heritage town for food walks.',
-      intro: [],
-      facts: [],
-      spotlight: [],
-      relatedTours: [],
-      relatedHotels: [],
-      createdAt: new Date('2026-04-30T00:00:00.000Z'),
-      updatedAt: new Date('2026-04-30T00:00:00.000Z'),
-    },
-  ],
+  destinationId: 'destination_1',
+  destination: {
+    id: 'destination_1',
+    slug: 'hoi-an',
+    title: 'Hoi An Ancient Town',
+    description: 'Lantern-lit lanes and riverside cafes.',
+    href: '/destinations/hoi-an',
+    image: 'https://images.unsplash.com/photo-5',
+    alt: 'Lanterns glowing in Hoi An Ancient Town',
+    price: 'From $75',
+    rating: 4.9,
+    market: 'Vietnam',
+    status: 'published',
+    heroImage: 'https://images.unsplash.com/photo-6',
+    heroAlt: 'Hoi An riverside at golden hour',
+    summary: 'A heritage town for food walks.',
+    intro: [],
+    facts: [],
+    spotlight: [],
+    relatedTours: [],
+    relatedHotels: [],
+    createdAt: new Date('2026-04-30T00:00:00.000Z'),
+    updatedAt: new Date('2026-04-30T00:00:00.000Z'),
+  },
   departures: [
     {
       id: 'departure_1',
@@ -163,14 +148,12 @@ describe('ToursService', () => {
         description: 'Glide through Hoi An coconut waterways.',
         image: 'https://images.unsplash.com/photo-1',
         alt: 'Basket boats in coconut forest',
-        destinations: [
-          {
-            slug: 'hoi-an',
-            title: 'Hoi An Ancient Town',
-            href: '/destinations/hoi-an',
-            market: 'Vietnam',
-          },
-        ],
+        destination: {
+          slug: 'hoi-an',
+          title: 'Hoi An Ancient Town',
+          href: '/destinations/hoi-an',
+          market: 'Vietnam',
+        },
         hotels: [
           {
             slug: 'shining-riverside-hoi-an',
@@ -499,6 +482,40 @@ describe('ToursService', () => {
     });
   });
 
+
+  it('filters tours by destination, hotel, type, duration, and query', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findMany.mockResolvedValue([tourRecord]);
+    const service = new ToursService(prisma as never);
+
+    await service.findAll({
+      destination: 'hoi-an',
+      hotel: 'shining-riverside-hoi-an',
+      type: 'Small Group',
+      duration: 'Hours',
+      search: 'coconut',
+      perPage: 5,
+      sort: 'newest',
+    });
+
+    expect(prisma.tour.findMany).toHaveBeenCalledWith({
+      where: {
+        destination: { slug: 'hoi-an' },
+        hotels: { some: { slug: 'shining-riverside-hoi-an' } },
+        type: { contains: 'Small Group', mode: 'insensitive' },
+        duration: { contains: 'Hours', mode: 'insensitive' },
+        OR: [
+          { title: { contains: 'coconut', mode: 'insensitive' } },
+          { shortDescription: { contains: 'coconut', mode: 'insensitive' } },
+          { subtitle: { contains: 'coconut', mode: 'insensitive' } },
+        ],
+      },
+      include: { destination: true, hotels: true },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    });
+  });
+
   it('returns tour detail by slug', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
@@ -516,14 +533,12 @@ describe('ToursService', () => {
           description: 'Navigate waterways.',
         },
       ],
-      destinations: [
-        {
-          slug: 'hoi-an',
-          title: 'Hoi An Ancient Town',
-          href: '/destinations/hoi-an',
-          market: 'Vietnam',
-        },
-      ],
+      destination: {
+        slug: 'hoi-an',
+        title: 'Hoi An Ancient Town',
+        href: '/destinations/hoi-an',
+        market: 'Vietnam',
+      },
       hotels: [
         {
           slug: 'shining-riverside-hoi-an',
@@ -533,6 +548,65 @@ describe('ToursService', () => {
           price: 'From $145',
         },
       ],
+    });
+  });
+
+
+  it('creates a tour by connecting one destination slug', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.create.mockResolvedValue(tourRecord);
+    const service = new ToursService(prisma as never);
+
+    await service.create({
+      slug: 'bay-mau-coconut-forest',
+      title: 'Traveling to Bay Mau Coconut Forest',
+      badge: 'Featured',
+      type: 'Small Group',
+      duration: '4.5 Hours',
+      guests: 'Max 12 Guests',
+      price: '$45',
+      availability: 'Daily',
+      description: ['Travel through Cam Thanh waterways.'],
+      shortDescription: 'Glide through Hoi An coconut waterways.',
+      image: 'https://images.unsplash.com/photo-1',
+      alt: 'Basket boats in coconut forest',
+      heroImage: 'https://images.unsplash.com/photo-2',
+      heroAlt: 'Aerial coconut forest',
+      curatorImage: 'https://images.unsplash.com/photo-3',
+      curatorImageAlt: 'Local tour curator',
+      subtitle: 'Discover Hoi An hidden water world.',
+      highlights: [{ icon: 'boat', title: 'Bamboo Basket Boat', description: 'Navigate waterways.' }],
+      itinerary: [{ title: 'Pick-up & Arrival', description: 'Depart from hotel.' }],
+      gallery: [{ image: 'https://images.unsplash.com/photo-4', alt: 'Fisherman', layout: 'portrait' }],
+      inclusions: ['Guide'],
+      exclusions: ['Personal expenses'],
+      destinationSlug: 'hoi-an',
+    });
+
+    expect(prisma.tour.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        destination: { connect: { slug: 'hoi-an' } },
+      }),
+      include: expect.any(Object),
+    });
+  });
+
+  it('updates a tour by replacing its destination connection', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findUnique.mockResolvedValue(tourRecord);
+    prisma.tour.update.mockResolvedValue({ ...tourRecord, destination: { ...tourRecord.destination, slug: 'da-nang', title: 'Da Nang' } });
+    const service = new ToursService(prisma as never);
+
+    await service.update('bay-mau-coconut-forest', {
+      destinationSlug: 'da-nang',
+    });
+
+    expect(prisma.tour.update).toHaveBeenCalledWith({
+      where: { slug: 'bay-mau-coconut-forest' },
+      data: expect.objectContaining({
+        destination: { connect: { slug: 'da-nang' } },
+      }),
+      include: expect.any(Object),
     });
   });
 
@@ -575,6 +649,7 @@ describe('ToursService', () => {
         gallery: tourRecord.gallery,
         inclusions: tourRecord.inclusions,
         exclusions: tourRecord.exclusions,
+        destinationSlug: tourRecord.destination.slug,
       }),
     ).resolves.toMatchObject({
       slug: tourRecord.slug,

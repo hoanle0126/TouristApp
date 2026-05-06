@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, type ReactNode, useMemo, useState } from "react";
+import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import {
   BadgeCheck,
   CheckCircle2,
@@ -37,6 +37,7 @@ import {
   type TourBadge,
   type TourFormState,
 } from "@/src/components/admin/adminTourFormData";
+import { getDestinationDetails } from "@/src/lib/api/destinations";
 import { createTour, updateTour, updateTourDepartures, type SaveTourInput, type UpdateTourDeparturesInput } from "@/src/lib/api/tours";
 import type { ApiTourDetail } from "@/src/lib/api/types";
 
@@ -64,7 +65,10 @@ interface FormErrors {
   cardImage?: string;
   heroImage?: string;
   shortDescription?: string;
+  destinationSlug?: string;
 }
+
+const DESTINATION_ERROR_ID = "tour-destination-error";
 
 interface InventoryValidationResult {
   readonly errors: readonly string[];
@@ -206,6 +210,7 @@ function toTourPayload(
     gallery: gallery.map(({ alt, image, layout }) => ({ alt, image, layout })),
     inclusions: splitLines(form.inclusions),
     exclusions: splitLines(form.exclusions),
+    destinationSlug: form.destinationSlug,
   };
 }
 
@@ -219,12 +224,48 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
   const [saved, setSaved] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [destinationOptions, setDestinationOptions] = useState<readonly { readonly slug: string; readonly title: string }[]>([]);
+  const [isLoadingDestinations, setIsLoadingDestinations] = useState(true);
+  const [destinationLoadError, setDestinationLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    getDestinationDetails({ perPage: 100 })
+      .then((items) => {
+        if (!isActive) {
+          return;
+        }
+
+        setDestinationOptions(
+          items.map((item) => ({ slug: item.slug, title: item.title })),
+        );
+        setDestinationLoadError(null);
+      })
+      .catch(() => {
+        if (!isActive) {
+          return;
+        }
+
+        setDestinationOptions([]);
+        setDestinationLoadError("Unable to load destinations. Refresh and try again.");
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoadingDestinations(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const readiness = useMemo(
     () => [
       {
         label: "Essentials",
-        ready: [form.title, form.duration, form.guests, form.price, form.shortDescription].every(hasValue),
+        ready: [form.title, form.duration, form.guests, form.price, form.shortDescription, form.destinationSlug].every(hasValue),
       },
       {
         label: "Media",
@@ -279,6 +320,11 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
     }
     if (!form.shortDescription.trim()) {
       nextErrors.shortDescription = "Short description is required.";
+    }
+    if (destinationLoadError) {
+      nextErrors.destinationSlug = destinationLoadError;
+    } else if (!hasValue(form.destinationSlug)) {
+      nextErrors.destinationSlug = "Choose a destination.";
     }
 
     setErrors(nextErrors);
@@ -349,7 +395,13 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
   return (
     <form className="grid gap-6 2xl:grid-cols-[minmax(0,1.55fr)_420px]" onSubmit={handleSubmit}>
       <div className="space-y-6">
-        <EssentialsSection errors={errors} form={form} updateField={updateField} />
+        <EssentialsSection
+          destinationOptions={destinationOptions}
+          errors={errors}
+          form={form}
+          isLoadingDestinations={isLoadingDestinations}
+          updateField={updateField}
+        />
         <MediaSection errors={errors} form={form} gallery={gallery} setGallery={updateGallery} updateField={updateField} />
         <ClientDetailSection
           form={form}
@@ -533,12 +585,16 @@ function TextField({
 }
 
 function EssentialsSection({
+  destinationOptions,
   errors,
   form,
+  isLoadingDestinations,
   updateField,
 }: Readonly<{
+  destinationOptions: readonly { readonly slug: string; readonly title: string }[];
   errors: FormErrors;
   form: TourFormState;
+  isLoadingDestinations: boolean;
   updateField: <K extends keyof TourFormState>(field: K, value: TourFormState[K]) => void;
 }>) {
   return (
@@ -570,6 +626,30 @@ function EssentialsSection({
           <TextField error={errors.guests} id="tour-guests" label="Guests / capacity label" onChange={(value) => updateField("guests", value)} value={form.guests} />
           <TextField error={errors.price} id="tour-price" label="Price" onChange={(value) => updateField("price", value)} value={form.price} />
           <TextField id="tour-availability" label="Availability" onChange={(value) => updateField("availability", value)} value={form.availability} />
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="tour-destination">Destination</Label>
+            <Select
+              disabled={isLoadingDestinations || destinationOptions.length === 0}
+              value={form.destinationSlug}
+              onValueChange={(value) => updateField("destinationSlug", value)}
+            >
+              <SelectTrigger
+                aria-describedby={errors.destinationSlug ? DESTINATION_ERROR_ID : undefined}
+                aria-invalid={errors.destinationSlug ? true : undefined}
+                id="tour-destination"
+              >
+                <SelectValue placeholder={isLoadingDestinations ? "Loading destinations..." : "Choose a destination"} />
+              </SelectTrigger>
+              <SelectContent>
+                {destinationOptions.map((destination) => (
+                  <SelectItem key={destination.slug} value={destination.slug}>
+                    {destination.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError id={DESTINATION_ERROR_ID} message={errors.destinationSlug} />
+          </div>
         </div>
         <div>
           <Label htmlFor="tour-short-description">Short description</Label>

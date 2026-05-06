@@ -6,7 +6,12 @@ function getAllowedOrigins() {
   const configuredOrigin = process.env.FRONTEND_ORIGIN;
 
   if (!configuredOrigin) {
-    return ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    return [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+    ];
   }
 
   return configuredOrigin

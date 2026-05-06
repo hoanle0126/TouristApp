@@ -112,10 +112,18 @@ export interface JournalDetail {
   readonly title: string;
 }
 
+export interface TourDestination {
+  readonly slug: string;
+  readonly title: string;
+  readonly href?: string;
+  readonly market?: string;
+}
+
 export interface TourCard {
   readonly alt: string;
   readonly badge?: "Featured" | "New" | string;
   readonly description: string;
+  readonly destination: TourDestination;
   readonly duration: string;
   readonly guests: string;
   readonly image: string;
@@ -238,6 +246,7 @@ export interface TourDetail {
   readonly curatorImageAlt: string;
   readonly description: readonly string[];
   readonly departures: readonly TourDeparture[];
+  readonly destination: TourDestination;
   readonly duration: string;
   readonly exclusions: readonly string[];
   readonly gallery: readonly TourDetailImage[];

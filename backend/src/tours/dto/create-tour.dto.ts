@@ -75,4 +75,7 @@ export class CreateTourDto {
 
   @IsArray()
   exclusions: string[];
+
+  @IsString()
+  destinationSlug: string;
 }

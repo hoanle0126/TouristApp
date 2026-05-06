@@ -88,7 +88,7 @@ type SeedTour = {
   gallery: { image: string; alt: string; layout: string }[];
   inclusions: string[];
   exclusions: string[];
-  destinationSlugs: string[];
+  destinationSlug: string;
   hotelSlugs: string[];
   departures: {
     date: Date;
@@ -526,7 +526,7 @@ export const seedTours: SeedTour[] = [
       'Personal expenses & souvenirs',
       'Gratuities/Tips for guide and boat rowers',
     ],
-    destinationSlugs: [],
+    destinationSlug: 'bavarian-trails',
     hotelSlugs: ['shining-riverside-hoi-an'],
     departures: genericTourDepartures,
   },
@@ -624,7 +624,10 @@ export const seedTours: SeedTour[] = [
     ],
     inclusions: [],
     exclusions: [],
-    destinationSlugs: [],
+    destinationSlug:
+      slug === 'the-soul-of-kyoto' || slug === 'amalfi-coast-discovery'
+        ? 'london-essence'
+        : 'nordic-fjords',
     hotelSlugs: [],
     departures: genericTourDepartures,
   })),
@@ -825,18 +828,18 @@ async function main() {
     }
 
     for (const tour of seedTours) {
-      const { destinationSlugs, hotelSlugs, departures, ...data } = tour;
+      const { destinationSlug, hotelSlugs, departures, ...data } = tour;
       await prisma.tour.upsert({
         where: { slug: tour.slug },
         create: {
           ...data,
-          destinations: { connect: destinationSlugs.map((slug) => ({ slug })) },
+          destination: { connect: { slug: destinationSlug } },
           hotels: { connect: hotelSlugs.map((slug) => ({ slug })) },
           departures: { create: departures },
         },
         update: {
           ...data,
-          destinations: { set: destinationSlugs.map((slug) => ({ slug })) },
+          destination: { connect: { slug: destinationSlug } },
           hotels: { set: hotelSlugs.map((slug) => ({ slug })) },
           departures: {
             deleteMany: {},

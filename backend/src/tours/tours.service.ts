@@ -9,27 +9,39 @@ import { UpsertTourDeparturesDto } from './dto/upsert-tour-departures.dto';
 const CAPACITY_ERROR = 'Capacity cannot be lower than current bookings.';
 
 const tourDetailInclude = {
-  destinations: true,
+  destination: true,
   hotels: true,
   departures: { orderBy: { date: 'asc' as const } },
 };
 
 type TourCardRecord = Prisma.TourGetPayload<{
-  include: { destinations: true; hotels: true };
+  include: { destination: true; hotels: true };
 }>;
 
 type TourRecord = Prisma.TourGetPayload<{
   include: typeof tourDetailInclude;
 }>;
 
+type FindAllFilters = {
+  destination?: string;
+  hotel?: string;
+  type?: string;
+  duration?: string;
+  search?: string;
+  perPage?: number;
+  sort?: string;
+};
+
 @Injectable()
 export class ToursService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(filters: FindAllFilters = {}) {
     const tours = await this.prisma.tour.findMany({
-      include: { destinations: true, hotels: true },
+      where: this.buildPublicWhere(filters),
+      include: { destination: true, hotels: true },
       orderBy: { createdAt: 'desc' },
+      ...(filters.perPage ? { take: filters.perPage } : {}),
     });
     return tours.map((tour) => this.toCardResponse(tour));
   }
@@ -48,8 +60,12 @@ export class ToursService {
   }
 
   async create(dto: CreateTourDto) {
+    const { destinationSlug, ...data } = dto;
     const tour = await this.prisma.tour.create({
-      data: dto,
+      data: {
+        ...data,
+        destination: { connect: { slug: destinationSlug } },
+      },
       include: tourDetailInclude,
     });
     return this.toDetailResponse(tour);
@@ -57,9 +73,15 @@ export class ToursService {
 
   async update(slug: string, dto: UpdateTourDto) {
     await this.findOne(slug);
+    const { destinationSlug, ...data } = dto;
     const tour = await this.prisma.tour.update({
       where: { slug },
-      data: dto,
+      data: {
+        ...data,
+        ...(destinationSlug
+          ? { destination: { connect: { slug: destinationSlug } } }
+          : {}),
+      },
       include: tourDetailInclude,
     });
     return this.toDetailResponse(tour);
@@ -158,6 +180,47 @@ export class ToursService {
     return this.findOne(slug);
   }
 
+  private buildPublicWhere(filters: FindAllFilters) {
+    return {
+      ...(filters.destination ? { destination: { slug: filters.destination } } : {}),
+      ...(filters.hotel ? { hotels: { some: { slug: filters.hotel } } } : {}),
+      ...(filters.type
+        ? {
+            type: {
+              contains: filters.type,
+              mode: 'insensitive' as const,
+            },
+          }
+        : {}),
+      ...(filters.duration
+        ? {
+            duration: {
+              contains: filters.duration,
+              mode: 'insensitive' as const,
+            },
+          }
+        : {}),
+      ...(filters.search
+        ? {
+            OR: [
+              { title: { contains: filters.search, mode: 'insensitive' as const } },
+              { shortDescription: { contains: filters.search, mode: 'insensitive' as const } },
+              { subtitle: { contains: filters.search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    } satisfies Prisma.TourWhereInput;
+  }
+
+  private toDestinationResponse(destination: TourRecord['destination']) {
+    return {
+      slug: destination.slug,
+      title: destination.title,
+      href: destination.href,
+      market: destination.market,
+    };
+  }
+
   private toCardResponse(tour: TourCardRecord) {
     return {
       slug: tour.slug,
@@ -169,21 +232,8 @@ export class ToursService {
       description: tour.shortDescription,
       image: tour.image,
       alt: tour.alt,
-      destinations: tour.destinations.map((destination) =>
-        this.toDestinationResponse(destination),
-      ),
+      destination: this.toDestinationResponse(tour.destination),
       hotels: tour.hotels.map((hotel) => this.toHotelResponse(hotel)),
-    };
-  }
-
-  private toDestinationResponse(
-    destination: TourRecord['destinations'][number],
-  ) {
-    return {
-      slug: destination.slug,
-      title: destination.title,
-      href: destination.href,
-      market: destination.market,
     };
   }
 
@@ -221,9 +271,7 @@ export class ToursService {
       gallery: tour.gallery,
       inclusions: tour.inclusions,
       exclusions: tour.exclusions,
-      destinations: tour.destinations.map((destination) =>
-        this.toDestinationResponse(destination),
-      ),
+      destination: this.toDestinationResponse(tour.destination),
       hotels: tour.hotels.map((hotel) => this.toHotelResponse(hotel)),
       departures: tour.departures.map((departure) => ({
         id: departure.id,

@@ -55,6 +55,7 @@ export interface TourFormState {
   readonly descriptionParagraphs: string;
   readonly inclusions: string;
   readonly exclusions: string;
+  readonly destinationSlug: string;
   readonly departureDate: string;
   readonly guide: string;
   readonly bookedSeats: string;
@@ -105,6 +106,7 @@ export const createTourInitialValues: AdminTourFormInitialValues = {
     descriptionParagraphs: "Travel through Cam Thanh's water-palm sanctuary with a local guide.\nLearn basket boat traditions, crab fishing, and the stories behind this living landscape.",
     inclusions: "Round-trip hotel pickup in Hoi An\nProfessional English-speaking guide\nBamboo basket boat fees\nAuthentic local lunch and mineral water",
     exclusions: "Personal expenses and souvenirs\nGratuities for guide and boat rowers",
+    destinationSlug: "",
     departureDate: "May 02, 2026",
     guide: "Lan Pham",
     bookedSeats: "9",
@@ -200,6 +202,7 @@ export function valuesFromTourDetail(detail: TourDetail): ResolvedAdminTourEditD
     alt: detail.heroAlt,
     badge: "Featured",
     description: detail.subtitle,
+    destination: detail.destination,
     duration: detail.duration,
     guests: detail.guests,
     image: detail.heroImage,
@@ -232,6 +235,7 @@ export function valuesFromTourDetail(detail: TourDetail): ResolvedAdminTourEditD
       descriptionParagraphs: detail.description.join("\n"),
       inclusions: detail.inclusions.join("\n"),
       exclusions: detail.exclusions.join("\n"),
+      destinationSlug: detail.destination.slug,
       ...operations,
     },
     departures: detail.departures.length > 0 ? detail.departures.map((departure, index) => ({

@@ -31,7 +31,7 @@ export type ApiTourCard = {
   readonly description: string;
   readonly image: string;
   readonly alt: string;
-  readonly destinations: readonly ApiDestinationLink[];
+  readonly destination: ApiDestinationLink;
   readonly hotels: readonly ApiHotelLink[];
 };
 

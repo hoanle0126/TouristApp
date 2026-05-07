@@ -120,6 +120,16 @@ type SeedBlogPost = Omit<
   mentionedHotelSlugs: string[];
 };
 
+type SeedMomentCaptured = {
+  id: string;
+  title: string;
+  country: string;
+  image: string;
+  alt: string;
+  wide: boolean;
+  sortOrder: number;
+};
+
 const nordicFjordsImage =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuCg4Pc4Hz2ckphmn1PXS-ra4wYOkUqi7PMGWKx61d5rMwLWxEwWY9yD9IAF7y6ED_dd3XsvuYHLJpjONv34C5d-NT7TZNwMJ3GE2UEGHGQosEdJI1MXtNKDRueIJXq0fSBHje9meDPhmJuiXmHKGqBBLuE93xjrlgt64-QMJgo8xyI1ZlOPUNmSQ95M1p-VknE5zyYismU3NeJlov_lokR9yBG_xV_ioAQIrI3-iCN6Zs7bY0PzXTqJb2qkYxvPYK24z3G9ZP2hIvls';
 const londonImage =
@@ -785,6 +795,49 @@ export const seedBlogPosts: SeedBlogPost[] = [
   })),
 ];
 
+export const seedMomentsCaptured: SeedMomentCaptured[] = [
+  {
+    id: 'moment-ubud-sanctuary',
+    title: 'Ubud Sanctuary',
+    country: 'Indonesia',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCXt_uOk39Ti37dURaaAO9Gv1kYVRVrW8XysehQZYZ-kt8ZIZ2bwtsNbCd8AQ10u4z3Ws-ygeCNJUv5Gop1UT63u6X8MxMOwsc3rhdMRY3tsgjeEe7qMzcd2149-FycyLeFDO7xpx9kcEWk2_fS8DKpX_9kDbN7JeuBgbv1G_I2vQxg6YBjFVxc2nyFZne7rAd3m-oBrS93hnfaOSPn5-SrDsWnmzW4Kbf9FhEm3BsIhBf9ZX3-3YD5FUAC77BSp5tPXQZqXBkT11Kv',
+    alt: 'Luxurious infinity pool overlooking tropical jungle in Bali at sunset',
+    wide: false,
+    sortOrder: 10,
+  },
+  {
+    id: 'moment-oia-heights',
+    title: 'Oia Heights',
+    country: 'Greece',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBPOgbPq_XwQHxqcdV8CyyHHmuASmYTCmNh8iC7Qa31o9m88sCugttUqmVEJ9bS5RPzElQEn3SYK-jK_z3ZTIrVazznHG0pefnGU_WXvkW-iVA_-PFDRH_IKzie9_WL8XUqXMxcvGZ2MQlUIH04iFzpzi0-Dw9h8BagV-0zsnmNHMyzCNzFKofG6m8Jgt1H4eP9Kmlfbm3tlEv7MKPMhepN0PChYlQh5bYZy_lqG6VpCO0OfdJSwkDnmnv66dBHDhuW2r9OkGCMoo0l',
+    alt: 'Sunset over Santorini caldera with white domed buildings',
+    wide: true,
+    sortOrder: 20,
+  },
+  {
+    id: 'moment-kyoto-rituals',
+    title: 'Kyoto Rituals',
+    country: 'Japan',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAF4vsCxEPUT55N-RY2qaIvB_vfZFOivZwZ9iOvf16bFRt0ntzY8S9f8SN1Y69IGH9UEwQJJ4z-s409ytBeuTtHET1tRKmmZZ7purJkx80yYpcbQu-HMrFGCLFQrH9MmxYVPtwbNMaGNC0pX5pHQFf6Pf20qr-d6DU5b8mbJ09TwyrMdeGgJK7i0ug1bPf7MuX84yyLKpMlihdxXp-Rx3Wny5jGquG2LmnAUEA0Xk-SSmox9ULLpYVMrzC7tbttWUuf-vk8cdjTvwoC',
+    alt: 'Orange torii gates at Fushimi Inari shrine in Kyoto',
+    wide: false,
+    sortOrder: 30,
+  },
+  {
+    id: 'moment-alpine-silence',
+    title: 'Alpine Silence',
+    country: 'Switzerland',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDmQGXS04u9LQQr8k62J4bbs5yRMtU1_3unbCZXTbhnDlAJZd6PTnWl9ObnEBg_XeHpk1EW78JTlcFrpgc03E6GF_GD30D8cTau7EFb48AKzznjX8M3MAwWIJrOGch91X09_JxAecQVTs0keSp11X99OraPR_Nmvc-aV-NT4PPebtaG5J9v2tIMaM5eCrLoVdStV6ZMQr2G8xdbmvLDtw1ByehwABdtCZGgp9ceBVrFy-U-3crNf73iAB6_pRpzvDuMxU397e3baeGv',
+    alt: 'Snow-capped alpine mountains reflecting in a turquoise lake',
+    wide: true,
+    sortOrder: 40,
+  },
+];
+
 async function main() {
   const connectionString = process.env.DATABASE_URL;
 
@@ -881,6 +934,15 @@ async function main() {
             set: mentionedTourSlugs.map((slug) => ({ slug })),
           },
         },
+        });
+      }
+
+    for (const moment of seedMomentsCaptured) {
+      const { id, ...data } = moment;
+      await prisma.momentCaptured.upsert({
+        where: { id },
+        create: { id, ...data },
+        update: data,
       });
     }
   } finally {

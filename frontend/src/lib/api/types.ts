@@ -5,6 +5,16 @@ export type ApiDestinationLink = {
   readonly market?: string;
 };
 
+export type ApiMomentCaptured = {
+  readonly alt: string;
+  readonly country: string;
+  readonly id: string;
+  readonly image: string;
+  readonly sortOrder: number;
+  readonly title: string;
+  readonly wide: boolean;
+};
+
 export type ApiHotelLink = {
   readonly slug: string;
   readonly name: string;

@@ -6,7 +6,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
-import type { VisualDiaryItem } from "@/src/data/mockData";
+import type { VisualDiaryItem } from "@/src/types/travel";
 
 interface VisualDiaryCarouselProps {
   readonly items: readonly VisualDiaryItem[];

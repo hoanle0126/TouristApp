@@ -1,10 +1,4 @@
-export interface VisualDiaryItem {
-  readonly alt: string;
-  readonly country: string;
-  readonly image: string;
-  readonly title: string;
-  readonly wide?: boolean;
-}
+import type { VisualDiaryItem } from "@/src/types/travel";
 
 export interface SuggestionCard {
   readonly alt: string;

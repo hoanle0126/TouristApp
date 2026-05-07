@@ -33,11 +33,9 @@ import {
 import { Textarea } from "@/src/components/ui/textarea";
 import {
   heroImage,
-  visualDiaryItems,
   type SuggestionCard,
-  type VisualDiaryItem,
 } from "@/src/data/mockData";
-import type { BlogPost, DestinationCard } from "@/src/types/travel";
+import type { BlogPost, DestinationCard, VisualDiaryItem } from "@/src/types/travel";
 
 interface SectionHeadingProps {
   readonly align?: "left" | "center";
@@ -461,9 +459,15 @@ interface TravelLandingPageProps {
   readonly blogPosts: readonly BlogPost[];
   readonly destinationCards: readonly DestinationCard[];
   readonly suggestionCards: readonly SuggestionCard[];
+  readonly visualDiaryItems: readonly VisualDiaryItem[];
 }
 
-export default function TravelLandingPage({ blogPosts, destinationCards, suggestionCards }: Readonly<TravelLandingPageProps>) {
+export default function TravelLandingPage({
+  blogPosts,
+  destinationCards,
+  suggestionCards,
+  visualDiaryItems,
+}: Readonly<TravelLandingPageProps>) {
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <TravelHeader activeItem="Home" />

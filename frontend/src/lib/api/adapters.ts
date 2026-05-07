@@ -9,8 +9,9 @@ import type {
   TourCard,
   TourDetail,
   TourDetailHighlight,
+  VisualDiaryItem,
 } from "@/src/types/travel";
-import type { ApiBlogCard, ApiBlogDetail, ApiDestinationDetail, ApiHotelCard, ApiHotelDetail, ApiTourCard, ApiTourDetail, ApiDestinationLink } from "@/src/lib/api/types";
+import type { ApiBlogCard, ApiBlogDetail, ApiDestinationDetail, ApiHotelCard, ApiHotelDetail, ApiMomentCaptured, ApiTourCard, ApiTourDetail, ApiDestinationLink } from "@/src/lib/api/types";
 
 function resolveTourDestination(tour: ApiTourCard | ApiTourDetail): ApiDestinationLink {
   const legacyDestination = (tour as ApiTourCard & { readonly destinations?: readonly ApiDestinationLink[] }).destinations?.[0];
@@ -192,6 +193,18 @@ export function toBlogPost(blog: ApiBlogCard): BlogPost {
     image: blog.image,
     title: blog.title,
     slug: blog.slug,
+  };
+}
+
+export function toVisualDiaryItem(moment: ApiMomentCaptured): VisualDiaryItem {
+  return {
+    alt: moment.alt,
+    country: moment.country,
+    id: moment.id,
+    image: moment.image,
+    sortOrder: moment.sortOrder,
+    title: moment.title,
+    wide: moment.wide,
   };
 }
 

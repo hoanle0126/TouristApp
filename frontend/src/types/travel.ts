@@ -65,6 +65,16 @@ export interface BlogPost {
   readonly title: string;
 }
 
+export interface VisualDiaryItem {
+  readonly alt: string;
+  readonly country: string;
+  readonly id?: string;
+  readonly image: string;
+  readonly sortOrder?: number;
+  readonly title: string;
+  readonly wide?: boolean;
+}
+
 export interface JournalPost {
   readonly alt: string;
   readonly category: string;

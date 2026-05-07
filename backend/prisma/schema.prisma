@@ -89,6 +89,20 @@ model Destination {
   @@index([status])
 }
 
+model MomentCaptured {
+  id        String   @id @default(cuid())
+  title     String
+  country   String
+  image     String
+  alt       String
+  wide      Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
+}
+
 model Hotel {
   id               String              @id @default(cuid())
   slug             String              @unique

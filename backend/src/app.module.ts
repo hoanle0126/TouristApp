@@ -6,6 +6,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { DestinationsModule } from './destinations/destinations.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { HotelsModule } from './hotels/hotels.module';
+import { MomentsCapturedModule } from './moments-captured/moments-captured.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
 import { ToursModule } from './tours/tours.module';
@@ -16,6 +17,7 @@ import { ToursModule } from './tours/tours.module';
     ToursModule,
     DestinationsModule,
     HotelsModule,
+    MomentsCapturedModule,
     BlogsModule,
     BookingsModule,
     ChatbotModule,

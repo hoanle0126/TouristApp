@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, type ReactNode, useMemo, useState } from "react";
-import { BadgeCheck, BedDouble, CheckCircle2, CircleAlert, ImageIcon, ListChecks, MapPinned, Plus, Save, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
+import { BadgeCheck, BedDouble, Car, CheckCircle2, CircleAlert, Coffee, Dumbbell, ImageIcon, ListChecks, MapPinned, Plus, Save, Sparkles, Trash2, Utensils, Waves, Wifi } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
@@ -17,23 +18,22 @@ import {
 import { Textarea } from "@/src/components/ui/textarea";
 import {
   type AdminHotelInventoryFormRow,
+  createEmptyAmenity,
   createEmptyGalleryImage,
-  createEmptyReview,
-  createEmptyReviewScore,
   createEmptySuite,
-  hotelStatusOptions,
   slugifyHotelName,
+  type HotelAmenityIcon,
+  type HotelAmenityRow,
   type HotelCommercialStatus,
   type HotelFormInitialValues,
   type HotelFormState,
   type HotelGalleryRow,
-  type HotelReviewRow,
-  type HotelReviewScoreRow,
   type HotelSuiteRow,
   type HotelTextRow,
 } from "@/src/components/admin/adminHotelFormData";
+import { getDestinationDetails } from "@/src/lib/api/destinations";
 import { createHotel, updateHotel, updateHotelInventory, type SaveHotelInput, type UpdateHotelInventoryInput } from "@/src/lib/api/hotels";
-import type { ApiHotelDetail } from "@/src/lib/api/types";
+import type { ApiDestinationDetail, ApiHotelDetail } from "@/src/lib/api/types";
 
 interface AdminHotelFormCopy {
   readonly readinessEyebrow: string;
@@ -52,12 +52,10 @@ interface AdminHotelFormProps {
 
 interface FormErrors {
   name?: string;
-  location?: string;
   price?: string;
   listingImage?: string;
-  listingAlt?: string;
   heroImage?: string;
-  heroAlt?: string;
+  destinationSlug?: string;
   description?: string;
 }
 
@@ -66,8 +64,19 @@ interface InventoryValidationResult {
   readonly payload: UpdateHotelInventoryInput;
 }
 
-function hasValue(value: string) {
-  return value.trim().length > 0;
+const amenityIconOptions = [
+  { value: "pool", label: "Pool", icon: Waves },
+  { value: "spa", label: "Spa", icon: Sparkles },
+  { value: "dining", label: "Dining", icon: Utensils },
+  { value: "gym", label: "Gym", icon: Dumbbell },
+  { value: "wifi", label: "Wi-Fi", icon: Wifi },
+  { value: "coffee", label: "Coffee", icon: Coffee },
+  { value: "parking", label: "Parking", icon: Car },
+  { value: "beach", label: "Beach", icon: Waves },
+] satisfies readonly { value: HotelAmenityIcon; label: string; icon: typeof Waves }[];
+
+function hasValue(value: string | undefined) {
+  return (value ?? "").trim().length > 0;
 }
 
 function createTextRow(prefix: string): HotelTextRow {
@@ -76,6 +85,10 @@ function createTextRow(prefix: string): HotelTextRow {
 
 function updateTextRow(items: readonly HotelTextRow[], id: string, value: string) {
   return items.map((item) => (item.id === id ? { ...item, value } : item));
+}
+
+function updateAmenityRow<K extends keyof HotelAmenityRow>(items: readonly HotelAmenityRow[], id: string, field: K, value: HotelAmenityRow[K]) {
+  return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
 }
 
 function removeRow<T extends { readonly id: string }>(items: readonly T[], id: string) {
@@ -100,20 +113,30 @@ function updateGalleryRow<K extends keyof HotelGalleryRow>(items: readonly Hotel
   return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
 }
 
-function updateReviewScoreRow<K extends keyof HotelReviewScoreRow>(items: readonly HotelReviewScoreRow[], id: string, field: K, value: HotelReviewScoreRow[K]) {
-  return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
-}
-
-function updateReviewRow<K extends keyof HotelReviewRow>(items: readonly HotelReviewRow[], id: string, field: K, value: HotelReviewRow[K]) {
-  return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
-}
-
 function toApiStatus(status: HotelCommercialStatus): SaveHotelInput["status"] {
   return status === "Published" ? "published" : status === "Ready for review" ? "draft" : "draft";
 }
 
 function toNumber(value: string) {
   return Number(value) || 0;
+}
+
+async function uploadAdminImage(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("/api/admin/uploads", {
+    body: formData,
+    method: "POST",
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(typeof payload.error === "string" ? payload.error : "Unable to upload image.");
+  }
+
+  return String(payload.url);
 }
 
 function updateInventoryRow<K extends keyof AdminHotelInventoryFormRow>(items: readonly AdminHotelInventoryFormRow[], rowId: string, field: K, value: AdminHotelInventoryFormRow[K]) {
@@ -191,12 +214,10 @@ function validateHotelInventory(inventory: readonly AdminHotelInventoryFormRow[]
 
 function toHotelPayload(
   form: HotelFormState,
-  amenities: readonly HotelTextRow[],
+  amenities: readonly HotelAmenityRow[],
   description: readonly HotelTextRow[],
   suites: readonly HotelSuiteRow[],
   gallery: readonly HotelGalleryRow[],
-  reviewScores: readonly HotelReviewScoreRow[],
-  reviews: readonly HotelReviewRow[],
 ): SaveHotelInput {
   return {
     slug: form.slug,
@@ -205,28 +226,19 @@ function toHotelPayload(
     address: form.address,
     price: form.price,
     ...(form.badge ? { badge: form.badge } : {}),
-    score: toNumber(form.score),
-    scoreLabel: form.scoreLabel,
-    scoreSummary: form.scoreSummary,
     status: toApiStatus(form.status),
     listingImage: form.listingImage,
-    listingAlt: form.listingAlt,
     heroImage: form.heroImage,
-    heroAlt: form.heroAlt,
     description: description.map((item) => item.value.trim()).filter(Boolean),
-    amenities: amenities.map((item) => item.value.trim()).filter(Boolean),
+    amenities: amenities
+      .filter((item) => hasValue(item.title))
+      .map((item) => ({ icon: item.icon, title: item.title.trim() })),
     suites: suites
-      .filter((suite) => [suite.name, suite.price, suite.description, suite.image, suite.alt].every(hasValue))
-      .map(({ alt, badge, description, image, name, price }) => ({ alt, ...(badge ? { badge } : {}), description, image, name, price })),
+      .filter((suite) => [suite.name, suite.price, suite.description, suite.image].every(hasValue))
+      .map(({ badge, description, image, name, price }) => ({ ...(badge ? { badge } : {}), description, image, name, price })),
     gallery: gallery
-      .filter((image) => [image.image, image.alt].every(hasValue))
-      .map(({ alt, image }) => ({ alt, image })),
-    reviewScores: reviewScores
-      .filter((score) => hasValue(score.label) && hasValue(score.score))
-      .map(({ label, score }) => ({ label, score: toNumber(score) })),
-    reviews: reviews
-      .filter((review) => [review.author, review.initials, review.quote, review.stayed].every(hasValue))
-      .map(({ author, initials, quote, stayed }) => ({ author, initials, quote, stayed })),
+      .filter((image) => hasValue(image.image))
+      .map(({ image }) => ({ image })),
     booking: {
       checkIn: form.bookingCheckIn,
       checkOut: form.bookingCheckOut,
@@ -237,32 +249,60 @@ function toHotelPayload(
       travelers: form.bookingTravelers,
       total: form.bookingTotal,
     },
+    destinationSlugs: form.destinationSlug ? [form.destinationSlug] : [],
   };
 }
 
 export function AdminHotelForm({ copy, initialValues, mode = "create", originalSlug }: AdminHotelFormProps) {
   const [form, setForm] = useState<HotelFormState>(initialValues.form);
   const [inventory, setInventory] = useState<readonly AdminHotelInventoryFormRow[]>(initialValues.inventory);
-  const [amenities, setAmenities] = useState<readonly HotelTextRow[]>(initialValues.amenities);
+  const [amenities, setAmenities] = useState<readonly HotelAmenityRow[]>(initialValues.amenities);
   const [description, setDescription] = useState<readonly HotelTextRow[]>(initialValues.description);
   const [suites, setSuites] = useState<readonly HotelSuiteRow[]>(initialValues.suites);
   const [gallery, setGallery] = useState<readonly HotelGalleryRow[]>(initialValues.gallery);
-  const [reviewScores, setReviewScores] = useState<readonly HotelReviewScoreRow[]>(initialValues.reviewScores);
-  const [reviews, setReviews] = useState<readonly HotelReviewRow[]>(initialValues.reviews);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saved, setSaved] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [destinations, setDestinations] = useState<readonly ApiDestinationDetail[]>([]);
+  const [isLoadingDestinations, setIsLoadingDestinations] = useState(true);
+  const [destinationLoadError, setDestinationLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getDestinationDetails({ perPage: 100 })
+      .then((items) => {
+        if (!cancelled) {
+          setDestinations(items);
+          setDestinationLoadError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDestinationLoadError("Unable to load destinations. Refresh and try again.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingDestinations(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const readiness = useMemo(
     () => [
       {
         label: "Essentials",
-        ready: [form.name, form.location, form.price].every(hasValue),
+        ready: [form.name, form.price, form.destinationSlug].every(hasValue),
       },
       {
         label: "Media",
-        ready: [form.listingImage, form.listingAlt, form.heroImage, form.heroAlt].every(hasValue),
+        ready: [form.listingImage, form.heroImage].every(hasValue),
       },
       {
         label: "Story",
@@ -271,23 +311,16 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
       {
         label: "Inventory",
         ready:
-          amenities.some((item) => hasValue(item.value)) &&
+          amenities.some((item) => hasValue(item.title)) &&
           suites.some((suite) => [suite.name, suite.price, suite.description].some(hasValue)) &&
-          gallery.some((image) => hasValue(image.image) && hasValue(image.alt)),
-      },
-      {
-        label: "Reviews",
-        ready:
-          [form.scoreLabel, form.scoreSummary].every(hasValue) &&
-          reviewScores.some((score) => hasValue(score.label) && hasValue(score.score)) &&
-          reviews.some((review) => [review.author, review.initials, review.quote, review.stayed].every(hasValue)),
+          gallery.some((image) => hasValue(image.image)),
       },
       {
         label: "Booking",
         ready: [form.bookingCheckIn, form.bookingCheckOut, form.bookingNights, form.bookingRating, form.bookingTotal].every(hasValue),
       },
     ],
-    [amenities, description, form, gallery, reviewScores, reviews, suites],
+    [amenities, description, form, gallery, suites],
   );
 
   function updateField<K extends keyof HotelFormState>(field: K, value: HotelFormState[K]) {
@@ -310,23 +343,17 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
     if (!form.name.trim()) {
       nextErrors.name = "Hotel name is required.";
     }
-    if (!form.location.trim()) {
-      nextErrors.location = "Location is required.";
-    }
     if (!form.price.trim()) {
       nextErrors.price = "Price is required.";
     }
     if (!form.listingImage.trim()) {
       nextErrors.listingImage = "Listing image URL is required.";
     }
-    if (!form.listingAlt.trim()) {
-      nextErrors.listingAlt = "Listing image alt text is required.";
-    }
     if (!form.heroImage.trim()) {
       nextErrors.heroImage = "Hero image URL is required.";
     }
-    if (!form.heroAlt.trim()) {
-      nextErrors.heroAlt = "Hero image alt text is required.";
+    if (!form.destinationSlug.trim()) {
+      nextErrors.destinationSlug = "Destination is required.";
     }
     if (!description[0]?.value.trim()) {
       nextErrors.description = "First description paragraph is required.";
@@ -354,7 +381,7 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
         return;
       }
 
-      const payload = toHotelPayload(form, amenities, description, suites, gallery, reviewScores, reviews);
+      const payload = toHotelPayload(form, amenities, description, suites, gallery);
       const savedHotel = mode === "update"
         ? await updateHotel(originalSlug ?? form.slug, payload)
         : await createHotel(payload);
@@ -385,7 +412,14 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
   return (
     <form className="grid gap-6 2xl:grid-cols-[minmax(0,1.55fr)_420px]" onSubmit={handleSubmit}>
       <div className="space-y-6">
-        <HotelEssentialsSection errors={errors} form={form} updateField={updateField} />
+        <HotelEssentialsSection
+          destinationLoadError={destinationLoadError}
+          destinations={destinations}
+          errors={errors}
+          form={form}
+          isLoadingDestinations={isLoadingDestinations}
+          updateField={updateField}
+        />
         <HotelMediaSection errors={errors} form={form} updateField={updateField} />
         <HotelStorySection
           description={description}
@@ -403,14 +437,6 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
           setGallery={(items) => updateCollection(setGallery, items)}
           setSuites={(items) => updateCollection(setSuites, items)}
           suites={suites}
-        />
-        <HotelReviewsSection
-          form={form}
-          reviewScores={reviewScores}
-          reviews={reviews}
-          setReviewScores={(items) => updateCollection(setReviewScores, items)}
-          setReviews={(items) => updateCollection(setReviews, items)}
-          updateField={updateField}
         />
         <HotelBookingSection form={form} updateField={updateField} />
       </div>
@@ -485,7 +511,6 @@ function HotelDraftSidebar({
           <div className="mt-5 grid gap-3 sm:grid-cols-2 2xl:grid-cols-1">
             <SummaryPill label="Location" value={form.location || "Not set"} />
             <SummaryPill label="Price" value={form.price || "Not set"} />
-            <SummaryPill label="Score" value={form.score || "Not set"} />
             <SummaryPill label="Status" value={form.status} />
           </div>
         </CardContent>
@@ -578,12 +603,18 @@ function TextField({
 }
 
 function HotelEssentialsSection({
+  destinationLoadError,
+  destinations,
   errors,
   form,
+  isLoadingDestinations,
   updateField,
 }: Readonly<{
+  destinationLoadError: string | null;
+  destinations: readonly ApiDestinationDetail[];
   errors: FormErrors;
   form: HotelFormState;
+  isLoadingDestinations: boolean;
   updateField: <K extends keyof HotelFormState>(field: K, value: HotelFormState[K]) => void;
 }>) {
   return (
@@ -597,27 +628,96 @@ function HotelEssentialsSection({
         <div className="grid gap-4 md:grid-cols-2">
           <TextField error={errors.name} id="hotel-name" label="Hotel name" onChange={(value) => updateField("name", value)} value={form.name} />
           <TextField id="hotel-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
-          <TextField error={errors.location} id="hotel-location" label="Location" onChange={(value) => updateField("location", value)} value={form.location} />
-          <TextField error={errors.price} id="hotel-price" label="Price" onChange={(value) => updateField("price", value)} value={form.price} />
-          <TextField id="hotel-badge" label="Badge" onChange={(value) => updateField("badge", value)} value={form.badge} />
-          <TextField id="hotel-score" label="Score" onChange={(value) => updateField("score", value)} value={form.score} />
-          <TextField id="hotel-score-label" label="Score label" onChange={(value) => updateField("scoreLabel", value)} value={form.scoreLabel} />
           <div>
-            <Label htmlFor="hotel-status">Commercial status</Label>
-            <Select value={form.status} onValueChange={(value) => updateField("status", value as HotelCommercialStatus)}>
-              <SelectTrigger id="hotel-status">
-                <SelectValue placeholder="Select status" />
+            <Label htmlFor="hotel-destination">Destination</Label>
+            <Select disabled={isLoadingDestinations} value={form.destinationSlug} onValueChange={(value) => updateField("destinationSlug", value)}>
+              <SelectTrigger id="hotel-destination">
+                <SelectValue placeholder={isLoadingDestinations ? "Loading destinations..." : "Choose a destination"} />
               </SelectTrigger>
               <SelectContent>
-                {hotelStatusOptions.map((status) => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                {destinations.map((destination) => (
+                  <SelectItem key={destination.slug} value={destination.slug}>{destination.title}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {errors.destinationSlug ? <p className="mt-2 text-xs font-semibold text-rose-600">{errors.destinationSlug}</p> : null}
+            {destinationLoadError ? <p className="mt-2 text-xs font-semibold text-rose-600">{destinationLoadError}</p> : null}
           </div>
+          <TextField error={errors.price} id="hotel-price" label="Price" onChange={(value) => updateField("price", value)} value={form.price} />
+          <TextField id="hotel-badge" label="Badge" onChange={(value) => updateField("badge", value)} value={form.badge} />
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function HotelImageUploadField({
+  error,
+  id,
+  label,
+  onChange,
+  previewLabel,
+  value,
+}: Readonly<{
+  error?: string;
+  id: string;
+  label: string;
+  onChange: (value: string) => void;
+  previewLabel: string;
+  value: string;
+}>) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleUpload(file: File | undefined) {
+    if (!file) {
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const url = await uploadAdminImage(file);
+      onChange(url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Unable to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  return (
+    <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4">
+      <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
+        {value ? (
+          <div className="relative aspect-[4/3]">
+            <Image alt={`${previewLabel} preview`} className="object-cover" fill sizes="(min-width: 768px) 50vw, 100vw" src={value} />
+          </div>
+        ) : (
+          <div className="flex aspect-[4/3] items-center justify-center bg-stone-100 text-sm font-semibold text-stone-400">
+            No preview
+          </div>
+        )}
+      </div>
+      <div className="mt-4 space-y-4">
+        <TextField error={error} id={id} label={label} onChange={onChange} value={value} />
+        <div>
+          <Label htmlFor={`${id}-upload`}>Upload image</Label>
+          <Input
+            accept="image/gif,image/jpeg,image/png,image/webp"
+            disabled={isUploading}
+            id={`${id}-upload`}
+            onChange={(event) => void handleUpload(event.target.files?.[0])}
+            type="file"
+          />
+          <p className="mt-2 text-xs font-medium text-stone-500">
+            {isUploading ? "Uploading..." : "JPG, PNG, WebP, or GIF up to 5MB."}
+          </p>
+          {uploadError ? <p className="mt-2 text-xs font-semibold text-rose-700">{uploadError}</p> : null}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -634,15 +734,27 @@ function HotelMediaSection({
     <Card>
       <CardContent className="space-y-6 p-6 sm:p-7">
         <SectionHeader
-          description="Listing and hero image URLs, accessible alt text, and the public-facing hotel address."
+          description="Listing and hero image URLs, plus the public-facing hotel address."
           eyebrow="Media"
           title="Hotel imagery and address"
         />
         <div className="grid gap-4 md:grid-cols-2">
-          <TextField error={errors.listingImage} id="hotel-listing-image" label="Listing image URL" onChange={(value) => updateField("listingImage", value)} value={form.listingImage} />
-          <TextField error={errors.listingAlt} id="hotel-listing-alt" label="Listing image alt text" onChange={(value) => updateField("listingAlt", value)} value={form.listingAlt} />
-          <TextField error={errors.heroImage} id="hotel-hero-image" label="Hero image URL" onChange={(value) => updateField("heroImage", value)} value={form.heroImage} />
-          <TextField error={errors.heroAlt} id="hotel-hero-alt" label="Hero image alt text" onChange={(value) => updateField("heroAlt", value)} value={form.heroAlt} />
+          <HotelImageUploadField
+            error={errors.listingImage}
+            id="hotel-listing-image"
+            label="Listing image URL"
+            onChange={(value) => updateField("listingImage", value)}
+            previewLabel="Listing image"
+            value={form.listingImage}
+          />
+          <HotelImageUploadField
+            error={errors.heroImage}
+            id="hotel-hero-image"
+            label="Hero image URL"
+            onChange={(value) => updateField("heroImage", value)}
+            previewLabel="Hero image"
+            value={form.heroImage}
+          />
         </div>
         <div>
           <Label htmlFor="hotel-address">Address</Label>
@@ -695,9 +807,9 @@ function HotelInventorySection({
   setSuites,
   suites,
 }: Readonly<{
-  amenities: readonly HotelTextRow[];
+  amenities: readonly HotelAmenityRow[];
   gallery: readonly HotelGalleryRow[];
-  setAmenities: (items: readonly HotelTextRow[]) => void;
+  setAmenities: (items: readonly HotelAmenityRow[]) => void;
   setGallery: (items: readonly HotelGalleryRow[]) => void;
   setSuites: (items: readonly HotelSuiteRow[]) => void;
   suites: readonly HotelSuiteRow[];
@@ -710,16 +822,11 @@ function HotelInventorySection({
           eyebrow="Inventory"
           title="Amenities, suites, and gallery"
         />
-        <TextRowsEditor
-          addLabel="Add amenity"
-          icon={<ListChecks className="size-4" />}
-          label="Amenities"
-          onAdd={() => setAmenities([...amenities, createTextRow("amenity")])}
+        <AmenitiesEditor
+          amenities={amenities}
+          onAdd={() => setAmenities([...amenities, createEmptyAmenity(`amenity-${crypto.randomUUID()}`)])}
           onRemove={(id) => setAmenities(removeRow(amenities, id))}
-          onUpdate={(id, value) => setAmenities(updateTextRow(amenities, id, value))}
-          removeLabel="Remove amenity"
-          rows={amenities}
-          textareaLabel="Amenity"
+          onUpdate={(id, field, value) => setAmenities(updateAmenityRow(amenities, id, field, value))}
         />
         <SuitesEditor
           onAdd={() => setSuites([...suites, createEmptySuite(`suite-${crypto.randomUUID()}`)])}
@@ -798,50 +905,6 @@ function HotelDailyRoomInventorySection({
   );
 }
 
-function HotelReviewsSection({
-  form,
-  reviewScores,
-  reviews,
-  setReviewScores,
-  setReviews,
-  updateField,
-}: Readonly<{
-  form: HotelFormState;
-  reviewScores: readonly HotelReviewScoreRow[];
-  reviews: readonly HotelReviewRow[];
-  setReviewScores: (items: readonly HotelReviewScoreRow[]) => void;
-  setReviews: (items: readonly HotelReviewRow[]) => void;
-  updateField: <K extends keyof HotelFormState>(field: K, value: HotelFormState[K]) => void;
-}>) {
-  return (
-    <Card>
-      <CardContent className="space-y-6 p-6 sm:p-7">
-        <SectionHeader
-          description="Review summary, review score rows, and guest quotes required by the hotel detail page."
-          eyebrow="Reviews"
-          title="Guest review content"
-        />
-        <div>
-          <Label htmlFor="hotel-score-summary">Score summary</Label>
-          <Textarea id="hotel-score-summary" onChange={(event) => updateField("scoreSummary", event.target.value)} value={form.scoreSummary} />
-        </div>
-        <ReviewScoresEditor
-          onAdd={() => setReviewScores([...reviewScores, createEmptyReviewScore(`review-score-${crypto.randomUUID()}`)])}
-          onRemove={(id) => setReviewScores(removeRow(reviewScores, id))}
-          onUpdate={(id, field, value) => setReviewScores(updateReviewScoreRow(reviewScores, id, field, value))}
-          reviewScores={reviewScores}
-        />
-        <ReviewsEditor
-          onAdd={() => setReviews([...reviews, createEmptyReview(`review-${crypto.randomUUID()}`)])}
-          onRemove={(id) => setReviews(removeRow(reviews, id))}
-          onUpdate={(id, field, value) => setReviews(updateReviewRow(reviews, id, field, value))}
-          reviews={reviews}
-        />
-      </CardContent>
-    </Card>
-  );
-}
-
 function HotelBookingSection({
   form,
   updateField,
@@ -872,64 +935,64 @@ function HotelBookingSection({
   );
 }
 
-function ReviewScoresEditor({
+function AmenitiesEditor({
+  amenities,
   onAdd,
   onRemove,
   onUpdate,
-  reviewScores,
 }: Readonly<{
+  amenities: readonly HotelAmenityRow[];
   onAdd: () => void;
   onRemove: (id: string) => void;
-  onUpdate: <K extends keyof HotelReviewScoreRow>(id: string, field: K, value: HotelReviewScoreRow[K]) => void;
-  reviewScores: readonly HotelReviewScoreRow[];
+  onUpdate: <K extends keyof HotelAmenityRow>(id: string, field: K, value: HotelAmenityRow[K]) => void;
 }>) {
   return (
-    <div className="space-y-4 border-t border-stone-200 pt-5">
-      <CollectionHeader addLabel="Add review score" icon={<ListChecks className="size-4" />} label="Review scores" onAdd={onAdd} />
+    <div className="space-y-4 border-t border-stone-200 pt-5 first:border-t-0 first:pt-0">
+      <CollectionHeader addLabel="Add amenity" icon={<ListChecks className="size-4" />} label="Amenities" onAdd={onAdd} />
       <div className="space-y-4">
-        {reviewScores.map((score, index) => (
-          <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={score.id}>
-            <RowHeader disabled={reviewScores.length <= 1} label={`Review score ${index + 1}`} onRemove={() => onRemove(score.id)} removeLabel={`Remove review score ${index + 1}`} />
-            <div className="grid gap-4 md:grid-cols-2">
-              <TextField id={`${score.id}-label`} label="Label" onChange={(value) => onUpdate(score.id, "label", value)} value={score.label} />
-              <TextField id={`${score.id}-score`} label="Score" onChange={(value) => onUpdate(score.id, "score", value)} value={score.score} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+        {amenities.map((amenity, index) => {
+          const selectedOption = amenityIconOptions.find((option) => option.value === amenity.icon) ?? amenityIconOptions[0];
+          const SelectedIcon = selectedOption.icon;
 
-function ReviewsEditor({
-  onAdd,
-  onRemove,
-  onUpdate,
-  reviews,
-}: Readonly<{
-  onAdd: () => void;
-  onRemove: (id: string) => void;
-  onUpdate: <K extends keyof HotelReviewRow>(id: string, field: K, value: HotelReviewRow[K]) => void;
-  reviews: readonly HotelReviewRow[];
-}>) {
-  return (
-    <div className="space-y-4 border-t border-stone-200 pt-5">
-      <CollectionHeader addLabel="Add review" icon={<BadgeCheck className="size-4" />} label="Guest reviews" onAdd={onAdd} />
-      <div className="space-y-4">
-        {reviews.map((review, index) => (
-          <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={review.id}>
-            <RowHeader disabled={reviews.length <= 1} label={`Guest review ${index + 1}`} onRemove={() => onRemove(review.id)} removeLabel={`Remove guest review ${index + 1}`} />
-            <div className="grid gap-4 md:grid-cols-2">
-              <TextField id={`${review.id}-author`} label="Author" onChange={(value) => onUpdate(review.id, "author", value)} value={review.author} />
-              <TextField id={`${review.id}-initials`} label="Initials" onChange={(value) => onUpdate(review.id, "initials", value)} value={review.initials} />
-              <TextField id={`${review.id}-stayed`} label="Stayed" onChange={(value) => onUpdate(review.id, "stayed", value)} value={review.stayed} />
+          return (
+            <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={amenity.id}>
+              <RowHeader
+                disabled={amenities.length <= 1}
+                label={`Amenity ${index + 1}`}
+                onRemove={() => onRemove(amenity.id)}
+                removeLabel={`Remove amenity ${index + 1}`}
+              />
+              <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+                <div>
+                  <Label htmlFor={`${amenity.id}-icon`}>Icon</Label>
+                  <Select value={amenity.icon} onValueChange={(value: HotelAmenityIcon) => onUpdate(amenity.id, "icon", value)}>
+                    <SelectTrigger id={`${amenity.id}-icon`}>
+                      <div className="flex items-center gap-2">
+                        <SelectedIcon className="size-4 text-emerald-800" />
+                        <span>{selectedOption.label}</span>
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {amenityIconOptions.map((option) => {
+                        const Icon = option.icon;
+
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            <span className="flex items-center gap-2">
+                              <Icon className="size-4 text-emerald-800" />
+                              <span>{option.label}</span>
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <TextField id={`${amenity.id}-title`} label="Title" onChange={(value) => onUpdate(amenity.id, "title", value)} value={amenity.title} />
+              </div>
             </div>
-            <div className="mt-4">
-              <Label htmlFor={`${review.id}-quote`}>Quote</Label>
-              <Textarea id={`${review.id}-quote`} onChange={(event) => onUpdate(review.id, "quote", event.target.value)} value={review.quote} />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -1018,7 +1081,6 @@ function SuitesEditor({
               <TextField id={`${suite.id}-price`} label="Suite price" onChange={(value) => onUpdate(suite.id, "price", value)} value={suite.price} />
               <TextField id={`${suite.id}-badge`} label="Suite badge" onChange={(value) => onUpdate(suite.id, "badge", value)} value={suite.badge} />
               <TextField id={`${suite.id}-image`} label="Suite image URL" onChange={(value) => onUpdate(suite.id, "image", value)} value={suite.image} />
-              <TextField id={`${suite.id}-alt`} label="Suite image alt text" onChange={(value) => onUpdate(suite.id, "alt", value)} value={suite.alt} />
             </div>
             <div className="mt-4">
               <Label htmlFor={`${suite.id}-description`}>Suite description</Label>
@@ -1042,9 +1104,31 @@ function GalleryEditor({
   onRemove: (id: string) => void;
   onUpdate: <K extends keyof HotelGalleryRow>(id: string, field: K, value: HotelGalleryRow[K]) => void;
 }>) {
+  const [uploadingRowId, setUploadingRowId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleUpload(rowId: string, file: File | undefined) {
+    if (!file) {
+      return;
+    }
+
+    setUploadingRowId(rowId);
+    setUploadError(null);
+
+    try {
+      const url = await uploadAdminImage(file);
+      onUpdate(rowId, "image", url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Unable to upload image.");
+    } finally {
+      setUploadingRowId(null);
+    }
+  }
+
   return (
     <div className="space-y-4 border-t border-stone-200 pt-5">
       <CollectionHeader addLabel="Add gallery image" icon={<ImageIcon className="size-4" />} label="Gallery" onAdd={onAdd} />
+      {uploadError ? <p className="text-xs font-semibold text-rose-700">{uploadError}</p> : null}
       <div className="space-y-4">
         {gallery.map((image, index) => (
           <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={image.id}>
@@ -1054,9 +1138,34 @@ function GalleryEditor({
               onRemove={() => onRemove(image.id)}
               removeLabel={`Remove gallery image ${index + 1}`}
             />
-            <div className="grid gap-4 md:grid-cols-2">
-              <TextField id={`${image.id}-image`} label="Image URL" onChange={(value) => onUpdate(image.id, "image", value)} value={image.image} />
-              <TextField id={`${image.id}-alt`} label="Image alt text" onChange={(value) => onUpdate(image.id, "alt", value)} value={image.alt} />
+            <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+              <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
+                {image.image ? (
+                  <div className="relative aspect-[4/3]">
+                    <Image alt={`Gallery preview ${index + 1}`} className="object-cover" fill sizes="240px" src={image.image} />
+                  </div>
+                ) : (
+                  <div className="flex aspect-[4/3] items-center justify-center bg-stone-100 text-sm font-semibold text-stone-400">
+                    No preview
+                  </div>
+                )}
+              </div>
+              <div className="space-y-4">
+                <TextField id={`${image.id}-image`} label="Image URL" onChange={(value) => onUpdate(image.id, "image", value)} value={image.image} />
+                <div>
+                  <Label htmlFor={`${image.id}-upload`}>Upload image</Label>
+                  <Input
+                    accept="image/gif,image/jpeg,image/png,image/webp"
+                    disabled={uploadingRowId === image.id}
+                    id={`${image.id}-upload`}
+                    onChange={(event) => void handleUpload(image.id, event.target.files?.[0])}
+                    type="file"
+                  />
+                  <p className="mt-2 text-xs font-medium text-stone-500">
+                    {uploadingRowId === image.id ? "Uploading..." : "JPG, PNG, WebP, or GIF up to 5MB."}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         ))}

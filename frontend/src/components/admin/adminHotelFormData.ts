@@ -1,6 +1,7 @@
 import type { HotelDetail } from "@/src/types/travel";
 
 export type HotelCommercialStatus = "Draft" | "Ready for review" | "Published";
+export type HotelAmenityIcon = "pool" | "spa" | "dining" | "gym" | "wifi" | "coffee" | "parking" | "beach";
 export type InventoryStatus = "open" | "closed";
 
 export interface AdminHotelInventoryFormRow {
@@ -19,13 +20,8 @@ export interface HotelFormState {
   readonly price: string;
   readonly badge: string;
   readonly status: HotelCommercialStatus;
-  readonly score: string;
-  readonly scoreLabel: string;
-  readonly scoreSummary: string;
   readonly listingImage: string;
-  readonly listingAlt: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
   readonly address: string;
   readonly bookingCheckIn: string;
   readonly bookingCheckOut: string;
@@ -35,11 +31,18 @@ export interface HotelFormState {
   readonly bookingRating: string;
   readonly bookingTravelers: string;
   readonly bookingTotal: string;
+  readonly destinationSlug: string;
 }
 
 export interface HotelTextRow {
   readonly id: string;
   readonly value: string;
+}
+
+export interface HotelAmenityRow {
+  readonly id: string;
+  readonly icon: HotelAmenityIcon;
+  readonly title: string;
 }
 
 export interface HotelSuiteRow {
@@ -49,38 +52,20 @@ export interface HotelSuiteRow {
   readonly badge: string;
   readonly description: string;
   readonly image: string;
-  readonly alt: string;
 }
 
 export interface HotelGalleryRow {
   readonly id: string;
   readonly image: string;
-  readonly alt: string;
-}
-
-export interface HotelReviewScoreRow {
-  readonly id: string;
-  readonly label: string;
-  readonly score: string;
-}
-
-export interface HotelReviewRow {
-  readonly id: string;
-  readonly author: string;
-  readonly initials: string;
-  readonly quote: string;
-  readonly stayed: string;
 }
 
 export interface HotelFormInitialValues {
   readonly form: HotelFormState;
   readonly inventory: readonly AdminHotelInventoryFormRow[];
-  readonly amenities: readonly HotelTextRow[];
+  readonly amenities: readonly HotelAmenityRow[];
   readonly description: readonly HotelTextRow[];
   readonly suites: readonly HotelSuiteRow[];
   readonly gallery: readonly HotelGalleryRow[];
-  readonly reviewScores: readonly HotelReviewScoreRow[];
-  readonly reviews: readonly HotelReviewRow[];
 }
 
 export interface ResolvedAdminHotelEditData {
@@ -90,6 +75,14 @@ export interface ResolvedAdminHotelEditData {
 
 export const hotelStatusOptions: readonly HotelCommercialStatus[] = ["Draft", "Ready for review", "Published"];
 
+export function createEmptyAmenity(id: string): HotelAmenityRow {
+  return {
+    id,
+    icon: "pool",
+    title: "",
+  };
+}
+
 export function createEmptySuite(id: string): HotelSuiteRow {
   return {
     id,
@@ -98,7 +91,6 @@ export function createEmptySuite(id: string): HotelSuiteRow {
     badge: "",
     description: "",
     image: "",
-    alt: "",
   };
 }
 
@@ -106,25 +98,6 @@ export function createEmptyGalleryImage(id: string): HotelGalleryRow {
   return {
     id,
     image: "",
-    alt: "",
-  };
-}
-
-export function createEmptyReviewScore(id: string): HotelReviewScoreRow {
-  return {
-    id,
-    label: "",
-    score: "",
-  };
-}
-
-export function createEmptyReview(id: string): HotelReviewRow {
-  return {
-    id,
-    author: "",
-    initials: "",
-    quote: "",
-    stayed: "",
   };
 }
 
@@ -136,13 +109,8 @@ export const createHotelInitialValues: HotelFormInitialValues = {
     price: "",
     badge: "",
     status: "Draft",
-    score: "",
-    scoreLabel: "",
-    scoreSummary: "",
     listingImage: "",
-    listingAlt: "",
     heroImage: "",
-    heroAlt: "",
     address: "",
     bookingCheckIn: "",
     bookingCheckOut: "",
@@ -152,6 +120,7 @@ export const createHotelInitialValues: HotelFormInitialValues = {
     bookingRating: "",
     bookingTravelers: "",
     bookingTotal: "",
+    destinationSlug: "",
   },
   inventory: [
     {
@@ -162,18 +131,13 @@ export const createHotelInitialValues: HotelFormInitialValues = {
       status: "open",
     },
   ],
-  amenities: [
-    { id: "amenity-1", value: "" },
-    { id: "amenity-2", value: "" },
-  ],
+  amenities: [createEmptyAmenity("amenity-1"), createEmptyAmenity("amenity-2")],
   description: [
     { id: "description-1", value: "" },
     { id: "description-2", value: "" },
   ],
   suites: [createEmptySuite("suite-1")],
   gallery: [createEmptyGalleryImage("gallery-1")],
-  reviewScores: [createEmptyReviewScore("review-score-1")],
-  reviews: [createEmptyReview("review-1")],
 };
 
 export function slugifyHotelName(name: string) {
@@ -205,13 +169,8 @@ export function valuesFromHotelDetail(detail: HotelDetail): ResolvedAdminHotelEd
         price: detail.price,
         badge: "",
         status: "Published",
-        score: detail.score,
-        scoreLabel: detail.scoreLabel,
-        scoreSummary: detail.scoreSummary,
         listingImage: detail.heroImage,
-        listingAlt: detail.heroAlt,
         heroImage: detail.heroImage,
-        heroAlt: detail.heroAlt,
         address: detail.address,
         bookingCheckIn: detail.booking.checkIn,
         bookingCheckOut: detail.booking.checkOut,
@@ -221,6 +180,7 @@ export function valuesFromHotelDetail(detail: HotelDetail): ResolvedAdminHotelEd
         bookingRating: String(detail.booking.rating),
         bookingTravelers: detail.booking.travelers,
         bookingTotal: detail.booking.total,
+        destinationSlug: detail.destinations[0]?.slug ?? "",
       },
       inventory: detail.inventory.length > 0 ? detail.inventory.map((day, index) => ({
         id: day.id,
@@ -230,10 +190,11 @@ export function valuesFromHotelDetail(detail: HotelDetail): ResolvedAdminHotelEd
         bookedRooms: String(day.bookedRooms),
         status: day.status,
       })) : [{ rowId: "inventory-1", date: "", totalRooms: "", bookedRooms: "0", status: "open" }],
-      amenities: textRows(
-        "amenity",
-        detail.amenities.map((amenity) => amenity.title),
-      ),
+      amenities: detail.amenities.length > 0 ? detail.amenities.map((amenity, index) => ({
+        id: `amenity-${index + 1}`,
+        icon: amenity.icon,
+        title: amenity.title,
+      })) : [createEmptyAmenity("amenity-1")],
       description: textRows("description", detail.description),
       suites: detail.suites.map((suite, index) => ({
         id: `suite-${index + 1}`,
@@ -242,24 +203,10 @@ export function valuesFromHotelDetail(detail: HotelDetail): ResolvedAdminHotelEd
         badge: suite.badge ?? "",
         description: suite.description,
         image: suite.image,
-        alt: suite.alt,
       })),
       gallery: detail.gallery.map((image, index) => ({
         id: `gallery-${index + 1}`,
         image: image.image,
-        alt: image.alt,
-      })),
-      reviewScores: detail.reviewScores.map((score, index) => ({
-        id: `review-score-${index + 1}`,
-        label: score.label,
-        score: score.score,
-      })),
-      reviews: detail.reviews.map((review, index) => ({
-        id: `review-${index + 1}`,
-        author: review.author,
-        initials: review.initials,
-        quote: review.quote,
-        stayed: review.stayed,
       })),
     },
   };

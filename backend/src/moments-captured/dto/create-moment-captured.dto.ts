@@ -10,9 +10,6 @@ export class CreateMomentCapturedDto {
   @IsString()
   image: string;
 
-  @IsString()
-  alt: string;
-
   @IsBoolean()
   wide: boolean;
 

@@ -7,9 +7,7 @@ type SeedDestination = {
   title: string;
   description: string;
   image: string;
-  alt: string;
   heroImage: string;
-  heroAlt: string;
   summary: string;
   intro: string[];
   facts: { label: string; value: string }[];
@@ -70,15 +68,11 @@ type SeedTour = {
   description: string[];
   shortDescription: string;
   image: string;
-  alt: string;
   heroImage: string;
-  heroAlt: string;
-  curatorImage: string;
-  curatorImageAlt: string;
   subtitle: string;
   highlights: { icon: string; title: string; description: string }[];
   itinerary: { title: string; description: string }[];
-  gallery: { image: string; alt: string; layout: string }[];
+  gallery: { image: string; layout: string }[];
   inclusions: string[];
   exclusions: string[];
   destinationSlug: string;
@@ -118,7 +112,6 @@ type SeedMomentCaptured = {
   title: string;
   country: string;
   image: string;
-  alt: string;
   wide: boolean;
   sortOrder: number;
 };
@@ -141,10 +134,7 @@ export const seedDestinations: SeedDestination[] = [
     description:
       'Sail through cinematic cliffs and quiet coastal villages shaped by ancient glacial landscapes.',
     image: nordicFjordsImage,
-    alt: 'Norwegian fjords with deep blue water and dramatic mountain peaks',
     heroImage: nordicFjordsImage,
-    heroAlt:
-      'Norwegian fjords with deep blue water and dramatic mountain peaks',
     summary:
       'A premium scenic destination for travelers who want atmosphere, nature, and calm logistical flow rather than constant activity.',
     intro: [
@@ -181,9 +171,7 @@ export const seedDestinations: SeedDestination[] = [
     description:
       'Discover the perfect blend of historic architecture and cutting-edge modern culture.',
     image: londonImage,
-    alt: 'Big Ben and Westminster Bridge in London at dusk',
     heroImage: londonImage,
-    heroAlt: 'Big Ben and Westminster Bridge in London at dusk',
     summary:
       'A flexible urban destination that performs best when treated as a culture and neighborhood itinerary, not only a monuments stop.',
     intro: [
@@ -220,9 +208,7 @@ export const seedDestinations: SeedDestination[] = [
     description:
       'Wander through fairy-tale villages and explore the majestic castles of the Black Forest.',
     image: bavarianImage,
-    alt: 'Medieval German town with half-timbered houses',
     heroImage: bavarianImage,
-    heroAlt: 'Medieval German town with half-timbered houses',
     summary:
       'A dependable, high-appeal destination for travelers who want European heritage with efficient logistics and immediate visual return.',
     intro: [
@@ -263,15 +249,9 @@ export const seedHotels: SeedHotel[] = [
     address: '21 Ly Thuong Kiet, Hoi An Ancient Town',
     price: '$180',
     badge: 'Riverside Calm',
-    score: 9.4,
-    scoreLabel: 'Exceptional',
-    scoreSummary: 'Based on 1,240 Reviews',
     status: 'published',
     listingImage: shiningRiversideImage,
-    listingAlt: 'Luxurious hotel pool overlooking a tranquil river at dusk',
     heroImage: shiningRiversideImage,
-    heroAlt:
-      'Luxurious hotel pool overlooking a tranquil river at dusk with warm lantern lighting and traditional Vietnamese architecture',
     description: [
       'A modern heritage stay bridging Hoi An historical pulse and serene luxury wellness.',
       'Minimalist geometry meets organic textures throughout the riverside property.',
@@ -290,22 +270,14 @@ export const seedHotels: SeedHotel[] = [
         description:
           '52 sqm • King Bed • Private Balcony with Panoramic River Views.',
         image: shiningRiversideImage,
-        alt: 'Luxury suite with private balcony and river view',
       },
     ],
     gallery: [
-      { image: shiningRiversideImage, alt: 'Modern minimalist hotel suite' },
+      { image: shiningRiversideImage },
       {
         image: shiningRiversideImage,
-        alt: 'Lantern-lit riverside pool terrace at Shining Riverside',
       },
     ],
-    reviewScores: [
-      { label: 'Cleanliness', score: '9.8' },
-      { label: 'Location', score: '9.5' },
-      { label: 'Service', score: '9.6' },
-    ],
-    reviews: [],
     booking: {
       checkIn: 'May 24',
       checkOut: 'May 27',
@@ -365,22 +337,15 @@ export const seedHotels: SeedHotel[] = [
     address: location,
     price,
     badge,
-    score: 9.1,
-    scoreLabel: 'Exceptional',
-    scoreSummary: 'Curated hotel collection stay.',
     status: 'published',
     listingImage: nordicFjordsImage,
-    listingAlt: `${name} hotel exterior`,
     heroImage: nordicFjordsImage,
-    heroAlt: `${name} hotel hero image`,
     description: [
       `${name} is part of the curated TouristWeb hotel collection.`,
     ],
     amenities: [],
     suites: [],
-    gallery: [{ image: nordicFjordsImage, alt: `${name} hotel gallery image` }],
-    reviewScores: [],
-    reviews: [],
+    gallery: [{ image: nordicFjordsImage }],
     booking: {},
     destinationSlugs: [],
     inventory: genericHotelInventory,
@@ -403,11 +368,7 @@ export const seedTours: SeedTour[] = [
     shortDescription:
       'Discover the tranquil rhythm of Hoi An hidden water world through ancient traditions and emerald landscapes.',
     image: bayMauImage,
-    alt: 'Aerial view of Bay Mau coconut forest in Hoi An with lush water palms and a basket boat at dawn',
     heroImage: bayMauImage,
-    heroAlt: 'Aerial view of Bay Mau coconut forest in Hoi An',
-    curatorImage: bayMauImage,
-    curatorImageAlt: 'Portrait of a friendly travel curator with a warm smile',
     subtitle:
       'Discover the tranquil rhythm of Hoi An hidden water world through ancient traditions and emerald landscapes.',
     highlights: [
@@ -436,7 +397,6 @@ export const seedTours: SeedTour[] = [
     gallery: [
       {
         image: bayMauImage,
-        alt: 'Basket boat through water palms',
         layout: 'portrait',
       },
     ],
@@ -529,18 +489,13 @@ export const seedTours: SeedTour[] = [
     description: [shortDescription],
     shortDescription,
     image: nordicFjordsImage,
-    alt: `${title} travel experience`,
     heroImage: nordicFjordsImage,
-    heroAlt: `${title} hero image`,
-    curatorImage: nordicFjordsImage,
-    curatorImageAlt: 'Travel curator portrait',
     subtitle: shortDescription,
     highlights: [],
     itinerary: [],
     gallery: [
       {
         image: nordicFjordsImage,
-        alt: `${title} visual journal portrait`,
         layout: 'portrait',
       },
     ],
@@ -567,9 +522,7 @@ export const seedBlogPosts: SeedBlogPost[] = [
     publishedAt: new Date('2024-10-12T00:00:00.000Z'),
     readingTime: '8 min read',
     image: nordicFjordsImage,
-    alt: 'Luxury boutique hotel lobby with minimalist wooden furniture and a tranquil zen garden view',
     heroImage: nordicFjordsImage,
-    heroAlt: 'Expansive view of a minimalist modern Kyoto machiya interior',
     intro:
       'In Kyoto, traditional machiya are being reimagined by a new generation of architects.',
     meta: '8 min read',
@@ -598,14 +551,12 @@ export const seedBlogPosts: SeedBlogPost[] = [
     ],
     inlineImage: {
       image: nordicFjordsImage,
-      alt: 'Modern machiya interior details',
     },
     secondaryFeature: {
       title: 'A Dialogue with Nature',
       body: 'Pocket gardens remain the spiritual heart of the home.',
       image: {
         image: nordicFjordsImage,
-        alt: 'Small tsubo-niwa courtyard garden',
       },
     },
     relatedPosts: [],
@@ -665,9 +616,7 @@ export const seedBlogPosts: SeedBlogPost[] = [
     publishedAt: new Date('2024-09-01T00:00:00.000Z'),
     readingTime: '5 min read',
     image: nordicFjordsImage,
-    alt: `${title} cover image`,
     heroImage: nordicFjordsImage,
-    heroAlt: `${title} hero image`,
     intro: `${title} from the TouristWeb journal collection.`,
     meta: '5 min read',
     quote: 'Travel rewards the patient eye.',
@@ -693,11 +642,11 @@ export const seedBlogPosts: SeedBlogPost[] = [
         ],
       },
     ],
-    inlineImage: { image: nordicFjordsImage, alt: `${title} inline image` },
+    inlineImage: { image: nordicFjordsImage },
     secondaryFeature: {
       title: 'Editor’s Field Note',
       body: `A focused companion note for ${title}, pairing practical context with the sensory details that shape the experience.`,
-      image: { image: nordicFjordsImage, alt: `${title} field note image` },
+      image: { image: nordicFjordsImage },
     },
     relatedPosts: [],
     seo: { title, description: `${title} travel journal.` },
@@ -714,7 +663,6 @@ export const seedMomentsCaptured: SeedMomentCaptured[] = [
     country: 'Indonesia',
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuCXt_uOk39Ti37dURaaAO9Gv1kYVRVrW8XysehQZYZ-kt8ZIZ2bwtsNbCd8AQ10u4z3Ws-ygeCNJUv5Gop1UT63u6X8MxMOwsc3rhdMRY3tsgjeEe7qMzcd2149-FycyLeFDO7xpx9kcEWk2_fS8DKpX_9kDbN7JeuBgbv1G_I2vQxg6YBjFVxc2nyFZne7rAd3m-oBrS93hnfaOSPn5-SrDsWnmzW4Kbf9FhEm3BsIhBf9ZX3-3YD5FUAC77BSp5tPXQZqXBkT11Kv',
-    alt: 'Luxurious infinity pool overlooking tropical jungle in Bali at sunset',
     wide: false,
     sortOrder: 10,
   },
@@ -724,7 +672,6 @@ export const seedMomentsCaptured: SeedMomentCaptured[] = [
     country: 'Greece',
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuBPOgbPq_XwQHxqcdV8CyyHHmuASmYTCmNh8iC7Qa31o9m88sCugttUqmVEJ9bS5RPzElQEn3SYK-jK_z3ZTIrVazznHG0pefnGU_WXvkW-iVA_-PFDRH_IKzie9_WL8XUqXMxcvGZ2MQlUIH04iFzpzi0-Dw9h8BagV-0zsnmNHMyzCNzFKofG6m8Jgt1H4eP9Kmlfbm3tlEv7MKPMhepN0PChYlQh5bYZy_lqG6VpCO0OfdJSwkDnmnv66dBHDhuW2r9OkGCMoo0l',
-    alt: 'Sunset over Santorini caldera with white domed buildings',
     wide: true,
     sortOrder: 20,
   },
@@ -734,7 +681,6 @@ export const seedMomentsCaptured: SeedMomentCaptured[] = [
     country: 'Japan',
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAF4vsCxEPUT55N-RY2qaIvB_vfZFOivZwZ9iOvf16bFRt0ntzY8S9f8SN1Y69IGH9UEwQJJ4z-s409ytBeuTtHET1tRKmmZZ7purJkx80yYpcbQu-HMrFGCLFQrH9MmxYVPtwbNMaGNC0pX5pHQFf6Pf20qr-d6DU5b8mbJ09TwyrMdeGgJK7i0ug1bPf7MuX84yyLKpMlihdxXp-Rx3Wny5jGquG2LmnAUEA0Xk-SSmox9ULLpYVMrzC7tbttWUuf-vk8cdjTvwoC',
-    alt: 'Orange torii gates at Fushimi Inari shrine in Kyoto',
     wide: false,
     sortOrder: 30,
   },
@@ -744,7 +690,6 @@ export const seedMomentsCaptured: SeedMomentCaptured[] = [
     country: 'Switzerland',
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuDmQGXS04u9LQQr8k62J4bbs5yRMtU1_3unbCZXTbhnDlAJZd6PTnWl9ObnEBg_XeHpk1EW78JTlcFrpgc03E6GF_GD30D8cTau7EFb48AKzznjX8M3MAwWIJrOGch91X09_JxAecQVTs0keSp11X99OraPR_Nmvc-aV-NT4PPebtaG5J9v2tIMaM5eCrLoVdStV6ZMQr2G8xdbmvLDtw1ByehwABdtCZGgp9ceBVrFy-U-3crNf73iAB6_pRpzvDuMxU397e3baeGv',
-    alt: 'Snow-capped alpine mountains reflecting in a turquoise lake',
     wide: true,
     sortOrder: 40,
   },

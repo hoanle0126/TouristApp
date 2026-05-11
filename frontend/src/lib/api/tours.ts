@@ -21,15 +21,11 @@ export type SaveTourInput = {
   readonly description: readonly string[];
   readonly shortDescription: string;
   readonly image: string;
-  readonly alt: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
-  readonly curatorImage: string;
-  readonly curatorImageAlt: string;
   readonly subtitle: string;
   readonly highlights: readonly { readonly icon: string; readonly title: string; readonly description: string }[];
   readonly itinerary: readonly { readonly title: string; readonly description: string }[];
-  readonly gallery: readonly { readonly image: string; readonly alt: string; readonly layout: "portrait" | "landscape" }[];
+  readonly gallery: readonly { readonly image: string; readonly layout: "portrait" | "landscape" }[];
   readonly inclusions: readonly string[];
   readonly exclusions: readonly string[];
   readonly destinationSlug: string;

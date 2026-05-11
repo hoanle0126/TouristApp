@@ -14,13 +14,7 @@ export class CreateDestinationDto {
   image: string;
 
   @IsString()
-  alt: string;
-
-  @IsString()
   heroImage: string;
-
-  @IsString()
-  heroAlt: string;
 
   @IsString()
   summary: string;

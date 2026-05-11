@@ -147,7 +147,6 @@ export interface HotelCard {
   readonly location: string;
   readonly name: string;
   readonly price: string;
-  readonly score?: string;
   readonly slug?: string;
 }
 
@@ -157,7 +156,7 @@ export interface HotelDetailImage {
 }
 
 export interface HotelDetailAmenity {
-  readonly icon: "pool" | "spa" | "dining" | "gym";
+  readonly icon: "pool" | "spa" | "dining" | "gym" | "wifi" | "coffee" | "parking" | "beach";
   readonly title: string;
 }
 
@@ -168,18 +167,6 @@ export interface HotelDetailSuite {
   readonly image: string;
   readonly name: string;
   readonly price: string;
-}
-
-export interface HotelDetailReviewScore {
-  readonly label: string;
-  readonly score: string;
-}
-
-export interface HotelDetailReview {
-  readonly author: string;
-  readonly initials: string;
-  readonly quote: string;
-  readonly stayed: string;
 }
 
 export interface HotelInventoryDay {
@@ -209,13 +196,9 @@ export interface HotelDetail {
   readonly heroAlt: string;
   readonly heroImage: string;
   readonly inventory: readonly HotelInventoryDay[];
+  readonly destinations: readonly TourDestination[];
   readonly location: string;
   readonly price: string;
-  readonly reviewScores: readonly HotelDetailReviewScore[];
-  readonly reviews: readonly HotelDetailReview[];
-  readonly score: string;
-  readonly scoreLabel: string;
-  readonly scoreSummary: string;
   readonly slug?: string;
   readonly suites: readonly HotelDetailSuite[];
   readonly title: string;
@@ -232,7 +215,7 @@ export interface TourDeparture {
 
 export interface TourDetailHighlight {
   readonly description: string;
-  readonly icon: "boat" | "fish" | "food" | "eco";
+  readonly icon: "boat" | "fish" | "food" | "eco" | "camera" | "map" | "mountain" | "sparkles" | "hotel" | "walk" | "coffee" | "compass";
   readonly title: string;
 }
 
@@ -249,8 +232,6 @@ export interface TourDetailImage {
 
 export interface TourDetail {
   readonly availability: string;
-  readonly curatorImage: string;
-  readonly curatorImageAlt: string;
   readonly description: readonly string[];
   readonly departures: readonly TourDeparture[];
   readonly destination: TourDestination;

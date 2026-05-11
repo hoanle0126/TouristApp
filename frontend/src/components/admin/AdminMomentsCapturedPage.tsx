@@ -21,7 +21,6 @@ interface AdminMomentsCapturedPageProps {
 }
 
 interface MomentFormState {
-  readonly alt: string;
   readonly country: string;
   readonly id?: string;
   readonly image: string;
@@ -32,7 +31,6 @@ interface MomentFormState {
 
 function createEmptyFormState(nextSortOrder: number): MomentFormState {
   return {
-    alt: "",
     country: "",
     image: "",
     sortOrder: String(nextSortOrder),
@@ -43,7 +41,6 @@ function createEmptyFormState(nextSortOrder: number): MomentFormState {
 
 function toFormState(moment: VisualDiaryItem): MomentFormState {
   return {
-    alt: moment.alt,
     country: moment.country,
     id: moment.id,
     image: moment.image,
@@ -55,7 +52,6 @@ function toFormState(moment: VisualDiaryItem): MomentFormState {
 
 function toPayload(form: MomentFormState): SaveMomentCapturedInput {
   return {
-    alt: form.alt.trim(),
     country: form.country.trim(),
     image: form.image.trim(),
     sortOrder: Number(form.sortOrder),
@@ -65,7 +61,6 @@ function toPayload(form: MomentFormState): SaveMomentCapturedInput {
 }
 
 function toMomentItem(moment: {
-  alt: string;
   country: string;
   id: string;
   image: string;
@@ -74,7 +69,7 @@ function toMomentItem(moment: {
   wide: boolean;
 }): VisualDiaryItem {
   return {
-    alt: moment.alt,
+    alt: `${moment.title} travel moment image`,
     country: moment.country,
     id: moment.id,
     image: moment.image,
@@ -318,14 +313,6 @@ export default function AdminMomentsCapturedPage({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="moment-alt">Alt text</Label>
-                <Input
-                  id="moment-alt"
-                  onChange={(event) => updateField("alt", event.target.value)}
-                  value={form.alt}
-                />
-              </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">

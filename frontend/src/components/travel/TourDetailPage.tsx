@@ -1,27 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, CircleX, Fish, Leaf, Sailboat, Utensils } from "lucide-react";
+import { Camera, CheckCircle2, ChevronRight, CircleX, Coffee, Compass, Fish, Hotel, Leaf, Map, Mountain, Sailboat, Sparkles, Utensils, Footprints } from "lucide-react";
 
 import { TourBookingCard } from "@/src/components/travel/TourBookingCard";
 import type { TourDetail, TourDetailHighlight } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
+const highlightIcons = {
+  boat: Sailboat,
+  fish: Fish,
+  food: Utensils,
+  eco: Leaf,
+  camera: Camera,
+  map: Map,
+  mountain: Mountain,
+  sparkles: Sparkles,
+  hotel: Hotel,
+  walk: Footprints,
+  coffee: Coffee,
+  compass: Compass,
+} satisfies Record<TourDetailHighlight["icon"], typeof Sailboat>;
+
 function HighlightIcon({ icon }: Readonly<{ icon: TourDetailHighlight["icon"] }>) {
-  const className = "size-8 text-emerald-800";
+  const Icon = highlightIcons[icon];
 
-  if (icon === "boat") {
-    return <Sailboat className={className} />;
-  }
-
-  if (icon === "fish") {
-    return <Fish className={className} />;
-  }
-
-  if (icon === "food") {
-    return <Utensils className={className} />;
-  }
-
-  return <Leaf className={className} />;
+  return <Icon className="size-8 text-emerald-800" />;
 }
 
 function DetailHero({ tour }: Readonly<{ tour: TourDetail }>) {

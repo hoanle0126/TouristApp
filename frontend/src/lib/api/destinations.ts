@@ -7,9 +7,7 @@ export type SaveDestinationInput = {
   readonly title: string;
   readonly description: string;
   readonly image: string;
-  readonly alt: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
   readonly summary: string;
   readonly intro: readonly string[];
   readonly facts: readonly { readonly label: string; readonly value: string }[];

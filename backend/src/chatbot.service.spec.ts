@@ -122,7 +122,6 @@ describe('ChatbotService', () => {
         slug: 'shining-riverside-hoi-an',
         name: 'Shining Riverside Hoi An',
         location: 'Hoi An',
-        scoreSummary: 'Riverside stay near the old town.',
         inventoryDays: [
           {
             date: new Date('2026-06-13T00:00:00.000Z'),
@@ -195,7 +194,6 @@ describe('ChatbotService', () => {
         slug: 'shining-riverside-hoi-an',
         name: 'Shining Riverside',
         location: 'Hoi An Hotel & Spa, Vietnam',
-        scoreSummary: 'Score 9.4 riverside hotel.',
         inventoryDays: [
           {
             date: new Date('2026-06-13T00:00:00.000Z'),
@@ -293,7 +291,6 @@ describe('ChatbotService', () => {
         slug: 'shining-riverside-hoi-an',
         name: 'Shining Riverside',
         location: 'Hoi An Hotel & Spa, Vietnam',
-        scoreSummary: 'Score 9.4 riverside hotel.',
         inventoryDays: [
           {
             date: new Date('2026-06-15T00:00:00.000Z'),
@@ -464,7 +461,6 @@ describe('ChatbotService', () => {
         slug: 'shining-riverside-hoi-an',
         name: 'Shining Riverside',
         location: 'Hoi An Hotel & Spa, Vietnam',
-        scoreSummary: 'Score 9.4 riverside hotel.',
         inventoryDays: [
           {
             date: new Date('2026-06-13T00:00:00.000Z'),
@@ -478,7 +474,6 @@ describe('ChatbotService', () => {
         slug: 'aman-tokyo',
         name: 'Aman Tokyo',
         location: 'Otemachi, Japan',
-        scoreSummary: 'Score 9.1 urban luxury hotel.',
         inventoryDays: [],
       },
     ]);

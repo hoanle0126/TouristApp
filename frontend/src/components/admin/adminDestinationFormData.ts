@@ -5,10 +5,8 @@ export interface DestinationFormState {
   readonly slug: string;
   readonly href: string;
   readonly cardImage: string;
-  readonly cardAlt: string;
   readonly shortDescription: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
   readonly summary: string;
 }
 
@@ -41,10 +39,8 @@ export const createDestinationInitialValues: DestinationFormInitialValues = {
     slug: "",
     href: "",
     cardImage: "",
-    cardAlt: "",
     shortDescription: "",
     heroImage: "",
-    heroAlt: "",
     summary: "",
   },
   intro: [
@@ -100,10 +96,8 @@ export function valuesFromDestinationDetail(destination: DestinationDetail): Res
         slug,
         href: `/destinations/${slug}`,
         cardImage: destination.card.image,
-        cardAlt: destination.card.alt,
         shortDescription: destination.card.description,
         heroImage: destination.heroImage,
-        heroAlt: destination.card.alt,
         summary: destination.summary,
       },
       intro: textRows("intro", destination.intro),

@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { MomentCaptured } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMomentCapturedDto } from './dto/create-moment-captured.dto';
 import { UpdateMomentCapturedDto } from './dto/update-moment-captured.dto';
@@ -48,9 +47,12 @@ export class MomentsCapturedService {
     return moment;
   }
 
-  private toResponse(moment: MomentCaptured) {
+  private toResponse(moment: Awaited<ReturnType<PrismaService['momentCaptured']['findUnique']>>) {
+    if (!moment) {
+      throw new NotFoundException('Captured moment was not found.');
+    }
+
     return {
-      alt: moment.alt,
       country: moment.country,
       id: moment.id,
       image: moment.image,

@@ -24,6 +24,7 @@ export class BlogsController {
     @Query('hotel') hotel?: string,
     @Query('search') search?: string,
     @Query('per_page') perPage?: string,
+    @Query('status') status?: string,
   ) {
     return this.blogsService.findAll({
       category,
@@ -32,12 +33,13 @@ export class BlogsController {
       hotel,
       search,
       perPage: this.parsePerPage(perPage),
+      status: this.parseStatus(status),
     });
   }
 
   @Get(':slug')
-  findOne(@Param('slug') slug: string) {
-    return this.blogsService.findOne(slug);
+  findOne(@Param('slug') slug: string, @Query('status') status?: string) {
+    return this.blogsService.findOne(slug, this.parseStatus(status));
   }
 
   @Post()
@@ -67,5 +69,13 @@ export class BlogsController {
     }
 
     return Math.min(parsed, 50);
+  }
+
+  private parseStatus(status?: string) {
+    if (status === 'all' || status === 'draft' || status === 'published' || status === 'archived') {
+      return status;
+    }
+
+    return undefined;
   }
 }

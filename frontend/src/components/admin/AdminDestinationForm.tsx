@@ -82,9 +82,7 @@ function toDestinationPayload(
     title: form.title,
     description: form.shortDescription,
     image: form.cardImage,
-    alt: form.cardAlt,
     heroImage: form.heroImage,
-    heroAlt: form.heroAlt,
     summary: form.summary,
     intro: intro.map((item) => item.value.trim()).filter(Boolean),
     facts: facts
@@ -410,15 +408,13 @@ function DestinationMediaSection({
     <Card>
       <CardContent className="space-y-6 p-6 sm:p-7">
         <SectionHeader
-          description="Image URLs and alt text for the listing card and destination hero."
+          description="Image URLs for the listing card and destination hero."
           eyebrow="Media"
           title="Destination imagery"
         />
         <div className="grid gap-4 md:grid-cols-2">
           <TextField error={errors.cardImage} id="destination-card-image" label="Card image URL" onChange={(value) => updateField("cardImage", value)} value={form.cardImage} />
-          <TextField id="destination-card-alt" label="Card image alt text" onChange={(value) => updateField("cardAlt", value)} value={form.cardAlt} />
           <TextField error={errors.heroImage} id="destination-hero-image" label="Hero image URL" onChange={(value) => updateField("heroImage", value)} value={form.heroImage} />
-          <TextField id="destination-hero-alt" label="Hero image alt text" onChange={(value) => updateField("heroAlt", value)} value={form.heroAlt} />
         </div>
       </CardContent>
     </Card>

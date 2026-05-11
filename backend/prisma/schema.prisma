@@ -19,11 +19,7 @@ model Tour {
   description      Json
   shortDescription String
   image            String
-  alt              String
   heroImage        String
-  heroAlt          String
-  curatorImage     String
-  curatorImageAlt  String
   subtitle         String
   highlights       Json
   itinerary        Json
@@ -65,9 +61,7 @@ model Destination {
   title            String
   description      String
   image            String
-  alt              String
   heroImage        String
-  heroAlt          String
   summary          String
   intro            Json
   facts            Json
@@ -84,7 +78,6 @@ model MomentCaptured {
   title     String
   country   String
   image     String
-  alt       String
   wide      Boolean  @default(false)
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
@@ -101,20 +94,13 @@ model Hotel {
   address          String
   price            String
   badge            String?
-  score            Float
-  scoreLabel       String
-  scoreSummary     String
   status           String              @default("published")
   listingImage     String
-  listingAlt       String
   heroImage        String
-  heroAlt          String
   description      Json
   amenities        Json
   suites           Json
   gallery          Json
-  reviewScores     Json
-  reviews          Json
   booking          Json
   destinations     Destination[]
   tours            Tour[]
@@ -155,9 +141,7 @@ model BlogPost {
   publishedAt           DateTime
   readingTime           String
   image                 String
-  alt                   String
   heroImage             String
-  heroAlt               String
   intro                 String
   meta                  String
   quote                 String

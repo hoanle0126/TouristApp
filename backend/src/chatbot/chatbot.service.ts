@@ -32,7 +32,6 @@ type HotelMatch = {
   slug: string;
   name: string;
   location: string;
-  scoreSummary: string;
   inventoryDays: {
     date: Date;
     totalRooms: number;

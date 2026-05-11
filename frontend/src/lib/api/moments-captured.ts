@@ -3,7 +3,6 @@ import { apiFetch } from "@/src/lib/api/client";
 import type { ApiMomentCaptured } from "@/src/lib/api/types";
 
 export type SaveMomentCapturedInput = {
-  readonly alt: string;
   readonly country: string;
   readonly image: string;
   readonly sortOrder: number;

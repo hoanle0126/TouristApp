@@ -16,11 +16,7 @@ const tourRecord = {
   description: ['Travel through Cam Thanh waterways.'],
   shortDescription: 'Glide through Hoi An coconut waterways.',
   image: 'https://images.unsplash.com/photo-1',
-  alt: 'Basket boats in coconut forest',
   heroImage: 'https://images.unsplash.com/photo-2',
-  heroAlt: 'Aerial coconut forest',
-  curatorImage: 'https://images.unsplash.com/photo-3',
-  curatorImageAlt: 'Local tour curator',
   subtitle: 'Discover Hoi An hidden water world.',
   highlights: [
     {
@@ -35,7 +31,6 @@ const tourRecord = {
   gallery: [
     {
       image: 'https://images.unsplash.com/photo-4',
-      alt: 'Fisherman',
       layout: 'portrait',
     },
   ],
@@ -48,9 +43,7 @@ const tourRecord = {
     title: 'Hoi An Ancient Town',
     description: 'Lantern-lit lanes and riverside cafes.',
     image: 'https://images.unsplash.com/photo-5',
-    alt: 'Lanterns glowing in Hoi An Ancient Town',
     heroImage: 'https://images.unsplash.com/photo-6',
-    heroAlt: 'Hoi An riverside at golden hour',
     summary: 'A heritage town for food walks.',
     intro: [],
     facts: [],
@@ -79,20 +72,13 @@ const tourRecord = {
       address: '08 Nguyen Phuc Chu',
       price: 'From $145',
       badge: 'Boutique stay',
-      score: 9.4,
-      scoreLabel: 'Exceptional',
-      scoreSummary: 'Loved for calm riverside views.',
       status: 'published',
       listingImage: 'https://images.unsplash.com/photo-7',
-      listingAlt: 'Boutique hotel pool',
       heroImage: 'https://images.unsplash.com/photo-8',
-      heroAlt: 'Riverside suite',
       description: [],
       amenities: [],
       suites: [],
       gallery: [],
-      reviewScores: [],
-      reviews: [],
       booking: {},
       createdAt: new Date('2026-04-30T00:00:00.000Z'),
       updatedAt: new Date('2026-04-30T00:00:00.000Z'),
@@ -152,8 +138,7 @@ describe('ToursService', () => {
         price: '$45',
         description: 'Glide through Hoi An coconut waterways.',
         image: 'https://images.unsplash.com/photo-1',
-        alt: 'Basket boats in coconut forest',
-        destination: {
+              destination: {
           slug: 'hoi-an',
           title: 'Hoi An Ancient Town',
           href: '/destinations/hoi-an',
@@ -575,9 +560,10 @@ describe('ToursService', () => {
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
     const service = new ToursService(prisma as never);
 
-    await expect(
-      service.findOne('bay-mau-coconut-forest'),
-    ).resolves.toMatchObject({
+    const detail = await service.findOne('bay-mau-coconut-forest');
+
+    expect(detail).not.toHaveProperty('curatorImage');
+    expect(detail).toMatchObject({
       slug: 'bay-mau-coconut-forest',
       description: ['Travel through Cam Thanh waterways.'],
       highlights: [
@@ -621,12 +607,8 @@ describe('ToursService', () => {
       description: ['Travel through Cam Thanh waterways.'],
       shortDescription: 'Glide through Hoi An coconut waterways.',
       image: 'https://images.unsplash.com/photo-1',
-      alt: 'Basket boats in coconut forest',
-      heroImage: 'https://images.unsplash.com/photo-2',
-      heroAlt: 'Aerial coconut forest',
-      curatorImage: 'https://images.unsplash.com/photo-3',
-      curatorImageAlt: 'Local tour curator',
-      subtitle: 'Discover Hoi An hidden water world.',
+          heroImage: 'https://images.unsplash.com/photo-2',
+                  subtitle: 'Discover Hoi An hidden water world.',
       highlights: [
         {
           icon: 'boat',
@@ -640,8 +622,7 @@ describe('ToursService', () => {
       gallery: [
         {
           image: 'https://images.unsplash.com/photo-4',
-          alt: 'Fisherman',
-          layout: 'portrait',
+              layout: 'portrait',
         },
       ],
       inclusions: ['Guide'],
@@ -711,11 +692,7 @@ describe('ToursService', () => {
         description: tourRecord.description,
         shortDescription: tourRecord.shortDescription,
         image: tourRecord.image,
-        alt: tourRecord.alt,
         heroImage: tourRecord.heroImage,
-        heroAlt: tourRecord.heroAlt,
-        curatorImage: tourRecord.curatorImage,
-        curatorImageAlt: tourRecord.curatorImageAlt,
         subtitle: tourRecord.subtitle,
         highlights: tourRecord.highlights,
         itinerary: tourRecord.itinerary,

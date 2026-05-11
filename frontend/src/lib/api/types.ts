@@ -6,7 +6,6 @@ export type ApiDestinationLink = {
 };
 
 export type ApiMomentCaptured = {
-  readonly alt: string;
   readonly country: string;
   readonly id: string;
   readonly image: string;
@@ -40,7 +39,6 @@ export type ApiTourCard = {
   readonly price: string;
   readonly description: string;
   readonly image: string;
-  readonly alt: string;
   readonly destination: ApiDestinationLink;
   readonly hotels: readonly ApiHotelLink[];
 };
@@ -60,15 +58,11 @@ export type ApiTourDetail = Omit<ApiTourCard, "description"> & {
   readonly description: readonly string[];
   readonly shortDescription: string;
   readonly image: string;
-  readonly alt: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
-  readonly curatorImage: string;
-  readonly curatorImageAlt: string;
   readonly subtitle: string;
   readonly highlights: readonly { readonly icon?: string; readonly title: string; readonly description: string }[];
   readonly itinerary: readonly { readonly title: string; readonly description: string }[];
-  readonly gallery: readonly { readonly image: string; readonly alt: string; readonly layout?: "portrait" | "landscape" }[];
+  readonly gallery: readonly { readonly image: string; readonly layout?: "portrait" | "landscape" }[];
   readonly inclusions: readonly string[];
   readonly exclusions: readonly string[];
   readonly departures: readonly ApiTourDeparture[];
@@ -79,9 +73,7 @@ export type ApiDestinationDetail = {
   readonly title: string;
   readonly description: string;
   readonly image: string;
-  readonly alt: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
   readonly summary: string;
   readonly intro: readonly string[];
   readonly facts: readonly { readonly label: string; readonly value: string }[];
@@ -90,16 +82,16 @@ export type ApiDestinationDetail = {
   readonly relatedHotels: readonly { readonly href: string; readonly label: string; readonly meta: string; readonly title: string }[];
 };
 
+export type ApiHotelAmenity = string | { readonly label?: string; readonly title?: string; readonly icon?: string };
+
 export type ApiHotelCard = {
   readonly slug: string;
-  readonly amenities: readonly { readonly label?: string; readonly title?: string; readonly icon?: string }[];
-  readonly alt?: string;
+  readonly amenities: readonly ApiHotelAmenity[];
   readonly badge?: string;
   readonly image?: string;
   readonly location: string;
   readonly name: string;
   readonly price: string;
-  readonly score: number | string;
   readonly destinations: readonly ApiDestinationLink[];
   readonly tours: readonly ApiTourLink[];
 };
@@ -117,9 +109,8 @@ export type ApiHotelDetail = ApiHotelCard & {
   readonly title: string;
   readonly address: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
   readonly description: readonly string[];
-  readonly gallery: readonly { readonly image: string; readonly alt: string }[];
+  readonly gallery: readonly { readonly image: string }[];
   readonly suites: readonly {
     readonly name?: string;
     readonly title?: string;
@@ -127,12 +118,7 @@ export type ApiHotelDetail = ApiHotelCard & {
     readonly price: string;
     readonly badge?: string;
     readonly image: string;
-    readonly alt: string;
   }[];
-  readonly scoreLabel: string;
-  readonly scoreSummary: string;
-  readonly reviewScores: readonly { readonly label: string; readonly score?: number; readonly value?: string }[];
-  readonly reviews: readonly { readonly author: string; readonly initials?: string; readonly location?: string; readonly quote: string; readonly stayed?: string }[];
   readonly inventory: readonly ApiHotelInventoryDay[];
   readonly booking: {
     readonly checkIn: string;
@@ -146,34 +132,47 @@ export type ApiHotelDetail = ApiHotelCard & {
   };
 };
 
+export type ApiBlogStatus = "draft" | "published" | "archived";
+
 export type ApiBlogCard = {
   readonly slug: string;
   readonly href: string;
   readonly title: string;
   readonly excerpt: string;
   readonly category: string;
+  readonly status?: ApiBlogStatus;
   readonly image: string;
-  readonly alt: string;
   readonly author: string;
   readonly date: string;
   readonly publishedAt: string;
   readonly readingTime: string;
+  readonly mentionedDestinations?: readonly ApiDestinationLink[];
+  readonly mentionedTours?: readonly ApiTourLink[];
+  readonly mentionedHotels?: readonly ApiHotelLink[];
+};
+
+export type ApiBlogRelatedPost = {
+  readonly href: string;
+  readonly title: string;
+  readonly excerpt: string;
+  readonly category: string;
+  readonly image: string;
 };
 
 export type ApiBlogDetail = ApiBlogCard & {
   readonly heroImage: string;
-  readonly heroAlt: string;
   readonly intro: string;
   readonly meta: string;
   readonly quote: string;
   readonly sections: readonly { readonly heading?: string; readonly body: readonly string[] }[];
-  readonly inlineImage: { readonly image: string; readonly alt: string };
+  readonly inlineImage: { readonly image: string };
   readonly secondaryFeature: {
     readonly title: string;
     readonly body: string;
-    readonly image: { readonly image: string; readonly alt: string };
+    readonly image: { readonly image: string };
   };
-  readonly relatedPosts: readonly (ApiBlogCard & { readonly href: string })[];
+  readonly relatedPosts: readonly ApiBlogRelatedPost[];
+  readonly seo?: { readonly title?: string; readonly description?: string; readonly ogImage?: string };
 };
 
 export type ApiBookingItemInput = {

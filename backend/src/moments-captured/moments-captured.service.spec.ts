@@ -7,7 +7,6 @@ const momentRecord = {
   country: 'Indonesia',
   image:
     'https://lh3.googleusercontent.com/aida-public/AB6AXuCXt_uOk39Ti37dURaaAO9Gv1kYVRVrW8XysehQZYZ-kt8ZIZ2bwtsNbCd8AQ10u4z3Ws-ygeCNJUv5Gop1UT63u6X8MxMOwsc3rhdMRY3tsgjeEe7qMzcd2149-FycyLeFDO7xpx9kcEWk2_fS8DKpX_9kDbN7JeuBgbv1G_I2vQxg6YBjFVxc2nyFZne7rAd3m-oBrS93hnfaOSPn5-SrDsWnmzW4Kbf9FhEm3BsIhBf9ZX3-3YD5FUAC77BSp5tPXQZqXBkT11Kv',
-  alt: 'Luxurious infinity pool overlooking tropical jungle in Bali at sunset',
   wide: false,
   sortOrder: 10,
   createdAt: new Date('2026-05-01T00:00:00.000Z'),
@@ -34,7 +33,6 @@ describe('MomentsCapturedService', () => {
 
     await expect(service.findAll()).resolves.toEqual([
       {
-        alt: momentRecord.alt,
         country: momentRecord.country,
         id: momentRecord.id,
         image: momentRecord.image,
@@ -55,7 +53,6 @@ describe('MomentsCapturedService', () => {
 
     await expect(
       service.create({
-        alt: momentRecord.alt,
         country: momentRecord.country,
         image: momentRecord.image,
         sortOrder: momentRecord.sortOrder,
@@ -63,7 +60,6 @@ describe('MomentsCapturedService', () => {
         wide: momentRecord.wide,
       }),
     ).resolves.toEqual({
-      alt: momentRecord.alt,
       country: momentRecord.country,
       id: momentRecord.id,
       image: momentRecord.image,
@@ -87,7 +83,6 @@ describe('MomentsCapturedService', () => {
 
     await expect(
       service.update(momentRecord.id, {
-        alt: momentRecord.alt,
         country: 'Greece',
         image: momentRecord.image,
         sortOrder: 20,
@@ -95,7 +90,6 @@ describe('MomentsCapturedService', () => {
         wide: true,
       }),
     ).resolves.toEqual({
-      alt: momentRecord.alt,
       country: 'Greece',
       id: momentRecord.id,
       image: momentRecord.image,
@@ -112,7 +106,6 @@ describe('MomentsCapturedService', () => {
 
     await expect(
       service.update('missing', {
-        alt: momentRecord.alt,
         country: momentRecord.country,
         image: momentRecord.image,
         sortOrder: momentRecord.sortOrder,

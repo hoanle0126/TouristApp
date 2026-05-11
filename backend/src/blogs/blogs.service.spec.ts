@@ -7,9 +7,7 @@ const destinationRecord = {
   title: 'Hoi An Ancient Town',
   description: 'Lantern-lit lanes.',
   image: 'https://images.unsplash.com/photo-1',
-  alt: 'Hoi An lanterns',
   heroImage: 'https://images.unsplash.com/photo-2',
-  heroAlt: 'Hoi An riverside',
   summary: 'A heritage town.',
   intro: [],
   facts: [],
@@ -31,11 +29,7 @@ const tourRecord = {
   description: ['Travel through Cam Thanh waterways.'],
   shortDescription: 'Glide through Hoi An coconut waterways.',
   image: 'https://images.unsplash.com/photo-3',
-  alt: 'Basket boats in coconut forest',
   heroImage: 'https://images.unsplash.com/photo-4',
-  heroAlt: 'Aerial coconut forest',
-  curatorImage: 'https://images.unsplash.com/photo-5',
-  curatorImageAlt: 'Local tour curator',
   subtitle: 'Discover Hoi An hidden water world.',
   highlights: [],
   itinerary: [],
@@ -54,20 +48,13 @@ const hotelRecord = {
   address: '08 Nguyen Phuc Chu',
   price: 'From $145',
   badge: 'Boutique stay',
-  score: 9.4,
-  scoreLabel: 'Exceptional',
-  scoreSummary: 'Loved for calm riverside views.',
   status: 'published',
   listingImage: 'https://images.unsplash.com/photo-6',
-  listingAlt: 'Boutique hotel pool',
   heroImage: 'https://images.unsplash.com/photo-7',
-  heroAlt: 'Riverside suite',
   description: [],
   amenities: [],
   suites: [],
   gallery: [],
-  reviewScores: [],
-  reviews: [],
   booking: {},
   createdAt: new Date('2026-05-01T00:00:00.000Z'),
   updatedAt: new Date('2026-05-01T00:00:00.000Z'),
@@ -84,9 +71,7 @@ const blogRecord = {
   publishedAt: new Date('2026-04-18T09:00:00.000Z'),
   readingTime: '6 min read',
   image: 'https://images.unsplash.com/photo-8',
-  alt: 'Lantern-lit riverside street in Hoi An',
   heroImage: 'https://images.unsplash.com/photo-9',
-  heroAlt: 'Hoi An riverside at sunset',
   intro: 'Hoi An rewards travelers who move slowly.',
   meta: 'Plan a relaxed Hoi An weekend.',
   quote:
@@ -99,14 +84,12 @@ const blogRecord = {
   ],
   inlineImage: {
     image: 'https://images.unsplash.com/photo-10',
-    alt: 'Hoi An old town lanterns',
   },
   secondaryFeature: {
     title: 'Stay close to the river',
     body: 'A riverside boutique hotel keeps the Ancient Town within reach.',
     image: {
       image: 'https://images.unsplash.com/photo-11',
-      alt: 'Boutique hotel pool',
     },
   },
   relatedPosts: [
@@ -116,7 +99,6 @@ const blogRecord = {
       excerpt: 'How to time your trip.',
       category: 'Seasonal Planning',
       image: 'https://images.unsplash.com/photo-12',
-      alt: 'Lanterns glowing at night',
     },
   ],
   seo: {
@@ -231,6 +213,50 @@ describe('BlogsService', () => {
     });
   });
 
+  it('returns admin blog cards without published filtering when status is all', async () => {
+    const prisma = createPrismaMock();
+    prisma.blogPost.findMany.mockResolvedValue([{ ...blogRecord, status: 'draft' }]);
+    const service = new BlogsService(prisma as never);
+
+    await expect(service.findAll({ status: 'all' })).resolves.toEqual([
+      expect.objectContaining({
+        slug: 'hoi-an-riverside-weekend',
+        status: 'draft',
+      }),
+    ]);
+    expect(prisma.blogPost.findMany).toHaveBeenCalledWith({
+      where: {},
+      include: {
+        mentionedDestinations: true,
+        mentionedHotels: true,
+        mentionedTours: true,
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: undefined,
+    });
+  });
+
+  it('returns admin blog detail by slug regardless of published status', async () => {
+    const prisma = createPrismaMock();
+    prisma.blogPost.findFirst.mockResolvedValue({ ...blogRecord, status: 'draft' });
+    const service = new BlogsService(prisma as never);
+
+    await expect(
+      service.findOne('hoi-an-riverside-weekend', 'all'),
+    ).resolves.toMatchObject({
+      slug: 'hoi-an-riverside-weekend',
+      status: 'draft',
+    });
+    expect(prisma.blogPost.findFirst).toHaveBeenCalledWith({
+      where: { slug: 'hoi-an-riverside-weekend' },
+      include: {
+        mentionedDestinations: true,
+        mentionedHotels: true,
+        mentionedTours: true,
+      },
+    });
+  });
+
   it('returns blog detail by slug', async () => {
     const prisma = createPrismaMock();
     prisma.blogPost.findFirst.mockResolvedValue(blogRecord);
@@ -290,9 +316,7 @@ describe('BlogsService', () => {
       publishedAt: '2026-04-18T09:00:00.000Z',
       readingTime: blogRecord.readingTime,
       image: blogRecord.image,
-      alt: blogRecord.alt,
       heroImage: blogRecord.heroImage,
-      heroAlt: blogRecord.heroAlt,
       intro: blogRecord.intro,
       meta: blogRecord.meta,
       quote: blogRecord.quote,

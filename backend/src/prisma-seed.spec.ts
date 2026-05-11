@@ -51,7 +51,7 @@ describe('Prisma seed data', () => {
       expect(post.secondaryFeature).toMatchObject({
         title: expect.any(String),
         body: expect.any(String),
-        image: { image: expect.any(String), alt: expect.any(String) },
+        image: { image: expect.any(String) },
       });
     }
   });

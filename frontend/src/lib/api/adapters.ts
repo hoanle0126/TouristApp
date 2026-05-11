@@ -30,17 +30,24 @@ function formatDate(date: string) {
   }).format(new Date(date));
 }
 
-function toHighlightIcon(icon: string | undefined): TourDetailHighlight["icon"] {
-  if (icon === "boat" || icon === "fish" || icon === "food" || icon === "eco") {
-    return icon;
-  }
+const highlightIcons = ["boat", "fish", "food", "eco", "camera", "map", "mountain", "sparkles", "hotel", "walk", "coffee", "compass"] as const;
+const hotelAmenityIcons = ["pool", "spa", "dining", "gym", "wifi", "coffee", "parking", "beach"] as const;
 
-  return "eco";
+function toHighlightIcon(icon: string | undefined): TourDetailHighlight["icon"] {
+  return highlightIcons.find((item) => item === icon) ?? "eco";
+}
+
+function toHotelAmenityIcon(icon: string | undefined): HotelDetail["amenities"][number]["icon"] {
+  return hotelAmenityIcons.find((item) => item === icon) ?? "pool";
+}
+
+function imageAlt(label: string, context: string) {
+  return `${label} ${context}`.trim();
 }
 
 export function toTourCard(tour: ApiTourCard): TourCard {
   return {
-    alt: tour.alt,
+    alt: imageAlt(tour.title, "tour image"),
     badge: tour.badge,
     description: Array.isArray(tour.description) ? tour.description[0] ?? "" : tour.description,
     destination: resolveTourDestination(tour),
@@ -56,16 +63,18 @@ export function toTourCard(tour: ApiTourCard): TourCard {
 export function toTourDetail(tour: ApiTourDetail): TourDetail {
   return {
     availability: tour.availability,
-    curatorImage: tour.curatorImage,
-    curatorImageAlt: tour.curatorImageAlt,
     description: resolveTourDescription(tour),
     departures: tour.departures ?? [],
     destination: resolveTourDestination(tour),
     duration: tour.duration,
     exclusions: tour.exclusions,
-    gallery: tour.gallery.map((image) => ({ ...image, layout: image.layout ?? "landscape" })),
+    gallery: tour.gallery.map((image, index) => ({
+      ...image,
+      alt: imageAlt(tour.title, `gallery image ${index + 1}`),
+      layout: image.layout ?? "landscape",
+    })),
     guests: tour.guests,
-    heroAlt: tour.heroAlt,
+    heroAlt: imageAlt(tour.title, "hero image"),
     heroImage: tour.heroImage,
     highlights: tour.highlights.map((highlight) => ({
       description: highlight.description,
@@ -84,7 +93,7 @@ export function toTourDetail(tour: ApiTourDetail): TourDetail {
 
 export function toDestinationCard(destination: ApiDestinationDetail): DestinationCard {
   return {
-    alt: destination.alt,
+    alt: imageAlt(destination.title, "destination image"),
     description: destination.description,
     href: `/destinations/${destination.slug}`,
     image: destination.image,
@@ -108,14 +117,13 @@ export function toDestinationDetail(destination: ApiDestinationDetail): Destinat
 
 export function toHotelCard(hotel: ApiHotelCard): HotelCard {
   return {
-    amenities: hotel.amenities.map((amenity) => amenity.label ?? amenity.title ?? "Amenity"),
-    alt: hotel.alt ?? hotel.name,
+    amenities: hotel.amenities.map((amenity) => (typeof amenity === "string" ? amenity : amenity.label ?? amenity.title ?? "Amenity")),
+    alt: imageAlt(hotel.name, "hotel image"),
     badge: hotel.badge,
     image: hotel.image ?? "",
     location: hotel.location,
     name: hotel.name,
     price: hotel.price,
-    score: String(hotel.score),
     slug: hotel.slug,
   };
 }
@@ -123,59 +131,57 @@ export function toHotelCard(hotel: ApiHotelCard): HotelCard {
 export function toHotelDetail(hotel: ApiHotelDetail): HotelDetail {
   return {
     address: hotel.address,
-    amenities: hotel.amenities.map((amenity) => ({
-      icon: amenity.icon === "pool" || amenity.icon === "spa" || amenity.icon === "dining" || amenity.icon === "gym" ? amenity.icon : "pool",
-      title: amenity.label ?? amenity.title ?? "Amenity",
-    })),
+    amenities: hotel.amenities.map((amenity) => {
+      if (typeof amenity === "string") {
+        return { icon: "pool", title: amenity };
+      }
+
+      return {
+        icon: toHotelAmenityIcon(amenity.icon),
+        title: amenity.title ?? amenity.label ?? "Amenity",
+      };
+    }),
     booking: {
-      checkIn: hotel.booking.checkIn,
-      checkOut: hotel.booking.checkOut,
-      fee: hotel.booking.fee,
-      nightlyTotal: hotel.booking.nightlyTotal,
-      nights: String(hotel.booking.nights),
-      rating: String(hotel.booking.rating),
-      travelers: hotel.booking.travelers,
-      total: hotel.booking.total,
+      checkIn: hotel.booking.checkIn ?? "",
+      checkOut: hotel.booking.checkOut ?? "",
+      fee: hotel.booking.fee ?? "",
+      nightlyTotal: hotel.booking.nightlyTotal ?? "",
+      nights: hotel.booking.nights === undefined ? "" : String(hotel.booking.nights),
+      rating: hotel.booking.rating === undefined ? "" : String(hotel.booking.rating),
+      travelers: hotel.booking.travelers ?? "",
+      total: hotel.booking.total ?? "",
     },
     description: hotel.description,
-    gallery: hotel.gallery,
+    gallery: hotel.gallery.map((image, index) => ({
+      ...image,
+      alt: imageAlt(hotel.name, `gallery image ${index + 1}`),
+    })),
     inventory: hotel.inventory ?? [],
-    heroAlt: hotel.heroAlt,
+    destinations: hotel.destinations,
+    heroAlt: imageAlt(hotel.name, "hero image"),
     heroImage: hotel.heroImage,
     location: hotel.location,
     price: hotel.price,
-    reviewScores: hotel.reviewScores.map((score) => ({ label: score.label, score: String(score.score ?? score.value ?? "") })),
-    reviews: hotel.reviews.map((review) => ({
-      author: review.author,
-      initials:
-        review.initials ??
-        review.author
-          .split(" ")
-          .map((part) => part[0])
-          .join("")
-          .slice(0, 2),
-      quote: review.quote,
-      stayed: review.stayed ?? review.location ?? "Recent stay",
-    })),
-    score: String(hotel.score),
-    scoreLabel: hotel.scoreLabel,
     slug: hotel.slug,
-    scoreSummary: hotel.scoreSummary,
-    suites: hotel.suites.map((suite) => ({
-      alt: suite.alt,
-      badge: suite.badge,
-      description: suite.description,
-      image: suite.image,
-      name: suite.name ?? suite.title ?? "Suite",
-      price: suite.price,
-    })),
+    suites: hotel.suites.map((suite) => {
+      const name = suite.name ?? suite.title ?? "Suite";
+
+      return {
+        alt: imageAlt(name, "suite image"),
+        badge: suite.badge,
+        description: suite.description,
+        image: suite.image,
+        name,
+        price: suite.price,
+      };
+    }),
     title: hotel.title,
   };
 }
 
 export function toJournalPost(blog: ApiBlogCard): JournalPost {
   return {
-    alt: blog.alt,
+    alt: imageAlt(blog.title, "journal image"),
     category: blog.category,
     excerpt: blog.excerpt,
     image: blog.image,
@@ -196,7 +202,7 @@ export function toBlogPost(blog: ApiBlogCard): BlogPost {
 
 export function toVisualDiaryItem(moment: ApiMomentCaptured): VisualDiaryItem {
   return {
-    alt: moment.alt,
+    alt: imageAlt(moment.title, "travel moment image"),
     country: moment.country,
     id: moment.id,
     image: moment.image,
@@ -211,17 +217,27 @@ export function toJournalDetail(blog: ApiBlogDetail): JournalDetail {
     author: blog.author,
     category: blog.category,
     date: formatDate(blog.publishedAt),
-    heroAlt: blog.heroAlt,
+    heroAlt: imageAlt(blog.title, "hero image"),
     heroImage: blog.heroImage,
-    inlineImage: blog.inlineImage,
+    inlineImage: { ...blog.inlineImage, alt: imageAlt(blog.title, "inline image") },
     intro: blog.intro,
     meta: blog.meta || blog.readingTime,
     quote: blog.quote,
     relatedPosts: blog.relatedPosts.map((post) => ({
-      ...toJournalPost(post),
+      alt: imageAlt(post.title, "journal image"),
+      category: post.category,
+      excerpt: post.excerpt,
       href: post.href,
+      image: post.image,
+      title: post.title,
     })),
-    secondaryFeature: blog.secondaryFeature,
+    secondaryFeature: {
+      ...blog.secondaryFeature,
+      image: {
+        ...blog.secondaryFeature.image,
+        alt: imageAlt(blog.secondaryFeature.title, "feature image"),
+      },
+    },
     sections: blog.sections,
     title: blog.title,
   };

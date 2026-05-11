@@ -36,26 +36,26 @@ export class CreateTourDto {
   image: string;
 
   @IsString()
-  alt: string;
-
-  @IsString()
   heroImage: string;
-
-  @IsString()
-  heroAlt: string;
-
-  @IsString()
-  curatorImage: string;
-
-  @IsString()
-  curatorImageAlt: string;
 
   @IsString()
   subtitle: string;
 
   @IsArray()
   highlights: Array<{
-    icon: 'boat' | 'fish' | 'food' | 'eco';
+    icon:
+      | 'boat'
+      | 'fish'
+      | 'food'
+      | 'eco'
+      | 'camera'
+      | 'map'
+      | 'mountain'
+      | 'sparkles'
+      | 'hotel'
+      | 'walk'
+      | 'coffee'
+      | 'compass';
     title: string;
     description: string;
   }>;
@@ -66,7 +66,6 @@ export class CreateTourDto {
   @IsArray()
   gallery: Array<{
     image: string;
-    alt: string;
     layout: 'portrait' | 'landscape';
   }>;
 

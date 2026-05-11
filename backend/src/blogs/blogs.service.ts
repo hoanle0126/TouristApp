@@ -18,6 +18,8 @@ type MentionInput = {
   mentionedTourSlugs?: string[];
 };
 
+type BlogStatusFilter = 'all' | 'draft' | 'published' | 'archived';
+
 @Injectable()
 export class BlogsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -30,10 +32,11 @@ export class BlogsService {
       hotel?: string;
       search?: string;
       perPage?: number;
+      status?: BlogStatusFilter;
     } = {},
   ) {
     const blogs = await this.prisma.blogPost.findMany({
-      where: this.buildPublicWhere(filters),
+      where: this.buildWhere(filters),
       include: this.includeMentions(),
       orderBy: { publishedAt: 'desc' },
       take: filters.perPage,
@@ -42,9 +45,12 @@ export class BlogsService {
     return blogs.map((blog) => this.toCardResponse(blog));
   }
 
-  async findOne(slug: string) {
+  async findOne(slug: string, status?: BlogStatusFilter) {
     const blog = await this.prisma.blogPost.findFirst({
-      where: { slug, status: 'published' },
+      where: {
+        slug,
+        ...(status && status !== 'all' ? { status } : status === 'all' ? {} : { status: 'published' }),
+      },
       include: this.includeMentions(),
     });
 
@@ -114,15 +120,16 @@ export class BlogsService {
     return { deleted: true, slug };
   }
 
-  private buildPublicWhere(filters: {
+  private buildWhere(filters: {
     category?: string;
     destination?: string;
     tour?: string;
     hotel?: string;
     search?: string;
+    status?: BlogStatusFilter;
   }) {
     return {
-      status: 'published',
+      ...(filters.status === 'all' ? {} : { status: filters.status ?? 'published' }),
       ...(filters.category ? { category: filters.category } : {}),
       ...(filters.destination
         ? { mentionedDestinations: { some: { slug: filters.destination } } }
@@ -246,8 +253,8 @@ export class BlogsService {
       title: blog.title,
       excerpt: blog.excerpt,
       category: blog.category,
+      status: blog.status,
       image: blog.image,
-      alt: blog.alt,
       author: blog.author,
       date: blog.publishedAt.toISOString(),
       publishedAt: blog.publishedAt.toISOString(),
@@ -268,7 +275,6 @@ export class BlogsService {
     return {
       ...this.toCardResponse(blog),
       heroImage: blog.heroImage,
-      heroAlt: blog.heroAlt,
       intro: blog.intro,
       meta: blog.meta,
       quote: blog.quote,

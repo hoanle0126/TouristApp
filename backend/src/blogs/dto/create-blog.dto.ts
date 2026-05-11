@@ -36,13 +36,7 @@ export class CreateBlogDto {
   image: string;
 
   @IsString()
-  alt: string;
-
-  @IsString()
   heroImage: string;
-
-  @IsString()
-  heroAlt: string;
 
   @IsString()
   intro: string;
@@ -57,13 +51,13 @@ export class CreateBlogDto {
   sections: Array<{ heading?: string; body: string[] }>;
 
   @IsObject()
-  inlineImage: { image: string; alt: string };
+  inlineImage: { image: string };
 
   @IsObject()
   secondaryFeature: {
     title: string;
     body: string;
-    image: { image: string; alt: string };
+    image: { image: string };
   };
 
   @IsArray()
@@ -73,7 +67,6 @@ export class CreateBlogDto {
     excerpt: string;
     category: string;
     image: string;
-    alt: string;
   }>;
 
   @IsObject()

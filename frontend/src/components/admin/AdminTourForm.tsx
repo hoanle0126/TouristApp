@@ -3,14 +3,25 @@
 import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import {
   BadgeCheck,
+  Camera,
   CheckCircle2,
   CircleAlert,
+  Coffee,
+  Compass,
+  Fish,
+  Footprints,
+  Hotel,
   ImageIcon,
+  Leaf,
   ListChecks,
+  Map,
+  Mountain,
   Plus,
+  Sailboat,
   Save,
   Sparkles,
   Trash2,
+  Utensils,
 } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
@@ -67,6 +78,21 @@ interface FormErrors {
   shortDescription?: string;
   destinationSlug?: string;
 }
+
+const highlightIconOptions = [
+  { value: "boat", label: "Boat", icon: Sailboat },
+  { value: "fish", label: "Fish", icon: Fish },
+  { value: "food", label: "Food", icon: Utensils },
+  { value: "eco", label: "Eco", icon: Leaf },
+  { value: "camera", label: "Camera", icon: Camera },
+  { value: "map", label: "Map", icon: Map },
+  { value: "mountain", label: "Mountain", icon: Mountain },
+  { value: "sparkles", label: "Signature", icon: Sparkles },
+  { value: "hotel", label: "Hotel", icon: Hotel },
+  { value: "walk", label: "Walking", icon: Footprints },
+  { value: "coffee", label: "Coffee", icon: Coffee },
+  { value: "compass", label: "Compass", icon: Compass },
+] satisfies readonly { value: HighlightIcon; label: string; icon: typeof Sailboat }[];
 
 const DESTINATION_ERROR_ID = "tour-destination-error";
 
@@ -199,15 +225,11 @@ function toTourPayload(
     description: splitLines(form.descriptionParagraphs),
     shortDescription: form.shortDescription,
     image: form.cardImage,
-    alt: form.cardAlt,
     heroImage: form.heroImage,
-    heroAlt: form.heroAlt,
-    curatorImage: form.curatorImage,
-    curatorImageAlt: form.curatorAlt,
     subtitle: form.subtitle,
     highlights: highlights.map(({ description, icon, title }) => ({ description, icon, title })),
     itinerary: itinerary.map(({ description, title }) => ({ description, title })),
-    gallery: gallery.map(({ alt, image, layout }) => ({ alt, image, layout })),
+    gallery: gallery.map(({ image, layout }) => ({ image, layout })),
     inclusions: splitLines(form.inclusions),
     exclusions: splitLines(form.exclusions),
     destinationSlug: form.destinationSlug,
@@ -272,7 +294,7 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
         ready:
           hasValue(form.cardImage) &&
           hasValue(form.heroImage) &&
-          gallery.some((item) => hasValue(item.image) && hasValue(item.alt)),
+          gallery.some((item) => hasValue(item.image)),
       },
       {
         label: "Detail",
@@ -584,6 +606,105 @@ function TextField({
   );
 }
 
+function ImagePreview({ alt, src, variant }: Readonly<{ alt: string; src: string; variant: "portrait" | "square" | "wide" }>) {
+  const [failedSrc, setFailedSrc] = useState("");
+  const trimmedSrc = src.trim();
+  const hasError = failedSrc === trimmedSrc;
+  const aspectClass = variant === "portrait" ? "aspect-[4/5]" : variant === "square" ? "aspect-square" : "aspect-video";
+
+  if (!trimmedSrc || hasError) {
+    return (
+      <div className={`flex ${aspectClass} items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 text-center text-sm font-semibold text-stone-400`}>
+        <div>
+          <ImageIcon className="mx-auto mb-2 size-5" />
+          {trimmedSrc ? "Preview unavailable" : "No image selected"}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${aspectClass} overflow-hidden rounded-2xl border border-stone-200 bg-stone-100`}>
+      <img alt={alt} className="size-full object-cover" onError={() => setFailedSrc(trimmedSrc)} src={trimmedSrc} />
+    </div>
+  );
+}
+
+function ImageUrlField({
+  error,
+  id,
+  label,
+  onChange,
+  previewAlt,
+  previewVariant = "wide",
+  value,
+}: Readonly<{
+  error?: string;
+  id: string;
+  label: string;
+  onChange: (value: string) => void;
+  previewAlt: string;
+  previewVariant?: "portrait" | "square" | "wide";
+  value: string;
+}>) {
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  async function uploadImage(file: File) {
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/uploads", {
+        body: formData,
+        method: "POST",
+      });
+      const payload = (await response.json()) as { error?: string; url?: string };
+
+      if (!response.ok || !payload.url) {
+        setUploadError(payload.error ?? "Upload failed. Please try another image.");
+        return;
+      }
+
+      onChange(payload.url);
+    } catch {
+      setUploadError("Upload failed. Please try another image.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <ImagePreview alt={previewAlt} src={value} variant={previewVariant} />
+      <TextField error={error} id={id} label={label} onChange={onChange} value={value} />
+      <div>
+        <Label htmlFor={`${id}-upload`}>Upload from computer</Label>
+        <Input
+          accept="image/gif,image/jpeg,image/png,image/webp"
+          disabled={isUploading}
+          id={`${id}-upload`}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) {
+              void uploadImage(file);
+            }
+          }}
+          type="file"
+        />
+        <p aria-live="polite" className="mt-2 text-xs font-medium text-stone-500">
+          {isUploading ? "Uploading..." : "JPG, PNG, WebP, or GIF up to 5MB."}
+        </p>
+        <FieldError message={uploadError ?? undefined} />
+      </div>
+    </div>
+  );
+}
+
 function EssentialsSection({
   destinationOptions,
   errors,
@@ -736,13 +857,31 @@ function ClientDetailSection({
                   <Label htmlFor={`${item.id}-icon`}>Icon</Label>
                   <Select value={item.icon} onValueChange={(value: HighlightIcon) => setHighlights(updateItem(highlights, item.id, { icon: value }))}>
                     <SelectTrigger id={`${item.id}-icon`}>
-                      <SelectValue placeholder="Select icon" />
+                      {(() => {
+                        const selectedOption = highlightIconOptions.find((option) => option.value === item.icon) ?? highlightIconOptions[0];
+                        const SelectedIcon = selectedOption.icon;
+
+                        return (
+                          <div className="flex items-center gap-2">
+                            <SelectedIcon className="size-4 text-emerald-800" />
+                            <span>{selectedOption.label}</span>
+                          </div>
+                        );
+                      })()}
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="boat">Boat</SelectItem>
-                      <SelectItem value="fish">Fish</SelectItem>
-                      <SelectItem value="food">Food</SelectItem>
-                      <SelectItem value="eco">Eco</SelectItem>
+                      {highlightIconOptions.map((option) => {
+                        const Icon = option.icon;
+
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            <span className="flex items-center gap-2">
+                              <Icon className="size-4 text-emerald-800" />
+                              <span>{option.label}</span>
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -953,17 +1092,27 @@ function MediaSection({
     <Card>
       <CardContent className="space-y-6 p-6 sm:p-7">
         <SectionHeader
-          description="Image URLs and alt text for listing cards, detail hero, curator profile, and gallery layouts."
+          description="Image URLs for listing cards, detail hero, and gallery layouts."
           eyebrow="Media"
           title="Tour imagery"
         />
         <div className="grid gap-4 md:grid-cols-2">
-          <TextField error={errors.cardImage} id="card-image" label="Card image URL" onChange={(value) => updateField("cardImage", value)} value={form.cardImage} />
-          <TextField id="card-alt" label="Card image alt text" onChange={(value) => updateField("cardAlt", value)} value={form.cardAlt} />
-          <TextField error={errors.heroImage} id="hero-image" label="Hero image URL" onChange={(value) => updateField("heroImage", value)} value={form.heroImage} />
-          <TextField id="hero-alt" label="Hero image alt text" onChange={(value) => updateField("heroAlt", value)} value={form.heroAlt} />
-          <TextField id="curator-image" label="Curator image URL" onChange={(value) => updateField("curatorImage", value)} value={form.curatorImage} />
-          <TextField id="curator-alt" label="Curator image alt text" onChange={(value) => updateField("curatorAlt", value)} value={form.curatorAlt} />
+          <ImageUrlField
+            error={errors.cardImage}
+            id="card-image"
+            label="Card image URL"
+            onChange={(value) => updateField("cardImage", value)}
+            previewAlt={`${form.title || "Tour"} card image preview`}
+            value={form.cardImage}
+          />
+          <ImageUrlField
+            error={errors.heroImage}
+            id="hero-image"
+            label="Hero image URL"
+            onChange={(value) => updateField("heroImage", value)}
+            previewAlt={`${form.title || "Tour"} hero image preview`}
+            value={form.heroImage}
+          />
         </div>
         <RepeatableHeader
           addLabel="Add gallery image"
@@ -972,7 +1121,7 @@ function MediaSection({
           onAdd={() =>
             setGallery([
               ...gallery,
-              { id: `gallery-${crypto.randomUUID()}`, image: "", alt: "", layout: "landscape" },
+              { id: `gallery-${crypto.randomUUID()}`, image: "", layout: "landscape" },
             ])
           }
         />
@@ -993,9 +1142,15 @@ function MediaSection({
                 </Button>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
-                <TextField id={`${item.id}-image`} label="Image URL" onChange={(value) => setGallery(updateItem(gallery, item.id, { image: value }))} value={item.image} />
-                <TextField id={`${item.id}-alt`} label="Alt text" onChange={(value) => setGallery(updateItem(gallery, item.id, { alt: value }))} value={item.alt} />
-                <div className="md:col-span-2">
+                <ImageUrlField
+                  id={`${item.id}-image`}
+                  label="Image URL"
+                  onChange={(value) => setGallery(updateItem(gallery, item.id, { image: value }))}
+                  previewAlt={`${form.title || "Tour"} gallery image ${index + 1} preview`}
+                  previewVariant={item.layout === "portrait" ? "portrait" : "wide"}
+                  value={item.image}
+                />
+                <div>
                   <Label htmlFor={`${item.id}-layout`}>Layout</Label>
                   <Select value={item.layout} onValueChange={(value: GalleryLayout) => setGallery(updateItem(gallery, item.id, { layout: value }))}>
                     <SelectTrigger id={`${item.id}-layout`}>

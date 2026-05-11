@@ -1,11 +1,8 @@
 import {
   IsArray,
   IsIn,
-  IsNumber,
   IsOptional,
   IsString,
-  Max,
-  Min,
 } from 'class-validator';
 
 export class CreateHotelDto {
@@ -28,17 +25,6 @@ export class CreateHotelDto {
   @IsString()
   badge?: string;
 
-  @IsNumber()
-  @Min(0)
-  @Max(10)
-  score: number;
-
-  @IsString()
-  scoreLabel: string;
-
-  @IsString()
-  scoreSummary: string;
-
   @IsIn(['draft', 'published', 'archived'])
   status: 'draft' | 'published' | 'archived';
 
@@ -46,13 +32,7 @@ export class CreateHotelDto {
   listingImage: string;
 
   @IsString()
-  listingAlt: string;
-
-  @IsString()
   heroImage: string;
-
-  @IsString()
-  heroAlt: string;
 
   @IsArray()
   description: string[];
@@ -67,22 +47,10 @@ export class CreateHotelDto {
     badge?: string;
     description: string;
     image: string;
-    alt: string;
   }>;
 
   @IsArray()
-  gallery: Array<{ image: string; alt: string }>;
-
-  @IsArray()
-  reviewScores: Array<{ label: string; score: number }>;
-
-  @IsArray()
-  reviews: Array<{
-    author: string;
-    initials: string;
-    quote: string;
-    stayed: string;
-  }>;
+  gallery: Array<{ image: string }>;
 
   booking: {
     checkIn: string;

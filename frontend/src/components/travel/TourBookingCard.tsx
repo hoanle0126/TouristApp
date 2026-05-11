@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
+import { aboutPageData } from "@/src/data/mockData";
 import { type CartItem, type TourDetail } from "@/src/types/travel";
 
 const travelerOptions = [
@@ -22,6 +23,8 @@ const travelerOptions = [
   "4 Guests",
   "Private Group",
 ] as const;
+
+const curatorAvatar = aboutPageData.curators[0];
 
 function travelersToQuantity(travelers: string) {
   const match = travelers.match(/^(\d+) Guests?/);
@@ -194,7 +197,7 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
           <h4 className="mb-4 font-bold text-stone-950">Need help planning?</h4>
           <div className="flex items-center gap-4">
             <div className="relative size-12 overflow-hidden rounded-full bg-stone-200">
-              <Image alt={tour.curatorImageAlt} className="object-cover" fill sizes="48px" src={tour.curatorImage} />
+              <Image alt={curatorAvatar.alt} className="object-cover" fill sizes="48px" src={curatorAvatar.image} />
             </div>
             <div>
               <p className="text-sm font-bold text-stone-950">Talk to a Curator</p>

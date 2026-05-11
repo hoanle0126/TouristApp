@@ -1,28 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronRight, Dumbbell, MapPin, Sparkles, Star, Utensils, Waves } from "lucide-react";
+import { ArrowRight, Car, ChevronRight, Coffee, Dumbbell, MapPin, Sparkles, Umbrella, Utensils, Waves, Wifi } from "lucide-react";
 
 import { HotelBookingCard } from "@/src/components/travel/HotelBookingCard";
 import { Button } from "@/src/components/ui/button";
 import type { HotelDetail, HotelDetailAmenity } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
+const amenityIcons = {
+  pool: Waves,
+  spa: Sparkles,
+  dining: Utensils,
+  gym: Dumbbell,
+  wifi: Wifi,
+  coffee: Coffee,
+  parking: Car,
+  beach: Umbrella,
+} satisfies Record<HotelDetailAmenity["icon"], typeof Waves>;
+
 function AmenityIcon({ icon }: Readonly<{ icon: HotelDetailAmenity["icon"] }>) {
-  const className = "size-8 text-emerald-800";
+  const Icon = amenityIcons[icon];
 
-  if (icon === "pool") {
-    return <Waves className={className} />;
-  }
-
-  if (icon === "spa") {
-    return <Sparkles className={className} />;
-  }
-
-  if (icon === "dining") {
-    return <Utensils className={className} />;
-  }
-
-  return <Dumbbell className={className} />;
+  return <Icon className="size-8 text-emerald-800" />;
 }
 
 function HotelBreadcrumb({ title }: Readonly<{ title: string }>) {
@@ -67,10 +66,6 @@ function HotelHero({ hotel }: Readonly<{ hotel: HotelDetail }>) {
           <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-stone-950/10 to-transparent" />
           <div className="absolute bottom-0 left-0 max-w-4xl p-8 text-white md:p-12">
             <HotelBreadcrumb title={hotel.title} />
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-md">
-              <Star className="size-4 fill-amber-300 text-amber-300" />
-              Highly Rated Choice
-            </div>
             <h1 className="mb-3 text-5xl font-black leading-[0.9] tracking-tighter md:text-7xl lg:text-8xl">{hotel.title}</h1>
             <p className="text-xl font-light text-white/90 md:text-2xl">{hotel.location}</p>
           </div>
@@ -112,9 +107,9 @@ function AmenitiesSection({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   return (
     <section className="rounded-[2rem] bg-stone-100 p-8 md:p-12">
       <h2 className="mb-10 text-2xl font-black tracking-tight text-stone-950">Property Curations</h2>
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
         {hotel.amenities.map((amenity) => (
-          <div className="space-y-4" key={amenity.title}>
+          <div className="rounded-3xl bg-white/60 p-5 shadow-sm ring-1 ring-stone-200/70" key={amenity.title}>
             <AmenityIcon icon={amenity.icon} />
             <p className="font-bold text-stone-950">{amenity.title}</p>
           </div>
@@ -160,57 +155,6 @@ function SuitesSection({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   );
 }
 
-function ReviewsSection({ hotel }: Readonly<{ hotel: HotelDetail }>) {
-  return (
-    <section className="border-t border-stone-200 pt-24">
-      <div className="mb-16 flex flex-col justify-between gap-8 md:flex-row md:items-end">
-        <div>
-          <h2 className="mb-4 text-4xl font-black tracking-tight text-stone-950">{hotel.scoreLabel}</h2>
-          <div className="flex items-center gap-4">
-            <span className="text-6xl font-black text-emerald-800">{hotel.score}</span>
-            <div className="text-stone-500">
-              <p className="font-bold text-stone-700">{hotel.scoreSummary}</p>
-              <p className="text-sm">Verified Guest Experiences</p>
-            </div>
-          </div>
-        </div>
-        <div className="w-full space-y-4 md:w-1/2">
-          {hotel.reviewScores.map((item) => (
-            <div className="space-y-2" key={item.label}>
-              <div className="flex justify-between text-sm font-bold text-stone-700">
-                <span>{item.label}</span>
-                <span>{item.score}</span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-stone-200">
-                <div className="h-full rounded-full bg-emerald-800" style={{ width: `${Number(item.score) * 10}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        {hotel.reviews.map((review) => (
-          <article className="rounded-[1.5rem] border border-stone-200 bg-white p-8 shadow-sm" key={review.author}>
-            <div className="mb-4 flex gap-1 text-emerald-800" aria-label="Five star review">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <Star className="size-4 fill-current" key={index} />
-              ))}
-            </div>
-            <p className="mb-6 text-lg font-medium italic leading-relaxed text-stone-700">“{review.quote}”</p>
-            <div className="flex items-center gap-4">
-              <div className="flex size-11 items-center justify-center rounded-full bg-emerald-800 text-sm font-black text-white">{review.initials}</div>
-              <div>
-                <p className="font-bold text-stone-950">{review.author}</p>
-                <p className="text-xs text-stone-500">{review.stayed}</p>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function HotelDetailPage({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
@@ -221,7 +165,6 @@ export default function HotelDetailPage({ hotel }: Readonly<{ hotel: HotelDetail
           <OverviewSection hotel={hotel} />
           <AmenitiesSection hotel={hotel} />
           <SuitesSection hotel={hotel} />
-          <ReviewsSection hotel={hotel} />
         </div>
         <HotelBookingCard hotel={hotel} />
       </div>

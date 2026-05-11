@@ -16,20 +16,13 @@ export type SaveHotelInput = {
   readonly address: string;
   readonly price: string;
   readonly badge?: string;
-  readonly score: number;
-  readonly scoreLabel: string;
-  readonly scoreSummary: string;
   readonly status: "draft" | "published" | "archived";
   readonly listingImage: string;
-  readonly listingAlt: string;
   readonly heroImage: string;
-  readonly heroAlt: string;
   readonly description: readonly string[];
-  readonly amenities: readonly string[];
-  readonly suites: readonly { readonly name: string; readonly price: string; readonly badge?: string; readonly description: string; readonly image: string; readonly alt: string }[];
-  readonly gallery: readonly { readonly image: string; readonly alt: string }[];
-  readonly reviewScores: readonly { readonly label: string; readonly score: number }[];
-  readonly reviews: readonly { readonly author: string; readonly initials: string; readonly quote: string; readonly stayed: string }[];
+  readonly amenities: readonly { readonly icon: string; readonly title: string }[];
+  readonly suites: readonly { readonly name: string; readonly price: string; readonly badge?: string; readonly description: string; readonly image: string }[];
+  readonly gallery: readonly { readonly image: string }[];
   readonly booking: {
     readonly checkIn: string;
     readonly checkOut: string;
@@ -40,6 +33,7 @@ export type SaveHotelInput = {
     readonly travelers: string;
     readonly total: string;
   };
+  readonly destinationSlugs?: readonly string[];
 };
 
 export async function getHotels(query: { readonly search?: string; readonly location?: string; readonly perPage?: number } = {}) {

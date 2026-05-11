@@ -50,7 +50,6 @@ type BlogMatch = {
 type DestinationMatch = {
   slug: string;
   title: string;
-  market: string;
   summary: string;
 };
 
@@ -119,9 +118,17 @@ export class ChatbotService {
         ]);
 
     const shouldGroundResponse = this.requiresWebsiteContext(message);
-    const groundedResult = bookingResult ?? (shouldGroundResponse
-      ? this.buildGroundedResult(message, tours, hotels, destinations ?? [], blogs)
-      : { groundedAnswer: null, sources: [] as ChatbotResponse['sources'] });
+    const groundedResult =
+      bookingResult ??
+      (shouldGroundResponse
+        ? this.buildGroundedResult(
+            message,
+            tours,
+            hotels,
+            destinations ?? [],
+            blogs,
+          )
+        : { groundedAnswer: null, sources: [] as ChatbotResponse['sources'] });
 
     return {
       answer: await this.generateAiAnswer(
@@ -139,7 +146,8 @@ export class ChatbotService {
     sources: ChatbotResponse['sources'],
   ) {
     const config = await this.settingsService.getAiProviderRuntimeConfig();
-    const fallbackAnswer = groundedAnswer ?? 'I do not know based on the current website data.';
+    const fallbackAnswer =
+      groundedAnswer ?? 'I do not know based on the current website data.';
     const hasGroundedContext = Boolean(groundedAnswer || sources.length > 0);
 
     if (!config.enabled || !config.apiKey) {
@@ -206,16 +214,16 @@ export class ChatbotService {
     const bookingCode = this.extractBookingCode(message);
     const contactEmail = this.extractEmail(message);
     const booking = bookingCode
-      ? await this.prisma.booking.findUnique({
+      ? ((await this.prisma.booking.findUnique({
           where: { bookingCode },
           include: { items: true },
-        }) as BookingMatch | null
+        })) as BookingMatch | null)
       : contactEmail
-        ? await this.prisma.booking.findFirst({
+        ? ((await this.prisma.booking.findFirst({
             where: { email: contactEmail },
             include: { items: true },
             orderBy: { createdAt: 'desc' },
-          }) as BookingMatch | null
+          })) as BookingMatch | null)
         : null;
 
     if (!booking || !this.messageContainsBookingContact(message, booking)) {
@@ -268,7 +276,6 @@ export class ChatbotService {
     ].some((keyword) => normalizedMessage.includes(keyword));
   }
 
-
   private buildGroundedResult(
     message: string,
     tours: TourMatch[],
@@ -276,15 +283,21 @@ export class ChatbotService {
     destinations: DestinationMatch[],
     blogs: BlogMatch[],
   ) {
-    if (this.isBroadCatalogRequest(message) || this.isDestinationAwareRequest(message)) {
+    if (
+      this.isBroadCatalogRequest(message) ||
+      this.isDestinationAwareRequest(message)
+    ) {
       const summaryParts: string[] = [];
       const sources: ChatbotResponse['sources'] = [];
 
-      const availableTour = tours.find((tour) =>
-        tour.departures.some((departure) => departure.status === 'open'),
-      ) ?? tours[0];
+      const availableTour =
+        tours.find((tour) =>
+          tour.departures.some((departure) => departure.status === 'open'),
+        ) ?? tours[0];
       if (availableTour) {
-        summaryParts.push(this.describeTourAvailability(availableTour, message));
+        summaryParts.push(
+          this.describeTourAvailability(availableTour, message),
+        );
         sources.push({
           kind: 'tour' as const,
           label: `Tour: ${availableTour.title}`,
@@ -292,11 +305,14 @@ export class ChatbotService {
         });
       }
 
-      const availableHotel = hotels.find((hotel) =>
-        hotel.inventoryDays.some((day) => day.status === 'open'),
-      ) ?? hotels[0];
+      const availableHotel =
+        hotels.find((hotel) =>
+          hotel.inventoryDays.some((day) => day.status === 'open'),
+        ) ?? hotels[0];
       if (availableHotel) {
-        summaryParts.push(this.describeHotelAvailability(availableHotel, message));
+        summaryParts.push(
+          this.describeHotelAvailability(availableHotel, message),
+        );
         sources.push({
           kind: 'hotel' as const,
           label: `Hotel: ${availableHotel.name}`,
@@ -307,7 +323,7 @@ export class ChatbotService {
       if (this.isDestinationAwareRequest(message)) {
         for (const destination of destinations) {
           summaryParts.push(
-            `Destination ${destination.title} in ${destination.market}: ${destination.summary}.`,
+            `Destination ${destination.title}: ${destination.summary}.`,
           );
           sources.push({
             kind: 'destination' as const,
@@ -372,9 +388,10 @@ export class ChatbotService {
     }
 
     if (this.isHotelRequest(message) && hotels.length > 0) {
-      const recommendedHotel = hotels.find((hotel) =>
-        hotel.inventoryDays.some((day) => day.status === 'open'),
-      ) ?? hotels[0];
+      const recommendedHotel =
+        hotels.find((hotel) =>
+          hotel.inventoryDays.some((day) => day.status === 'open'),
+        ) ?? hotels[0];
       const source = {
         kind: 'hotel' as const,
         label: `Hotel: ${recommendedHotel.name}`,
@@ -434,13 +451,21 @@ export class ChatbotService {
     const normalizedMessage = this.normalizeForMatch(message);
     return candidates.some((candidate) => {
       const normalizedCandidate = this.normalizeForMatch(candidate);
-      return normalizedCandidate.length > 0 && normalizedMessage.includes(normalizedCandidate);
+      return (
+        normalizedCandidate.length > 0 &&
+        normalizedMessage.includes(normalizedCandidate)
+      );
     });
   }
 
   private getTourCandidates(tour: TourMatch) {
     const simplifiedTitle = tour.title.replace(/^traveling to\s+/i, '');
-    return [tour.title, simplifiedTitle, tour.slug, tour.slug.replace(/-/g, ' ')];
+    return [
+      tour.title,
+      simplifiedTitle,
+      tour.slug,
+      tour.slug.replace(/-/g, ' '),
+    ];
   }
 
   private extractBookingCode(message: string) {
@@ -448,7 +473,11 @@ export class ChatbotService {
   }
 
   private extractEmail(message: string) {
-    return message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0].toLowerCase() ?? null;
+    return (
+      message
+        .match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0]
+        .toLowerCase() ?? null
+    );
   }
 
   private isBookingRequest(message: string) {
@@ -458,11 +487,16 @@ export class ChatbotService {
     );
   }
 
-  private messageContainsBookingContact(message: string, booking: BookingMatch) {
+  private messageContainsBookingContact(
+    message: string,
+    booking: BookingMatch,
+  ) {
     const normalizedMessage = this.normalizeContact(message);
     return [booking.email, booking.phone]
       .map((contact) => this.normalizeContact(contact))
-      .some((contact) => contact.length > 0 && normalizedMessage.includes(contact));
+      .some(
+        (contact) => contact.length > 0 && normalizedMessage.includes(contact),
+      );
   }
 
   private formatBookingContext(booking: BookingMatch) {
@@ -486,10 +520,14 @@ export class ChatbotService {
         : null,
       booking.pickupLocation ? `Pickup: ${booking.pickupLocation}.` : null,
       booking.dropoffLocation ? `Dropoff: ${booking.dropoffLocation}.` : null,
-      booking.specialRequests ? `Special requests: ${booking.specialRequests}.` : null,
+      booking.specialRequests
+        ? `Special requests: ${booking.specialRequests}.`
+        : null,
       `Total: ${booking.total.toNumber()} ${booking.currency}.`,
       `Items: ${itemDetails.join(' ')}`,
-    ].filter(Boolean).join(' ');
+    ]
+      .filter(Boolean)
+      .join(' ');
   }
 
   private normalizeContact(value: string) {
@@ -505,8 +543,8 @@ export class ChatbotService {
 
   private isDestinationAwareRequest(message: string) {
     const normalizedMessage = message.toLowerCase();
-    return ['website', 'web', 'destination', 'destinations', 'điểm đến'].some((keyword) =>
-      normalizedMessage.includes(keyword),
+    return ['website', 'web', 'destination', 'destinations', 'điểm đến'].some(
+      (keyword) => normalizedMessage.includes(keyword),
     );
   }
 
@@ -531,7 +569,10 @@ export class ChatbotService {
   }
 
   private describeHotelAvailability(hotel: HotelMatch, message: string) {
-    if (this.isWebsiteOverviewRequest(message) && hotel.inventoryDays.length > 0) {
+    if (
+      this.isWebsiteOverviewRequest(message) &&
+      hotel.inventoryDays.length > 0
+    ) {
       return `${hotel.name} inventory: ${hotel.inventoryDays.map((day) => `${this.toDateString(day.date)}: ${day.status}, ${Math.max(day.totalRooms - day.bookedRooms, 0)} rooms left`).join('; ')}.`;
     }
 

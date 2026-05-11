@@ -38,29 +38,32 @@ export class AiBookingSummaryService {
     const timeout = setTimeout(() => abortController.abort(), timeoutMs);
 
     try {
-      const response = await fetch(this.buildChatCompletionsUrl(config.baseUrl), {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${config.apiKey}`,
+      const response = await fetch(
+        this.buildChatCompletionsUrl(config.baseUrl),
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${config.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: config.model,
+            temperature: 0.2,
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You write one short English booking operations summary for travel admins. Keep it to one paragraph, concise, factual, and based only on the provided booking data.',
+              },
+              {
+                role: 'user',
+                content: this.buildPrompt(input),
+              },
+            ],
+          }),
+          signal: abortController.signal,
         },
-        body: JSON.stringify({
-          model: config.model,
-          temperature: 0.2,
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You write one short English booking operations summary for travel admins. Keep it to one paragraph, concise, factual, and based only on the provided booking data.',
-            },
-            {
-              role: 'user',
-              content: this.buildPrompt(input),
-            },
-          ],
-        }),
-        signal: abortController.signal,
-      });
+      );
 
       if (!response.ok) {
         this.logger.warn(
@@ -74,7 +77,9 @@ export class AiBookingSummaryService {
       };
       const content = data.choices?.[0]?.message?.content;
 
-      return typeof content === 'string' && content.trim() ? content.trim() : null;
+      return typeof content === 'string' && content.trim()
+        ? content.trim()
+        : null;
     } catch (error) {
       this.logger.warn(
         'Booking AI summary provider request failed',

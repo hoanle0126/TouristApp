@@ -6,21 +6,14 @@ type SeedDestination = {
   slug: string;
   title: string;
   description: string;
-  href: string;
   image: string;
   alt: string;
-  price: string;
-  rating: number;
-  market: string;
-  status: string;
   heroImage: string;
   heroAlt: string;
   summary: string;
   intro: string[];
   facts: { label: string; value: string }[];
   spotlight: { title: string; description: string }[];
-  relatedTours: { href: string; label: string; meta: string; title: string }[];
-  relatedHotels: { href: string; label: string; meta: string; title: string }[];
 };
 
 const genericTourDepartures = [
@@ -147,13 +140,8 @@ export const seedDestinations: SeedDestination[] = [
     title: 'Nordic Fjords',
     description:
       'Sail through cinematic cliffs and quiet coastal villages shaped by ancient glacial landscapes.',
-    href: '/destinations/nordic-fjords',
     image: nordicFjordsImage,
     alt: 'Norwegian fjords with deep blue water and dramatic mountain peaks',
-    price: '$1,200',
-    rating: 4.9,
-    market: 'Northern Europe',
-    status: 'published',
     heroImage: nordicFjordsImage,
     heroAlt:
       'Norwegian fjords with deep blue water and dramatic mountain peaks',
@@ -186,41 +174,14 @@ export const seedDestinations: SeedDestination[] = [
           'Extended light hours let you spread out movement and experiences without crowding the middle of the day.',
       },
     ],
-    relatedTours: [
-      {
-        href: '/tours',
-        label: 'Journey',
-        meta: 'Private charter pacing and premium scenic routing',
-        title: 'Cyclades Silk Sails',
-      },
-      {
-        href: '/tours',
-        label: 'Journey',
-        meta: 'Cold-climate expedition energy and boutique scale',
-        title: 'Arctic Sky Expedition',
-      },
-    ],
-    relatedHotels: [
-      {
-        href: '/hotels/shining-riverside-hoi-an',
-        label: 'Stay',
-        meta: 'Quiet architecture-led retreat',
-        title: 'Shining Riverside Suite',
-      },
-    ],
   },
   {
     slug: 'london-essence',
     title: 'London Essence',
     description:
       'Discover the perfect blend of historic architecture and cutting-edge modern culture.',
-    href: '/destinations/london-essence',
     image: londonImage,
     alt: 'Big Ben and Westminster Bridge in London at dusk',
-    price: '$850',
-    rating: 4.7,
-    market: 'Western Europe',
-    status: 'published',
     heroImage: londonImage,
     heroAlt: 'Big Ben and Westminster Bridge in London at dusk',
     summary:
@@ -252,41 +213,14 @@ export const seedDestinations: SeedDestination[] = [
           'London can sit inside a first-time Europe itinerary or serve as a focused return trip for shopping, food, and theater.',
       },
     ],
-    relatedTours: [
-      {
-        href: '/tours',
-        label: 'Journey',
-        meta: 'City-led discovery with strong local access',
-        title: 'Amalfi Coast Discovery',
-      },
-      {
-        href: '/blog/kyotos-new-wave',
-        label: 'Editorial',
-        meta: 'Reference point for culture-forward curation',
-        title: "Kyoto's New Wave",
-      },
-    ],
-    relatedHotels: [
-      {
-        href: '/hotels',
-        label: 'Stay',
-        meta: 'Refined city-base positioning for a cultural itinerary',
-        title: 'Urban collection stays',
-      },
-    ],
   },
   {
     slug: 'bavarian-trails',
     title: 'Bavarian Trails',
     description:
       'Wander through fairy-tale villages and explore the majestic castles of the Black Forest.',
-    href: '/destinations/bavarian-trails',
     image: bavarianImage,
     alt: 'Medieval German town with half-timbered houses',
-    price: '$1,100',
-    rating: 4.8,
-    market: 'Central Europe',
-    status: 'published',
     heroImage: bavarianImage,
     heroAlt: 'Medieval German town with half-timbered houses',
     summary:
@@ -316,28 +250,6 @@ export const seedDestinations: SeedDestination[] = [
         title: 'Easy itinerary bundling',
         description:
           'It pairs well with city extensions, rail segments, and soft-active days without breaking the journey rhythm.',
-      },
-    ],
-    relatedTours: [
-      {
-        href: '/tours',
-        label: 'Journey',
-        meta: 'Classic Europe pacing with cultural stops',
-        title: 'Venetian Renaissance',
-      },
-      {
-        href: '/tours',
-        label: 'Journey',
-        meta: 'Textural city-to-landscape contrast',
-        title: 'Colors of Marrakech',
-      },
-    ],
-    relatedHotels: [
-      {
-        href: '/hotels',
-        label: 'Stay',
-        meta: 'Countryside and heritage stay pairings',
-        title: 'Curated alpine-adjacent stays',
       },
     ],
   },
@@ -404,7 +316,7 @@ export const seedHotels: SeedHotel[] = [
       travelers: '2 Adults',
       total: '$1,125',
     },
-    destinationSlugs: [],
+    destinationSlugs: ['bavarian-trails'],
     inventory: genericHotelInventory,
   },
   ...(

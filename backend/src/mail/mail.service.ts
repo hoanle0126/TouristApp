@@ -131,7 +131,9 @@ export class MailService {
       `Phone: ${booking.customer.phone}`,
       `Country: ${booking.customer.country}`,
       booking.customer.city ? `City: ${booking.customer.city}` : undefined,
-      booking.customer.address ? `Address: ${booking.customer.address}` : undefined,
+      booking.customer.address
+        ? `Address: ${booking.customer.address}`
+        : undefined,
       '',
       'Booking:',
       `Travelers: ${booking.travelers}`,

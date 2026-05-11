@@ -1,28 +1,18 @@
 "use client";
 
 import { FormEvent, type ReactNode, useMemo, useState } from "react";
-import { BadgeCheck, CheckCircle2, CircleAlert, Hotel, ImageIcon, MapPinned, Plus, Save, Sparkles, Trash2 } from "lucide-react";
+import { BadgeCheck, CheckCircle2, CircleAlert, MapPinned, Plus, Save, Sparkles, Trash2 } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 import {
-  destinationStatusOptions,
   slugifyDestinationTitle,
-  type DestinationCommercialStatus,
   type DestinationFactRow,
   type DestinationFormInitialValues,
   type DestinationFormState,
-  type DestinationLinkRow,
   type DestinationTextRow,
 } from "@/src/components/admin/adminDestinationFormData";
 import { createDestination, updateDestination, type SaveDestinationInput } from "@/src/lib/api/destinations";
@@ -44,8 +34,6 @@ interface AdminDestinationFormProps {
 
 interface FormErrors {
   title?: string;
-  price?: string;
-  rating?: string;
   cardImage?: string;
   heroImage?: string;
   shortDescription?: string;
@@ -63,10 +51,6 @@ function updateFactRow<K extends keyof DestinationFactRow>(items: readonly Desti
   return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
 }
 
-function updateLinkRow<K extends keyof DestinationLinkRow>(items: readonly DestinationLinkRow[], id: string, field: K, value: DestinationLinkRow[K]) {
-  return items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
-}
-
 function removeRow<T extends { readonly id: string }>(items: readonly T[], id: string) {
   return items.length > 1 ? items.filter((item) => item.id !== id) : items;
 }
@@ -77,14 +61,6 @@ function createRow(prefix: string): DestinationTextRow {
 
 function createFactRow(): DestinationFactRow {
   return { id: `fact-${crypto.randomUUID()}`, label: "", value: "" };
-}
-
-function createLinkRow(prefix: string): DestinationLinkRow {
-  return { id: `${prefix}-${crypto.randomUUID()}`, href: "", label: "", meta: "", title: "" };
-}
-
-function toApiStatus(status: DestinationCommercialStatus): SaveDestinationInput["status"] {
-  return status === "Published" ? "published" : status === "Ready for review" ? "draft" : "draft";
 }
 
 function splitSpotlight(value: string) {
@@ -100,20 +76,13 @@ function toDestinationPayload(
   intro: readonly DestinationTextRow[],
   facts: readonly DestinationFactRow[],
   spotlight: readonly DestinationTextRow[],
-  relatedTours: readonly DestinationLinkRow[],
-  relatedHotels: readonly DestinationLinkRow[],
 ): SaveDestinationInput {
   return {
     slug: form.slug,
     title: form.title,
     description: form.shortDescription,
-    href: form.href,
     image: form.cardImage,
     alt: form.cardAlt,
-    price: form.price,
-    rating: Number(form.rating),
-    market: form.market,
-    status: toApiStatus(form.status),
     heroImage: form.heroImage,
     heroAlt: form.heroAlt,
     summary: form.summary,
@@ -122,12 +91,6 @@ function toDestinationPayload(
       .filter((item) => hasValue(item.label) && hasValue(item.value))
       .map(({ label, value }) => ({ label, value })),
     spotlight: spotlight.map((item) => splitSpotlight(item.value)).filter((item) => hasValue(item.title)),
-    relatedTours: relatedTours
-      .filter((item) => [item.href, item.label, item.meta, item.title].every(hasValue))
-      .map(({ href, label, meta, title }) => ({ href, label, meta, title })),
-    relatedHotels: relatedHotels
-      .filter((item) => [item.href, item.label, item.meta, item.title].every(hasValue))
-      .map(({ href, label, meta, title }) => ({ href, label, meta, title })),
   };
 }
 
@@ -136,8 +99,6 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
   const [intro, setIntro] = useState<readonly DestinationTextRow[]>(initialValues.intro);
   const [facts, setFacts] = useState<readonly DestinationFactRow[]>(initialValues.facts);
   const [spotlight, setSpotlight] = useState<readonly DestinationTextRow[]>(initialValues.spotlight);
-  const [relatedTours, setRelatedTours] = useState<readonly DestinationLinkRow[]>(initialValues.relatedTours);
-  const [relatedHotels, setRelatedHotels] = useState<readonly DestinationLinkRow[]>(initialValues.relatedHotels);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saved, setSaved] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -147,7 +108,7 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
     () => [
       {
         label: "Essentials",
-        ready: [form.title, form.price, form.rating, form.shortDescription].every(hasValue),
+        ready: [form.title, form.shortDescription].every(hasValue),
       },
       {
         label: "Media",
@@ -161,21 +122,17 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
           facts.some((item) => hasValue(item.label) && hasValue(item.value)) &&
           spotlight.some((item) => hasValue(item.value)),
       },
-      {
-        label: "Connections",
-        ready:
-          relatedTours.some((item) => [item.href, item.label, item.meta, item.title].every(hasValue)) ||
-          relatedHotels.some((item) => [item.href, item.label, item.meta, item.title].every(hasValue)),
-      },
     ],
-    [facts, form, intro, relatedHotels, relatedTours, spotlight],
+    [facts, form, intro, spotlight],
   );
 
   function updateField<K extends keyof DestinationFormState>(field: K, value: DestinationFormState[K]) {
     setForm((current) => {
       if (field === "title") {
-        const slug = current.slug || slugifyDestinationTitle(String(value));
-        return { ...current, title: value, slug, href: current.href || `/destinations/${slug}` };
+        const slug = slugifyDestinationTitle(String(value));
+        const previousHref = current.slug ? `/destinations/${current.slug}` : "";
+        const href = !current.href || current.href === previousHref ? `/destinations/${slug}` : current.href;
+        return { ...current, title: value, slug, href };
       }
 
       return { ...current, [field]: value };
@@ -191,12 +148,6 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
 
     if (!form.title.trim()) {
       nextErrors.title = "Title is required.";
-    }
-    if (!form.price.trim()) {
-      nextErrors.price = "Price is required.";
-    }
-    if (!form.rating.trim()) {
-      nextErrors.rating = "Rating is required.";
     }
     if (!form.cardImage.trim()) {
       nextErrors.cardImage = "Card image URL is required.";
@@ -223,7 +174,7 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
 
     setIsSubmitting(true);
     try {
-      const payload = toDestinationPayload(form, intro, facts, spotlight, relatedTours, relatedHotels);
+      const payload = toDestinationPayload(form, intro, facts, spotlight);
       if (mode === "update") {
         await updateDestination(originalSlug ?? form.slug, payload);
       } else {
@@ -256,12 +207,6 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
           setSpotlight={(items) => updateRows(setSpotlight, items)}
           spotlight={spotlight}
           updateField={updateField}
-        />
-        <DestinationRelatedSection
-          relatedHotels={relatedHotels}
-          relatedTours={relatedTours}
-          setRelatedHotels={(items) => updateRows(setRelatedHotels, items)}
-          setRelatedTours={(items) => updateRows(setRelatedTours, items)}
         />
       </div>
 
@@ -332,12 +277,6 @@ function DestinationDraftSidebar({
           <p className="mt-3 text-sm leading-relaxed text-stone-600">
             {form.shortDescription || "Add a short description to preview the destination card copy."}
           </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 2xl:grid-cols-1">
-            <SummaryPill label="Market" value={form.market || "Not set"} />
-            <SummaryPill label="Price" value={form.price || "Not set"} />
-            <SummaryPill label="Rating" value={form.rating || "Not set"} />
-            <SummaryPill label="Status" value={form.status} />
-          </div>
         </CardContent>
       </Card>
 
@@ -367,15 +306,6 @@ function DestinationDraftSidebar({
   );
 }
 
-function SummaryPill({ label, value }: Readonly<{ label: string; value: string }>) {
-  return (
-    <div className="rounded-2xl bg-stone-50 p-4">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-stone-950">{value}</p>
-    </div>
-  );
-}
-
 function SectionHeader({ eyebrow, title, description }: Readonly<{ eyebrow: string; title: string; description: string }>) {
   return (
     <div className="border-b border-stone-200 pb-5">
@@ -395,6 +325,7 @@ function FieldError({ id, message }: Readonly<{ id?: string; message?: string }>
 }
 
 function TextField({
+  disabled,
   error,
   id,
   label,
@@ -402,6 +333,7 @@ function TextField({
   placeholder,
   value,
 }: Readonly<{
+  disabled?: boolean;
   error?: string;
   id: string;
   label: string;
@@ -417,6 +349,7 @@ function TextField({
       <Input
         aria-describedby={errorId}
         aria-invalid={Boolean(error)}
+        disabled={disabled}
         id={id}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
@@ -446,24 +379,7 @@ function DestinationEssentialsSection({
         />
         <div className="grid gap-4 md:grid-cols-2">
           <TextField error={errors.title} id="destination-title" label="Title" onChange={(value) => updateField("title", value)} value={form.title} />
-          <TextField id="destination-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
-          <TextField id="destination-href" label="Public href" onChange={(value) => updateField("href", value)} value={form.href} />
-          <TextField id="destination-market" label="Market / region" onChange={(value) => updateField("market", value)} value={form.market} />
-          <TextField error={errors.price} id="destination-price" label="Price" onChange={(value) => updateField("price", value)} value={form.price} />
-          <TextField error={errors.rating} id="destination-rating" label="Rating" onChange={(value) => updateField("rating", value)} value={form.rating} />
-          <div>
-            <Label htmlFor="destination-status">Commercial status</Label>
-            <Select value={form.status} onValueChange={(value: DestinationCommercialStatus) => updateField("status", value)}>
-              <SelectTrigger id="destination-status">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                {destinationStatusOptions.map((status) => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <TextField disabled id="destination-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
         </div>
         <div>
           <Label htmlFor="destination-short-description">Short description</Label>
@@ -576,50 +492,6 @@ function DestinationStorySection({
   );
 }
 
-function DestinationRelatedSection({
-  relatedHotels,
-  relatedTours,
-  setRelatedHotels,
-  setRelatedTours,
-}: Readonly<{
-  relatedHotels: readonly DestinationLinkRow[];
-  relatedTours: readonly DestinationLinkRow[];
-  setRelatedHotels: (items: readonly DestinationLinkRow[]) => void;
-  setRelatedTours: (items: readonly DestinationLinkRow[]) => void;
-}>) {
-  return (
-    <Card>
-      <CardContent className="space-y-6 p-6 sm:p-7">
-        <SectionHeader
-          description="Attach suggested tours and hotels that should appear around this destination."
-          eyebrow="Related inventory"
-          title="Tours and hotels"
-        />
-        <LinkRowsEditor
-          addLabel="Add related tour"
-          icon={<ImageIcon className="size-4" />}
-          label="Related tours"
-          onAdd={() => setRelatedTours([...relatedTours, createLinkRow("related-tour")])}
-          onRemove={(id) => setRelatedTours(removeRow(relatedTours, id))}
-          onUpdate={(id, field, value) => setRelatedTours(updateLinkRow(relatedTours, id, field, value))}
-          removeLabel="Remove related tour"
-          rows={relatedTours}
-        />
-        <LinkRowsEditor
-          addLabel="Add related hotel"
-          icon={<Hotel className="size-4" />}
-          label="Related hotels"
-          onAdd={() => setRelatedHotels([...relatedHotels, createLinkRow("related-hotel")])}
-          onRemove={(id) => setRelatedHotels(removeRow(relatedHotels, id))}
-          onUpdate={(id, field, value) => setRelatedHotels(updateLinkRow(relatedHotels, id, field, value))}
-          removeLabel="Remove related hotel"
-          rows={relatedHotels}
-        />
-      </CardContent>
-    </Card>
-  );
-}
-
 function FactsEditor({
   facts,
   onAdd,
@@ -657,61 +529,6 @@ function FactsEditor({
             <div className="grid gap-4 md:grid-cols-2">
               <TextField id={`${fact.id}-label`} label="Label" onChange={(value) => onUpdate(fact.id, "label", value)} value={fact.label} />
               <TextField id={`${fact.id}-value`} label="Value" onChange={(value) => onUpdate(fact.id, "value", value)} value={fact.value} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function LinkRowsEditor({
-  addLabel,
-  icon,
-  label,
-  onAdd,
-  onRemove,
-  onUpdate,
-  removeLabel,
-  rows,
-}: Readonly<{
-  addLabel: string;
-  icon: ReactNode;
-  label: string;
-  onAdd: () => void;
-  onRemove: (id: string) => void;
-  onUpdate: <K extends keyof DestinationLinkRow>(id: string, field: K, value: DestinationLinkRow[K]) => void;
-  removeLabel: string;
-  rows: readonly DestinationLinkRow[];
-}>) {
-  return (
-    <div className="space-y-4 border-t border-stone-200 pt-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
-          <span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900">
-            {icon}
-          </span>
-          {label}
-        </div>
-        <Button aria-label={addLabel} onClick={onAdd} size="sm" type="button" variant="outline">
-          <Plus className="size-4" />
-          {addLabel}
-        </Button>
-      </div>
-      <div className="space-y-4">
-        {rows.map((row, index) => (
-          <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={row.id}>
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <p className="text-sm font-bold text-stone-950">{label} {index + 1}</p>
-              <Button aria-label={`${removeLabel} ${index + 1}`} disabled={rows.length <= 1} onClick={() => onRemove(row.id)} size="icon" type="button" variant="ghost">
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <TextField id={`${row.id}-title`} label="Title" onChange={(value) => onUpdate(row.id, "title", value)} value={row.title} />
-              <TextField id={`${row.id}-label`} label="Label" onChange={(value) => onUpdate(row.id, "label", value)} value={row.label} />
-              <TextField id={`${row.id}-href`} label="Href" onChange={(value) => onUpdate(row.id, "href", value)} value={row.href} />
-              <TextField id={`${row.id}-meta`} label="Meta" onChange={(value) => onUpdate(row.id, "meta", value)} value={row.meta} />
             </div>
           </div>
         ))}

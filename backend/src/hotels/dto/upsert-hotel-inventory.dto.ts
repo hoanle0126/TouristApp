@@ -1,5 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { IsValidDateOnly } from '../../tours/dto/is-valid-date-only.validator';
 
 export class HotelInventoryInputDto {

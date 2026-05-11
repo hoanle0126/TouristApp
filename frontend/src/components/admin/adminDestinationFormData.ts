@@ -1,15 +1,9 @@
 import type { DestinationDetail } from "@/src/types/travel";
 
-export type DestinationCommercialStatus = "Draft" | "Ready for review" | "Published";
-
 export interface DestinationFormState {
   readonly title: string;
   readonly slug: string;
   readonly href: string;
-  readonly market: string;
-  readonly price: string;
-  readonly rating: string;
-  readonly status: DestinationCommercialStatus;
   readonly cardImage: string;
   readonly cardAlt: string;
   readonly shortDescription: string;
@@ -29,21 +23,11 @@ export interface DestinationFactRow {
   readonly value: string;
 }
 
-export interface DestinationLinkRow {
-  readonly id: string;
-  readonly href: string;
-  readonly label: string;
-  readonly meta: string;
-  readonly title: string;
-}
-
 export interface DestinationFormInitialValues {
   readonly form: DestinationFormState;
   readonly intro: readonly DestinationTextRow[];
   readonly facts: readonly DestinationFactRow[];
   readonly spotlight: readonly DestinationTextRow[];
-  readonly relatedTours: readonly DestinationLinkRow[];
-  readonly relatedHotels: readonly DestinationLinkRow[];
 }
 
 export interface ResolvedAdminDestinationEditData {
@@ -51,21 +35,11 @@ export interface ResolvedAdminDestinationEditData {
   readonly initialValues: DestinationFormInitialValues;
 }
 
-export const destinationStatusOptions: readonly DestinationCommercialStatus[] = [
-  "Draft",
-  "Ready for review",
-  "Published",
-];
-
 export const createDestinationInitialValues: DestinationFormInitialValues = {
   form: {
     title: "",
     slug: "",
     href: "",
-    market: "Asia Pacific",
-    price: "",
-    rating: "",
-    status: "Draft",
     cardImage: "",
     cardAlt: "",
     shortDescription: "",
@@ -86,19 +60,14 @@ export const createDestinationInitialValues: DestinationFormInitialValues = {
     { id: "spotlight-2", value: "" },
     { id: "spotlight-3", value: "" },
   ],
-  relatedTours: [
-    { id: "related-tour-1", href: "", label: "", meta: "", title: "" },
-    { id: "related-tour-2", href: "", label: "", meta: "", title: "" },
-  ],
-  relatedHotels: [
-    { id: "related-hotel-1", href: "", label: "", meta: "", title: "" },
-    { id: "related-hotel-2", href: "", label: "", meta: "", title: "" },
-  ],
 };
 
 export function slugifyDestinationTitle(title: string) {
   return title
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/g, "d")
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
@@ -120,20 +89,6 @@ function factRows(values: readonly { readonly label: string; readonly value: str
   return values.map((fact, index) => ({ id: `fact-${index + 1}`, label: fact.label, value: fact.value }));
 }
 
-function linkRows(prefix: string, values: readonly { readonly href: string; readonly label: string; readonly meta: string; readonly title: string }[]) {
-  if (values.length === 0) {
-    return [{ id: `${prefix}-1`, href: "", label: "", meta: "", title: "" }];
-  }
-
-  return values.map((item, index) => ({
-    id: `${prefix}-${index + 1}`,
-    href: item.href,
-    label: item.label,
-    meta: item.meta,
-    title: item.title,
-  }));
-}
-
 export function valuesFromDestinationDetail(destination: DestinationDetail): ResolvedAdminDestinationEditData {
   const slug = destination.card.href.split("/").filter(Boolean).at(-1) ?? slugifyDestinationTitle(destination.card.title);
 
@@ -144,10 +99,6 @@ export function valuesFromDestinationDetail(destination: DestinationDetail): Res
         title: destination.card.title,
         slug,
         href: `/destinations/${slug}`,
-        market: destination.heroEyebrow,
-        price: destination.card.price,
-        rating: String(destination.card.rating),
-        status: "Published",
         cardImage: destination.card.image,
         cardAlt: destination.card.alt,
         shortDescription: destination.card.description,
@@ -161,8 +112,6 @@ export function valuesFromDestinationDetail(destination: DestinationDetail): Res
         "spotlight",
         destination.spotlight.map((item) => `${item.title}: ${item.description}`),
       ),
-      relatedTours: linkRows("related-tour", destination.relatedTours),
-      relatedHotels: linkRows("related-hotel", destination.relatedHotels),
     },
   };
 }

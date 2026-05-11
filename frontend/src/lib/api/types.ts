@@ -78,13 +78,8 @@ export type ApiDestinationDetail = {
   readonly slug: string;
   readonly title: string;
   readonly description: string;
-  readonly href: string;
   readonly image: string;
   readonly alt: string;
-  readonly price: string;
-  readonly rating: string;
-  readonly market: string;
-  readonly status: string;
   readonly heroImage: string;
   readonly heroAlt: string;
   readonly summary: string;

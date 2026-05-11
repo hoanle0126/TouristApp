@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronRight, Star } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { Button } from "@/src/components/ui/button";
@@ -42,15 +42,6 @@ function Hero({ detail }: Readonly<{ detail: DestinationDetail }>) {
       <div className="relative mx-auto w-full max-w-screen-2xl px-8 pb-24 md:pb-32 lg:px-24">
         <div className="max-w-4xl">
           <Breadcrumb title={detail.card.title} />
-          <div className="mb-6 flex flex-wrap gap-4">
-            <span className="rounded-full bg-emerald-100/90 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-950 backdrop-blur-md">
-              {detail.heroEyebrow}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-stone-950 backdrop-blur-md">
-              <Star className="size-3.5 fill-amber-400 text-amber-400" />
-              {detail.card.rating}
-            </span>
-          </div>
           <h1 className="mb-6 text-5xl font-extrabold leading-[0.95] tracking-tighter text-white md:text-8xl">
             {detail.card.title}
           </h1>

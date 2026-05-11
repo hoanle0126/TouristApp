@@ -50,7 +50,9 @@ export class SettingsCryptoService {
     const key = Buffer.from(configuredKey, 'base64');
 
     if (key.length !== 32) {
-      throw new Error('SETTINGS_ENCRYPTION_KEY must be a 32-byte base64 value.');
+      throw new Error(
+        'SETTINGS_ENCRYPTION_KEY must be a 32-byte base64 value.',
+      );
     }
 
     return key;

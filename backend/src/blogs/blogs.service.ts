@@ -215,8 +215,7 @@ export class BlogsService {
     return {
       slug: destination.slug,
       title: destination.title,
-      href: destination.href,
-      market: destination.market,
+      href: `/destinations/${destination.slug}`,
     };
   }
 

@@ -6,21 +6,14 @@ export type SaveDestinationInput = {
   readonly slug: string;
   readonly title: string;
   readonly description: string;
-  readonly href: string;
   readonly image: string;
   readonly alt: string;
-  readonly price: string;
-  readonly rating: number;
-  readonly market: string;
-  readonly status: "draft" | "published" | "archived";
   readonly heroImage: string;
   readonly heroAlt: string;
   readonly summary: string;
   readonly intro: readonly string[];
   readonly facts: readonly { readonly label: string; readonly value: string }[];
   readonly spotlight: readonly { readonly title: string; readonly description: string }[];
-  readonly relatedTours: readonly { readonly href: string; readonly label: string; readonly meta: string; readonly title: string }[];
-  readonly relatedHotels: readonly { readonly href: string; readonly label: string; readonly meta: string; readonly title: string }[];
 };
 
 export async function getDestinations(query: { readonly search?: string; readonly market?: string; readonly perPage?: number } = {}) {

@@ -16,8 +16,6 @@ export class DestinationsService {
     filters: { market?: string; search?: string; perPage?: number } = {},
   ) {
     const where: Prisma.DestinationWhereInput = {
-      status: 'published',
-      ...(filters.market ? { market: filters.market } : {}),
       ...(filters.search
         ? {
             OR: [
@@ -43,7 +41,7 @@ export class DestinationsService {
 
   async findOne(slug: string) {
     const destination = await this.prisma.destination.findFirst({
-      where: { slug, status: 'published' },
+      where: { slug },
       include: { hotels: true, tours: true },
     });
 
@@ -113,29 +111,20 @@ export class DestinationsService {
       slug: destination.slug,
       title: destination.title,
       description: destination.description,
-      href: destination.href,
       image: destination.image,
       alt: destination.alt,
-      price: destination.price,
-      rating: destination.rating,
-      market: destination.market,
-      status: destination.status,
       heroImage: destination.heroImage,
       heroAlt: destination.heroAlt,
       summary: destination.summary,
       intro: destination.intro ?? [],
       facts: destination.facts ?? [],
       spotlight: destination.spotlight ?? [],
-      relatedTours:
-        destination.tours.length > 0
-          ? destination.tours.map((tour) => this.toRelatedTourResponse(tour))
-          : (destination.relatedTours ?? []),
-      relatedHotels:
-        destination.hotels.length > 0
-          ? destination.hotels.map((hotel) =>
-              this.toRelatedHotelResponse(hotel),
-            )
-          : (destination.relatedHotels ?? []),
+      relatedTours: destination.tours.map((tour) =>
+        this.toRelatedTourResponse(tour),
+      ),
+      relatedHotels: destination.hotels.map((hotel) =>
+        this.toRelatedHotelResponse(hotel),
+      ),
     };
   }
 }

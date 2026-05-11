@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHotelDto } from './dto/create-hotel.dto';
@@ -288,8 +292,7 @@ export class HotelsService {
     return {
       slug: destination.slug,
       title: destination.title,
-      href: destination.href,
-      market: destination.market,
+      href: `/destinations/${destination.slug}`,
     };
   }
 
@@ -357,7 +360,9 @@ export class HotelsService {
     };
   }
 
-  private validateUniquePayload(inventory: UpsertHotelInventoryDto['inventory']) {
+  private validateUniquePayload(
+    inventory: UpsertHotelInventoryDto['inventory'],
+  ) {
     const ids = new Set<string>();
     const dates = new Set<string>();
 
@@ -378,7 +383,9 @@ export class HotelsService {
 
   private toInventoryDate(date: string) {
     if (!isValidDateOnly(date)) {
-      throw new BadRequestException('date must be a valid date in YYYY-MM-DD format');
+      throw new BadRequestException(
+        'date must be a valid date in YYYY-MM-DD format',
+      );
     }
 
     return new Date(`${date}T00:00:00.000Z`);

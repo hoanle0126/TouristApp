@@ -37,7 +37,9 @@ export class MomentsCapturedService {
   }
 
   private async findExisting(id: string) {
-    const moment = await this.prisma.momentCaptured.findUnique({ where: { id } });
+    const moment = await this.prisma.momentCaptured.findUnique({
+      where: { id },
+    });
 
     if (!moment) {
       throw new NotFoundException(`Captured moment ${id} was not found.`);

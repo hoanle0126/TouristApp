@@ -88,8 +88,7 @@ export function toDestinationCard(destination: ApiDestinationDetail): Destinatio
     description: destination.description,
     href: `/destinations/${destination.slug}`,
     image: destination.image,
-    price: destination.price,
-    rating: destination.rating,
+    slug: destination.slug,
     title: destination.title,
   };
 }
@@ -98,7 +97,6 @@ export function toDestinationDetail(destination: ApiDestinationDetail): Destinat
   return {
     card: toDestinationCard(destination),
     facts: destination.facts,
-    heroEyebrow: destination.market,
     heroImage: destination.heroImage,
     intro: destination.intro,
     relatedHotels: destination.relatedHotels,

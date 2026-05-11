@@ -9,47 +9,14 @@ import { getDestinationDetails, getDestinations } from "@/src/lib/api/destinatio
 import type { DestinationCard } from "@/src/types/travel";
 
 function getDestinationStats(destinations: readonly DestinationCard[]) {
-  const ratings = destinations.map((destination) => Number(destination.rating)).filter((rating) => Number.isFinite(rating));
-  const averageRating = ratings.length > 0 ? (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1) : "—";
   const leadDestination = destinations[0]?.title ?? "—";
 
   return [
     { label: "Published destinations", note: `${destinations.length} active editorial pages`, value: `${destinations.length}` },
-    { label: "Average rating", note: "Across current collection", value: averageRating },
     { label: "Lead destination", note: "Highest inquiry volume", value: leadDestination },
     { label: "Launch candidates", note: "Ready for merchandising", value: destinations.length.toString().padStart(2, "0") },
   ] as const;
 }
-
-const regionRows = [
-  {
-    focus: "Luxury expedition",
-    market: "Northern Europe",
-    status: "Scaling",
-    title: "Nordic Fjords",
-    trend: "+22%",
-  },
-  {
-    focus: "Urban culture",
-    market: "Western Europe",
-    status: "Stable",
-    title: "London Essence",
-    trend: "+9%",
-  },
-  {
-    focus: "Scenic heritage",
-    market: "Central Europe",
-    status: "Growing",
-    title: "Bavarian Trails",
-    trend: "+14%",
-  },
-] as const;
-
-const regionStatusStyles: Record<(typeof regionRows)[number]["status"], string> = {
-  Growing: "bg-emerald-100 text-emerald-900",
-  Scaling: "bg-stone-900 text-white",
-  Stable: "bg-stone-200 text-stone-700",
-};
 
 const watchlistItems = [
   {
@@ -63,7 +30,7 @@ const watchlistItems = [
     title: "London Essence needs positioning work",
   },
   {
-    detail: "Balanced rating and price point make it a good cross-sell with tour itineraries.",
+    detail: "Strong destination fit makes it a good cross-sell with tour itineraries.",
     icon: Sparkles,
     title: "Bavarian Trails fits bundle experiments",
   },
@@ -88,56 +55,6 @@ function DestinationStatGrid({ destinations }: { readonly destinations: readonly
         </Card>
       ))}
     </section>
-  );
-}
-
-function RegionTablePanel() {
-  return (
-    <Card>
-      <CardContent className="p-6 sm:p-7">
-        <div className="flex items-center justify-between border-b border-stone-200 pb-5">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
-              Market view
-            </p>
-            <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
-              Destination performance by positioning
-            </h3>
-          </div>
-        </div>
-
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-y-3">
-            <thead>
-              <tr className="text-left text-[11px] font-bold uppercase tracking-[0.22em] text-stone-400">
-                <th className="pb-1 pr-4">Destination</th>
-                <th className="pb-1 pr-4">Market</th>
-                <th className="pb-1 pr-4">Focus</th>
-                <th className="pb-1 pr-4">Trend</th>
-                <th className="pb-1">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {regionRows.map((row) => (
-                <tr className="bg-stone-50 text-sm text-stone-600" key={row.title}>
-                  <td className="rounded-l-2xl px-4 py-4 font-semibold text-stone-950">
-                    {row.title}
-                  </td>
-                  <td className="px-4 py-4">{row.market}</td>
-                  <td className="px-4 py-4">{row.focus}</td>
-                  <td className="px-4 py-4 font-semibold text-emerald-800">{row.trend}</td>
-                  <td className="rounded-r-2xl px-4 py-4">
-                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${regionStatusStyles[row.status]}`}>
-                      {row.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -206,8 +123,6 @@ export default async function AdminDestinationsPage() {
         <AdminDestinationCatalogPreview destinationDetails={destinationDetails} destinations={destinations} />
         <WatchlistPanel />
       </section>
-
-      <RegionTablePanel />
     </AdminShell>
   );
 }

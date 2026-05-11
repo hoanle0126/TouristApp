@@ -22,8 +22,6 @@ export interface DestinationCard {
   readonly description: string;
   readonly href: string;
   readonly image: string;
-  readonly price: string;
-  readonly rating: string;
   readonly slug?: string;
   readonly title: string;
 }
@@ -48,7 +46,6 @@ export interface DestinationDetailRelatedLink {
 export interface DestinationDetail {
   readonly card: DestinationCard;
   readonly facts: readonly DestinationDetailFact[];
-  readonly heroEyebrow: string;
   readonly heroImage: string;
   readonly intro: readonly string[];
   readonly relatedHotels: readonly DestinationDetailRelatedLink[];

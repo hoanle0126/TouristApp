@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Building2, Eye, Hotel, MapPinned, Pencil, Star, X } from "lucide-react";
+import { ArrowRight, Building2, Eye, Hotel, Pencil, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { slugifyDestinationTitle } from "@/src/components/admin/adminDestinationFormData";
@@ -16,20 +16,12 @@ interface AdminDestinationCatalogPreviewProps {
   readonly destinationDetails: readonly ApiDestinationDetail[];
 }
 
-function getDestinationPositioning(destination: DestinationCard) {
-  return destination.price === "$1,200" ? "Premium scenic" : "Core city escape";
-}
-
-function getDestinationCommercialSignal(destination: DestinationCard) {
-  return destination.rating === "4.9" ? "High priority" : "Steady demand";
-}
-
 function getDestinationDetail(destination: DestinationCard, destinationDetails: readonly ApiDestinationDetail[]) {
-  return destinationDetails.find((detail) => detail.title === destination.title || detail.href === destination.href) ?? null;
+  return destinationDetails.find((detail) => detail.title === destination.title || detail.slug === destination.slug) ?? null;
 }
 
 function getDestinationSlug(destination: DestinationCard) {
-  return destination.href.split("/").filter(Boolean).at(-1) ?? slugifyDestinationTitle(destination.title);
+  return destination.slug ?? destination.href.split("/").filter(Boolean).at(-1) ?? slugifyDestinationTitle(destination.title);
 }
 
 function getDestinationEditHref(destination: DestinationCard) {
@@ -127,10 +119,7 @@ function AdminDestinationPreviewModal({
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/80 to-transparent p-6 text-white">
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-950">
-                {detail?.market ?? "Destination"}
-              </span>
-              <span className="rounded-full bg-stone-950/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em]">
-                {getDestinationCommercialSignal(destination)}
+                Destination
               </span>
             </div>
             <h2 className="mt-4 text-3xl font-bold tracking-tight" id={titleId}>
@@ -143,11 +132,7 @@ function AdminDestinationPreviewModal({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Destination preview</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-stone-950">{destination.price}</p>
-              <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-stone-700">
-                <Star className="size-4 fill-amber-400 text-amber-400" />
-                {destination.rating}
-              </p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-stone-950">{destination.title}</p>
             </div>
             <button
               aria-label="Close destination preview"
@@ -163,20 +148,6 @@ function AdminDestinationPreviewModal({
             {destination.description}
           </p>
           {detail ? <p className="mt-4 text-sm leading-7 text-stone-600">{detail.summary}</p> : null}
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="rounded-2xl bg-stone-100 p-4">
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">
-                <MapPinned className="size-4" />
-                Market
-              </div>
-              <p className="mt-2 text-sm font-semibold text-stone-950">{detail?.market ?? "Editorial destination"}</p>
-            </div>
-            <div className="rounded-2xl border border-stone-200 bg-white p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Positioning</p>
-              <p className="mt-2 text-sm font-semibold text-stone-950">{getDestinationPositioning(destination)}</p>
-            </div>
-          </div>
 
           {detail ? (
             <div className="mt-6 space-y-4">
@@ -263,32 +234,9 @@ export function AdminDestinationCatalogPreview({ destinationDetails, destination
                   <Image alt={destination.alt} className="object-cover" fill sizes="(min-width: 1280px) 33vw, 100vw" src={destination.image} />
                 </div>
                 <div className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h4 className="text-2xl font-bold tracking-tight text-stone-950">{destination.title}</h4>
-                      <p className="mt-2 text-sm leading-relaxed text-stone-600">{destination.description}</p>
-                    </div>
-                    <span className="rounded-2xl bg-stone-900 px-3 py-2 text-sm font-semibold text-white">
-                      {destination.price}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-2xl bg-white p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Rating</p>
-                      <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-stone-950">
-                        <Star className="size-4 fill-amber-400 text-amber-400" />
-                        {destination.rating}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-white p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Positioning</p>
-                      <p className="mt-2 text-sm font-semibold text-stone-950">{getDestinationPositioning(destination)}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Commercial</p>
-                      <p className="mt-2 text-sm font-semibold text-stone-950">{getDestinationCommercialSignal(destination)}</p>
-                    </div>
+                  <div>
+                    <h4 className="text-2xl font-bold tracking-tight text-stone-950">{destination.title}</h4>
+                    <p className="mt-2 text-sm leading-relaxed text-stone-600">{destination.description}</p>
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-2">

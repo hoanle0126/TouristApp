@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTourDto } from './dto/create-tour.dto';
@@ -112,7 +116,9 @@ export class ToursService {
           });
 
           if (!existing || existing.tourId !== tour.id) {
-            throw new NotFoundException(`Tour departure ${departure.id} was not found.`);
+            throw new NotFoundException(
+              `Tour departure ${departure.id} was not found.`,
+            );
           }
 
           const dateConflict = await tx.tourDeparture.findUnique({
@@ -182,7 +188,9 @@ export class ToursService {
 
   private buildPublicWhere(filters: FindAllFilters) {
     return {
-      ...(filters.destination ? { destination: { slug: filters.destination } } : {}),
+      ...(filters.destination
+        ? { destination: { slug: filters.destination } }
+        : {}),
       ...(filters.hotel ? { hotels: { some: { slug: filters.hotel } } } : {}),
       ...(filters.type
         ? {
@@ -203,9 +211,24 @@ export class ToursService {
       ...(filters.search
         ? {
             OR: [
-              { title: { contains: filters.search, mode: 'insensitive' as const } },
-              { shortDescription: { contains: filters.search, mode: 'insensitive' as const } },
-              { subtitle: { contains: filters.search, mode: 'insensitive' as const } },
+              {
+                title: {
+                  contains: filters.search,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                shortDescription: {
+                  contains: filters.search,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                subtitle: {
+                  contains: filters.search,
+                  mode: 'insensitive' as const,
+                },
+              },
             ],
           }
         : {}),
@@ -216,8 +239,7 @@ export class ToursService {
     return {
       slug: destination.slug,
       title: destination.title,
-      href: destination.href,
-      market: destination.market,
+      href: `/destinations/${destination.slug}`,
     };
   }
 
@@ -307,7 +329,9 @@ export class ToursService {
 
   private toInventoryDate(date: string) {
     if (!isValidDateOnly(date)) {
-      throw new BadRequestException('date must be a valid date in YYYY-MM-DD format');
+      throw new BadRequestException(
+        'date must be a valid date in YYYY-MM-DD format',
+      );
     }
 
     return new Date(`${date}T00:00:00.000Z`);

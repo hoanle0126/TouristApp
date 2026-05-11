@@ -4,7 +4,14 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Booking, BookingItem, Hotel, Prisma, Tour, TourDeparture } from '@prisma/client';
+import {
+  Booking,
+  BookingItem,
+  Hotel,
+  Prisma,
+  Tour,
+  TourDeparture,
+} from '@prisma/client';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -119,7 +126,7 @@ export class BookingsService {
         dto.items.map((item) => this.prepareItem(item, tx)),
       );
       await this.reserveInventory(items, tx);
-      const bookingItems = items.map(({ hotelInventoryDays, tourDeparture, ...item }) => item);
+      const bookingItems = items.map(({ ...item }) => item);
       const subtotal = items.reduce(
         (total, item) => total + item.lineTotal.toNumber(),
         0,
@@ -234,7 +241,9 @@ export class BookingsService {
     return this.toResponse(updatedBooking!);
   }
 
-  private async sendBookingEmails(booking: ReturnType<BookingsService['toResponse']>) {
+  private async sendBookingEmails(
+    booking: ReturnType<BookingsService['toResponse']>,
+  ) {
     try {
       await Promise.all([
         this.mailService.sendBookingConfirmationToUser(booking),
@@ -531,7 +540,11 @@ export class BookingsService {
     tourId: string,
     requestedQuantity = 1,
   ): asserts departure is TourDeparture {
-    if (!departure || departure.tourId !== tourId || departure.status !== 'open') {
+    if (
+      !departure ||
+      departure.tourId !== tourId ||
+      departure.status !== 'open'
+    ) {
       throw new BadRequestException('This departure is sold out.');
     }
 
@@ -545,7 +558,9 @@ export class BookingsService {
     }
 
     if (remaining < requestedQuantity) {
-      throw new BadRequestException(`Only ${remaining} seats left for this departure.`);
+      throw new BadRequestException(
+        `Only ${remaining} seats left for this departure.`,
+      );
     }
   }
 
@@ -570,7 +585,11 @@ export class BookingsService {
     departure: TourDeparture | null,
     tourId: string,
   ): never {
-    if (!departure || departure.tourId !== tourId || departure.status !== 'open') {
+    if (
+      !departure ||
+      departure.tourId !== tourId ||
+      departure.status !== 'open'
+    ) {
       throw new BadRequestException('This departure is sold out.');
     }
 
@@ -579,24 +598,35 @@ export class BookingsService {
       throw new BadRequestException('This departure is sold out.');
     }
 
-    throw new BadRequestException(`Only ${remaining} seats left for this departure.`);
+    throw new BadRequestException(
+      `Only ${remaining} seats left for this departure.`,
+    );
   }
 
   private throwHotelAvailabilityError(
-    inventoryDay: { totalRooms: number; bookedRooms: number; status: string } | null,
+    inventoryDay: {
+      totalRooms: number;
+      bookedRooms: number;
+      status: string;
+    } | null,
     date: string,
   ): never {
     if (!inventoryDay || inventoryDay.status !== 'open') {
       throw new BadRequestException(`This hotel is unavailable on ${date}.`);
     }
 
-    const remaining = Math.max(inventoryDay.totalRooms - inventoryDay.bookedRooms, 0);
+    const remaining = Math.max(
+      inventoryDay.totalRooms - inventoryDay.bookedRooms,
+      0,
+    );
     throw new BadRequestException(`Only ${remaining} rooms left on ${date}.`);
   }
 
   private buildHotelNights(item: CreateBookingItemDto) {
     if (!item.checkIn || !item.checkOut) {
-      throw new BadRequestException('Hotel check-in and check-out are required.');
+      throw new BadRequestException(
+        'Hotel check-in and check-out are required.',
+      );
     }
 
     const checkIn = this.parseDateOnly(item.checkIn);
@@ -606,7 +636,11 @@ export class BookingsService {
     }
 
     const nights: string[] = [];
-    for (const current = new Date(checkIn); current < checkOut; current.setUTCDate(current.getUTCDate() + 1)) {
+    for (
+      const current = new Date(checkIn);
+      current < checkOut;
+      current.setUTCDate(current.getUTCDate() + 1)
+    ) {
       nights.push(this.toDateOnlyString(current));
     }
 
@@ -694,8 +728,12 @@ export class BookingsService {
 
   private toPublicResponse(booking: BookingRecord) {
     const response = this.toResponse(booking);
-    const { internalNotes, ...trip } = response.trip;
-    const { aiSummary, ...publicResponse } = response;
+    const trip = Object.fromEntries(
+      Object.entries(response.trip).filter(([key]) => key !== 'internalNotes'),
+    );
+    const publicResponse = Object.fromEntries(
+      Object.entries(response).filter(([key]) => key !== 'aiSummary'),
+    );
 
     return {
       ...publicResponse,

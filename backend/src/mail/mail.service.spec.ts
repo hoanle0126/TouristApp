@@ -47,7 +47,10 @@ describe('MailService', () => {
   it('sends a booking confirmation email to the customer', async () => {
     const service = new MailService();
     const sendMail = jest
-      .spyOn(service as unknown as { sendMail: MailService['sendMail'] }, 'sendMail')
+      .spyOn(
+        service as unknown as { sendMail: MailService['sendMail'] },
+        'sendMail',
+      )
       .mockResolvedValue(undefined);
 
     await service.sendBookingConfirmationToUser(booking);
@@ -56,7 +59,9 @@ describe('MailService', () => {
       expect.objectContaining({
         to: 'mai.anh@example.com',
         subject: expect.stringContaining('TW-20260501-SEED'),
-        text: expect.stringContaining('Your booking has been created successfully.'),
+        text: expect.stringContaining(
+          'Your booking has been created successfully.',
+        ),
       }),
     );
     expect(sendMail).toHaveBeenCalledWith(
@@ -70,7 +75,10 @@ describe('MailService', () => {
     process.env.ADMIN_EMAIL = 'admin@example.com';
     const service = new MailService();
     const sendMail = jest
-      .spyOn(service as unknown as { sendMail: MailService['sendMail'] }, 'sendMail')
+      .spyOn(
+        service as unknown as { sendMail: MailService['sendMail'] },
+        'sendMail',
+      )
       .mockResolvedValue(undefined);
 
     await service.sendNewBookingNotificationToAdmin(booking);

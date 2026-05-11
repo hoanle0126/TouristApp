@@ -1,4 +1,4 @@
-import { IsArray, IsIn, IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsString } from 'class-validator';
 
 export class CreateDestinationDto {
   @IsString()
@@ -11,27 +11,10 @@ export class CreateDestinationDto {
   description: string;
 
   @IsString()
-  href: string;
-
-  @IsString()
   image: string;
 
   @IsString()
   alt: string;
-
-  @IsString()
-  price: string;
-
-  @IsNumber()
-  @Min(0)
-  @Max(5)
-  rating: number;
-
-  @IsString()
-  market: string;
-
-  @IsIn(['draft', 'published', 'archived'])
-  status: 'draft' | 'published' | 'archived';
 
   @IsString()
   heroImage: string;
@@ -50,20 +33,4 @@ export class CreateDestinationDto {
 
   @IsArray()
   spotlight: Array<{ title: string; description: string }>;
-
-  @IsArray()
-  relatedTours: Array<{
-    href: string;
-    label: string;
-    meta: string;
-    title: string;
-  }>;
-
-  @IsArray()
-  relatedHotels: Array<{
-    href: string;
-    label: string;
-    meta: string;
-    title: string;
-  }>;
 }

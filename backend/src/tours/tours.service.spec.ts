@@ -22,9 +22,23 @@ const tourRecord = {
   curatorImage: 'https://images.unsplash.com/photo-3',
   curatorImageAlt: 'Local tour curator',
   subtitle: 'Discover Hoi An hidden water world.',
-  highlights: [{ icon: 'boat', title: 'Bamboo Basket Boat', description: 'Navigate waterways.' }],
-  itinerary: [{ title: 'Pick-up & Arrival', description: 'Depart from hotel.' }],
-  gallery: [{ image: 'https://images.unsplash.com/photo-4', alt: 'Fisherman', layout: 'portrait' }],
+  highlights: [
+    {
+      icon: 'boat',
+      title: 'Bamboo Basket Boat',
+      description: 'Navigate waterways.',
+    },
+  ],
+  itinerary: [
+    { title: 'Pick-up & Arrival', description: 'Depart from hotel.' },
+  ],
+  gallery: [
+    {
+      image: 'https://images.unsplash.com/photo-4',
+      alt: 'Fisherman',
+      layout: 'portrait',
+    },
+  ],
   inclusions: ['Guide'],
   exclusions: ['Personal expenses'],
   destinationId: 'destination_1',
@@ -33,21 +47,14 @@ const tourRecord = {
     slug: 'hoi-an',
     title: 'Hoi An Ancient Town',
     description: 'Lantern-lit lanes and riverside cafes.',
-    href: '/destinations/hoi-an',
     image: 'https://images.unsplash.com/photo-5',
     alt: 'Lanterns glowing in Hoi An Ancient Town',
-    price: 'From $75',
-    rating: 4.9,
-    market: 'Vietnam',
-    status: 'published',
     heroImage: 'https://images.unsplash.com/photo-6',
     heroAlt: 'Hoi An riverside at golden hour',
     summary: 'A heritage town for food walks.',
     intro: [],
     facts: [],
     spotlight: [],
-    relatedTours: [],
-    relatedHotels: [],
     createdAt: new Date('2026-04-30T00:00:00.000Z'),
     updatedAt: new Date('2026-04-30T00:00:00.000Z'),
   },
@@ -126,9 +133,7 @@ describe('ToursService', () => {
     });
 
     await expect(validate(dto)).resolves.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ property: 'date' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ property: 'date' })]),
     );
   });
 
@@ -152,7 +157,6 @@ describe('ToursService', () => {
           slug: 'hoi-an',
           title: 'Hoi An Ancient Town',
           href: '/destinations/hoi-an',
-          market: 'Vietnam',
         },
         hotels: [
           {
@@ -186,11 +190,18 @@ describe('ToursService', () => {
     await expect(
       service.upsertDepartures('bay-mau-coconut-forest', {
         departures: [
-          { id: 'departure_1', date: '2026-06-12', capacity: 3, status: 'open' },
+          {
+            id: 'departure_1',
+            date: '2026-06-12',
+            capacity: 3,
+            status: 'open',
+          },
         ],
       }),
     ).rejects.toThrow(
-      new BadRequestException('Capacity cannot be lower than current bookings.'),
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
     );
     expect(prisma.tourDeparture.update).not.toHaveBeenCalled();
     expect(prisma.tourDeparture.upsert).not.toHaveBeenCalled();
@@ -215,7 +226,9 @@ describe('ToursService', () => {
         departures: [{ date: '2026-06-12', capacity: 3, status: 'open' }],
       }),
     ).rejects.toThrow(
-      new BadRequestException('Capacity cannot be lower than current bookings.'),
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
     );
     expect(prisma.tourDeparture.update).not.toHaveBeenCalled();
     expect(prisma.tourDeparture.create).not.toHaveBeenCalled();
@@ -280,7 +293,9 @@ describe('ToursService', () => {
         update: jest.fn(),
         updateMany: jest.fn().mockImplementation((args) => {
           writes.push(args);
-          return Promise.resolve({ count: args.where.id === 'departure_1' ? 1 : 0 });
+          return Promise.resolve({
+            count: args.where.id === 'departure_1' ? 1 : 0,
+          });
         }),
         upsert: jest.fn(),
       },
@@ -299,12 +314,24 @@ describe('ToursService', () => {
     await expect(
       service.upsertDepartures('bay-mau-coconut-forest', {
         departures: [
-          { id: 'departure_1', date: '2026-06-12', capacity: 16, status: 'open' },
-          { id: 'departure_2', date: '2026-06-13', capacity: 5, status: 'open' },
+          {
+            id: 'departure_1',
+            date: '2026-06-12',
+            capacity: 16,
+            status: 'open',
+          },
+          {
+            id: 'departure_2',
+            date: '2026-06-13',
+            capacity: 5,
+            status: 'open',
+          },
         ],
       }),
     ).rejects.toThrow(
-      new BadRequestException('Capacity cannot be lower than current bookings.'),
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
     );
     expect(tx.tourDeparture.updateMany).toHaveBeenCalledTimes(2);
     expect(writes).toEqual([]);
@@ -353,7 +380,12 @@ describe('ToursService', () => {
 
     await service.upsertDepartures('bay-mau-coconut-forest', {
       departures: [
-        { date: '2026-06-13', capacity: 12, status: 'open', booked: 9 } as never,
+        {
+          date: '2026-06-13',
+          capacity: 12,
+          status: 'open',
+          booked: 9,
+        } as never,
       ],
     });
 
@@ -384,10 +416,19 @@ describe('ToursService', () => {
     await expect(
       service.upsertDepartures('bay-mau-coconut-forest', {
         departures: [
-          { id: 'departure_1', date: '2026-06-12', capacity: 4, status: 'open' },
+          {
+            id: 'departure_1',
+            date: '2026-06-12',
+            capacity: 4,
+            status: 'open',
+          },
         ],
       }),
-    ).rejects.toThrow(new BadRequestException('Capacity cannot be lower than current bookings.'));
+    ).rejects.toThrow(
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
+    );
   });
 
   it('rejects id departure updates to an existing date for the same tour', async () => {
@@ -408,10 +449,17 @@ describe('ToursService', () => {
     await expect(
       service.upsertDepartures('bay-mau-coconut-forest', {
         departures: [
-          { id: 'departure_1', date: '2026-06-13', capacity: 12, status: 'open' },
+          {
+            id: 'departure_1',
+            date: '2026-06-13',
+            capacity: 12,
+            status: 'open',
+          },
         ],
       }),
-    ).rejects.toThrow(new BadRequestException('Inventory date already exists.'));
+    ).rejects.toThrow(
+      new BadRequestException('Inventory date already exists.'),
+    );
     expect(prisma.tourDeparture.update).not.toHaveBeenCalled();
   });
 
@@ -426,7 +474,9 @@ describe('ToursService', () => {
           { date: '2026-06-12', capacity: 14, status: 'open' },
         ],
       }),
-    ).rejects.toThrow(new BadRequestException('Duplicate inventory date in payload.'));
+    ).rejects.toThrow(
+      new BadRequestException('Duplicate inventory date in payload.'),
+    );
     expect(prisma.tour.findUnique).not.toHaveBeenCalled();
   });
 
@@ -465,7 +515,12 @@ describe('ToursService', () => {
     await expect(
       service.upsertDepartures('bay-mau-coconut-forest', {
         departures: [
-          { id: 'departure_1', date: '2026-06-12', capacity: 16, status: 'open' },
+          {
+            id: 'departure_1',
+            date: '2026-06-12',
+            capacity: 16,
+            status: 'open',
+          },
         ],
       }),
     ).resolves.toMatchObject({
@@ -481,7 +536,6 @@ describe('ToursService', () => {
       ],
     });
   });
-
 
   it('filters tours by destination, hotel, type, duration, and query', async () => {
     const prisma = createPrismaMock();
@@ -537,7 +591,6 @@ describe('ToursService', () => {
         slug: 'hoi-an',
         title: 'Hoi An Ancient Town',
         href: '/destinations/hoi-an',
-        market: 'Vietnam',
       },
       hotels: [
         {
@@ -550,7 +603,6 @@ describe('ToursService', () => {
       ],
     });
   });
-
 
   it('creates a tour by connecting one destination slug', async () => {
     const prisma = createPrismaMock();
@@ -575,9 +627,23 @@ describe('ToursService', () => {
       curatorImage: 'https://images.unsplash.com/photo-3',
       curatorImageAlt: 'Local tour curator',
       subtitle: 'Discover Hoi An hidden water world.',
-      highlights: [{ icon: 'boat', title: 'Bamboo Basket Boat', description: 'Navigate waterways.' }],
-      itinerary: [{ title: 'Pick-up & Arrival', description: 'Depart from hotel.' }],
-      gallery: [{ image: 'https://images.unsplash.com/photo-4', alt: 'Fisherman', layout: 'portrait' }],
+      highlights: [
+        {
+          icon: 'boat',
+          title: 'Bamboo Basket Boat',
+          description: 'Navigate waterways.',
+        },
+      ],
+      itinerary: [
+        { title: 'Pick-up & Arrival', description: 'Depart from hotel.' },
+      ],
+      gallery: [
+        {
+          image: 'https://images.unsplash.com/photo-4',
+          alt: 'Fisherman',
+          layout: 'portrait',
+        },
+      ],
       inclusions: ['Guide'],
       exclusions: ['Personal expenses'],
       destinationSlug: 'hoi-an',
@@ -594,7 +660,14 @@ describe('ToursService', () => {
   it('updates a tour by replacing its destination connection', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findUnique.mockResolvedValue(tourRecord);
-    prisma.tour.update.mockResolvedValue({ ...tourRecord, destination: { ...tourRecord.destination, slug: 'da-nang', title: 'Da Nang' } });
+    prisma.tour.update.mockResolvedValue({
+      ...tourRecord,
+      destination: {
+        ...tourRecord.destination,
+        slug: 'da-nang',
+        title: 'Da Nang',
+      },
+    });
     const service = new ToursService(prisma as never);
 
     await service.update('bay-mau-coconut-forest', {

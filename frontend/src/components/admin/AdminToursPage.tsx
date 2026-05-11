@@ -17,43 +17,6 @@ function getCatalogStats(tours: readonly TourCard[]) {
   ] as const;
 }
 
-const departureRows = [
-  {
-    date: "May 02, 2026",
-    guide: "Lan Pham",
-    route: "Bay Mau Coconut Forest",
-    seats: "9 / 12",
-    status: "Healthy",
-  },
-  {
-    date: "May 06, 2026",
-    guide: "Akira Mori",
-    route: "The Soul of Kyoto",
-    seats: "5 / 8",
-    status: "Push sales",
-  },
-  {
-    date: "May 11, 2026",
-    guide: "Luca Serra",
-    route: "Amalfi Coast Discovery",
-    seats: "11 / 12",
-    status: "Almost full",
-  },
-  {
-    date: "May 18, 2026",
-    guide: "Freya Nordin",
-    route: "Arctic Sky Expedition",
-    seats: "3 / 6",
-    status: "Push sales",
-  },
-] as const;
-
-const statusStyles: Record<(typeof departureRows)[number]["status"], string> = {
-  Healthy: "bg-emerald-100 text-emerald-900",
-  "Push sales": "bg-amber-100 text-amber-900",
-  "Almost full": "bg-stone-900 text-white",
-};
-
 function ToursStatGrid({ tours }: { readonly tours: readonly TourCard[] }) {
   const catalogStats = getCatalogStats(tours);
 
@@ -73,56 +36,6 @@ function ToursStatGrid({ tours }: { readonly tours: readonly TourCard[] }) {
         </Card>
       ))}
     </section>
-  );
-}
-
-function DeparturesPanel() {
-  return (
-    <Card>
-      <CardContent className="p-6 sm:p-7">
-        <div className="flex items-center justify-between border-b border-stone-200 pb-5">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
-              Upcoming departures
-            </p>
-            <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
-              Departure load by guide and seat count
-            </h3>
-          </div>
-        </div>
-
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-y-3">
-            <thead>
-              <tr className="text-left text-[11px] font-bold uppercase tracking-[0.22em] text-stone-400">
-                <th className="pb-1 pr-4">Route</th>
-                <th className="pb-1 pr-4">Date</th>
-                <th className="pb-1 pr-4">Guide</th>
-                <th className="pb-1 pr-4">Seats</th>
-                <th className="pb-1">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {departureRows.map((row) => (
-                <tr className="bg-stone-50 text-sm text-stone-600" key={`${row.route}-${row.date}`}>
-                  <td className="rounded-l-2xl px-4 py-4 font-semibold text-stone-950">
-                    {row.route}
-                  </td>
-                  <td className="px-4 py-4">{row.date}</td>
-                  <td className="px-4 py-4">{row.guide}</td>
-                  <td className="px-4 py-4">{row.seats}</td>
-                  <td className="rounded-r-2xl px-4 py-4">
-                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${statusStyles[row.status]}`}>
-                      {row.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -151,7 +64,7 @@ function InsightsPanel() {
   ] as const;
 
   return (
-    <Card className="border-none bg-stone-950 text-white">
+    <Card className="sticky top-6 h-fit border-none bg-stone-950 text-white">
       <CardContent className="p-6 sm:p-7">
         <div className="flex items-center justify-between">
           <div>
@@ -211,8 +124,6 @@ export default async function AdminToursPage() {
         <AdminTourCatalogPreview tours={tours} />
         <InsightsPanel />
       </section>
-
-      <DeparturesPanel />
     </AdminShell>
   );
 }

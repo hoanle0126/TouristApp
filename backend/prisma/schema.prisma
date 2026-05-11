@@ -64,29 +64,19 @@ model Destination {
   slug             String     @unique
   title            String
   description      String
-  href             String
   image            String
   alt              String
-  price            String
-  rating           Float
-  market           String
-  status           String     @default("published")
   heroImage        String
   heroAlt          String
   summary          String
   intro            Json
   facts            Json
   spotlight        Json
-  relatedTours     Json
-  relatedHotels    Json
   tours            Tour[]
   hotels           Hotel[]
   mentionedInPosts BlogPost[] @relation("BlogMentionedDestinations")
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
-
-  @@index([market])
-  @@index([status])
 }
 
 model MomentCaptured {

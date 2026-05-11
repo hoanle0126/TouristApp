@@ -6,35 +6,14 @@ const destinationRecord = {
   slug: 'ha-long-bay',
   title: 'Ha Long Bay',
   description: 'Cruise through emerald waters.',
-  href: '/destinations/ha-long-bay',
   image: 'https://images.unsplash.com/photo-1',
   alt: 'Limestone islands across Ha Long Bay',
-  price: 'From $120',
-  rating: 4.8,
-  market: 'Vietnam',
-  status: 'published',
   heroImage: 'https://images.unsplash.com/photo-2',
   heroAlt: 'Sunrise over Ha Long Bay karsts',
   summary: 'Vietnam’s iconic seascape.',
   intro: ['Sail between limestone towers.'],
   facts: [{ label: 'Best season', value: 'October to April' }],
   spotlight: [{ title: 'Overnight cruise', description: 'Sleep on the bay.' }],
-  relatedTours: [
-    {
-      href: '/tours/ha-long-bay-cruise',
-      label: 'Tour',
-      meta: '2 days',
-      title: 'Ha Long Bay Cruise',
-    },
-  ],
-  relatedHotels: [
-    {
-      href: '/hotels/ha-long-harbor-hotel',
-      label: 'Hotel',
-      meta: '4-star',
-      title: 'Ha Long Harbor Hotel',
-    },
-  ],
   tours: [
     {
       id: 'tour_1',
@@ -132,7 +111,7 @@ describe('DestinationsService', () => {
     ]);
     expect(prisma.destination.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { status: 'published' },
+        where: {},
         include: { hotels: true, tours: true },
         orderBy: { createdAt: 'desc' },
       }),
@@ -148,8 +127,6 @@ describe('DestinationsService', () => {
 
     expect(prisma.destination.findMany).toHaveBeenCalledWith({
       where: {
-        status: 'published',
-        market: 'Vietnam',
         OR: [
           { title: { contains: 'Ha Long', mode: 'insensitive' } },
           { description: { contains: 'Ha Long', mode: 'insensitive' } },
@@ -180,7 +157,7 @@ describe('DestinationsService', () => {
       ],
     });
     expect(prisma.destination.findFirst).toHaveBeenCalledWith({
-      where: { slug: 'ha-long-bay', status: 'published' },
+      where: { slug: 'ha-long-bay' },
       include: { hotels: true, tours: true },
     });
   });
@@ -205,21 +182,14 @@ describe('DestinationsService', () => {
         slug: destinationRecord.slug,
         title: destinationRecord.title,
         description: destinationRecord.description,
-        href: destinationRecord.href,
         image: destinationRecord.image,
         alt: destinationRecord.alt,
-        price: destinationRecord.price,
-        rating: destinationRecord.rating,
-        market: destinationRecord.market,
-        status: 'published',
         heroImage: destinationRecord.heroImage,
         heroAlt: destinationRecord.heroAlt,
         summary: destinationRecord.summary,
         intro: destinationRecord.intro,
         facts: destinationRecord.facts,
         spotlight: destinationRecord.spotlight,
-        relatedTours: destinationRecord.relatedTours,
-        relatedHotels: destinationRecord.relatedHotels,
       }),
     ).resolves.toMatchObject({
       slug: destinationRecord.slug,

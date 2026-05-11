@@ -122,10 +122,10 @@ export async function searchTravelProducts(
       category: "Destination",
       cta: "View Destination",
       description: destination.description,
-      href: destination.href,
+      href: `/destinations/${destination.slug}`,
       image: destination.image,
       meta: destination.description,
-      price: destination.price,
+      price: "",
       title: destination.title,
     })),
   ];

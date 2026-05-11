@@ -105,8 +105,10 @@ export class SettingsService {
     });
 
     if (!response.ok) {
-      const payload = await response.json().catch(() => undefined);
-      const message = this.extractProviderErrorMessage(payload) ?? `Provider request failed with status ${response.status}.`;
+      const payload: unknown = await response.json().catch(() => undefined);
+      const message =
+        this.extractProviderErrorMessage(payload) ??
+        `Provider request failed with status ${response.status}.`;
       throw new Error(message);
     }
 
@@ -150,7 +152,9 @@ export class SettingsService {
     return data;
   }
 
-  private toReadModel(config: AiProviderSettingsRecord | null): AiProviderSettingsReadModel {
+  private toReadModel(
+    config: AiProviderSettingsRecord | null,
+  ): AiProviderSettingsReadModel {
     const hasApiKey = Boolean(config?.encryptedApiKey);
 
     return {
@@ -159,7 +163,7 @@ export class SettingsService {
       model: config?.model ?? DEFAULT_MODEL,
       enabled: config?.enabled ?? false,
       hasApiKey,
-      apiKeyLast4: hasApiKey ? config?.apiKeyLast4 ?? null : null,
+      apiKeyLast4: hasApiKey ? (config?.apiKeyLast4 ?? null) : null,
     };
   }
 

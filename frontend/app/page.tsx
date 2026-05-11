@@ -23,7 +23,7 @@ export default async function Home() {
       href: destination.href,
       image: destination.image,
       location: destination.title,
-      price: destination.price,
+      price: "Explore",
       title: destination.title,
     })),
     ...tours.slice(0, 2).map((tour) => ({

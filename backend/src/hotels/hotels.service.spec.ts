@@ -8,21 +8,14 @@ const destinationRecord = {
   slug: 'hoi-an',
   title: 'Hoi An Ancient Town',
   description: 'Lantern-lit lanes.',
-  href: '/destinations/hoi-an',
   image: 'https://images.unsplash.com/photo-1',
   alt: 'Hoi An lanterns',
-  price: 'From $75',
-  rating: 4.9,
-  market: 'Vietnam',
-  status: 'published',
   heroImage: 'https://images.unsplash.com/photo-2',
   heroAlt: 'Hoi An riverside',
   summary: 'A heritage town.',
   intro: [],
   facts: [],
   spotlight: [],
-  relatedTours: [],
-  relatedHotels: [],
   createdAt: new Date('2026-05-01T00:00:00.000Z'),
   updatedAt: new Date('2026-05-01T00:00:00.000Z'),
 };
@@ -154,9 +147,7 @@ describe('HotelsService', () => {
     });
 
     await expect(validate(dto)).resolves.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ property: 'date' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ property: 'date' })]),
     );
   });
 
@@ -176,7 +167,6 @@ describe('HotelsService', () => {
             slug: 'hoi-an',
             title: 'Hoi An Ancient Town',
             href: '/destinations/hoi-an',
-            market: 'Vietnam',
           },
         ],
         tours: [
@@ -211,11 +201,18 @@ describe('HotelsService', () => {
     await expect(
       service.upsertInventory('shining-riverside-hoi-an', {
         inventory: [
-          { id: 'inventory_1', date: '2026-06-12', totalRooms: 2, status: 'open' },
+          {
+            id: 'inventory_1',
+            date: '2026-06-12',
+            totalRooms: 2,
+            status: 'open',
+          },
         ],
       }),
     ).rejects.toThrow(
-      new BadRequestException('Capacity cannot be lower than current bookings.'),
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
     );
     expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
     expect(prisma.hotelInventoryDay.upsert).not.toHaveBeenCalled();
@@ -240,7 +237,9 @@ describe('HotelsService', () => {
         inventory: [{ date: '2026-06-12', totalRooms: 2, status: 'open' }],
       }),
     ).rejects.toThrow(
-      new BadRequestException('Capacity cannot be lower than current bookings.'),
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
     );
     expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
     expect(prisma.hotelInventoryDay.create).not.toHaveBeenCalled();
@@ -305,7 +304,9 @@ describe('HotelsService', () => {
         update: jest.fn(),
         updateMany: jest.fn().mockImplementation((args) => {
           writes.push(args);
-          return Promise.resolve({ count: args.where.id === 'inventory_1' ? 1 : 0 });
+          return Promise.resolve({
+            count: args.where.id === 'inventory_1' ? 1 : 0,
+          });
         }),
         upsert: jest.fn(),
       },
@@ -324,12 +325,24 @@ describe('HotelsService', () => {
     await expect(
       service.upsertInventory('shining-riverside-hoi-an', {
         inventory: [
-          { id: 'inventory_1', date: '2026-06-12', totalRooms: 12, status: 'open' },
-          { id: 'inventory_2', date: '2026-06-13', totalRooms: 5, status: 'open' },
+          {
+            id: 'inventory_1',
+            date: '2026-06-12',
+            totalRooms: 12,
+            status: 'open',
+          },
+          {
+            id: 'inventory_2',
+            date: '2026-06-13',
+            totalRooms: 5,
+            status: 'open',
+          },
         ],
       }),
     ).rejects.toThrow(
-      new BadRequestException('Capacity cannot be lower than current bookings.'),
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
     );
     expect(tx.hotelInventoryDay.updateMany).toHaveBeenCalledTimes(2);
     expect(writes).toEqual([]);
@@ -355,26 +368,33 @@ describe('HotelsService', () => {
 
   it('does not allow payload booked rooms to affect inventory writes', async () => {
     const prisma = createPrismaMock();
-    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord).mockResolvedValueOnce({
-      ...hotelRecord,
-      inventoryDays: [
-        {
-          id: 'inventory_2',
-          hotelId: 'hotel_1',
-          date: new Date('2026-06-13T00:00:00.000Z'),
-          totalRooms: 10,
-          bookedRooms: 0,
-          status: 'open',
-          createdAt: new Date('2026-05-01T00:00:00.000Z'),
-          updatedAt: new Date('2026-05-01T00:00:00.000Z'),
-        },
-      ],
-    });
+    prisma.hotel.findUnique
+      .mockResolvedValueOnce(hotelRecord)
+      .mockResolvedValueOnce({
+        ...hotelRecord,
+        inventoryDays: [
+          {
+            id: 'inventory_2',
+            hotelId: 'hotel_1',
+            date: new Date('2026-06-13T00:00:00.000Z'),
+            totalRooms: 10,
+            bookedRooms: 0,
+            status: 'open',
+            createdAt: new Date('2026-05-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+          },
+        ],
+      });
     const service = new HotelsService(prisma as never);
 
     await service.upsertInventory('shining-riverside-hoi-an', {
       inventory: [
-        { date: '2026-06-13', totalRooms: 10, status: 'open', bookedRooms: 8 } as never,
+        {
+          date: '2026-06-13',
+          totalRooms: 10,
+          status: 'open',
+          bookedRooms: 8,
+        } as never,
       ],
     });
 
@@ -405,10 +425,19 @@ describe('HotelsService', () => {
     await expect(
       service.upsertInventory('shining-riverside-hoi-an', {
         inventory: [
-          { id: 'inventory_1', date: '2026-06-12', totalRooms: 3, status: 'open' },
+          {
+            id: 'inventory_1',
+            date: '2026-06-12',
+            totalRooms: 3,
+            status: 'open',
+          },
         ],
       }),
-    ).rejects.toThrow(new BadRequestException('Capacity cannot be lower than current bookings.'));
+    ).rejects.toThrow(
+      new BadRequestException(
+        'Capacity cannot be lower than current bookings.',
+      ),
+    );
   });
 
   it('rejects id inventory updates to an existing date for the same hotel', async () => {
@@ -429,10 +458,17 @@ describe('HotelsService', () => {
     await expect(
       service.upsertInventory('shining-riverside-hoi-an', {
         inventory: [
-          { id: 'inventory_1', date: '2026-06-13', totalRooms: 10, status: 'open' },
+          {
+            id: 'inventory_1',
+            date: '2026-06-13',
+            totalRooms: 10,
+            status: 'open',
+          },
         ],
       }),
-    ).rejects.toThrow(new BadRequestException('Inventory date already exists.'));
+    ).rejects.toThrow(
+      new BadRequestException('Inventory date already exists.'),
+    );
     expect(prisma.hotelInventoryDay.update).not.toHaveBeenCalled();
   });
 
@@ -447,7 +483,9 @@ describe('HotelsService', () => {
           { date: '2026-06-12', totalRooms: 12, status: 'open' },
         ],
       }),
-    ).rejects.toThrow(new BadRequestException('Duplicate inventory date in payload.'));
+    ).rejects.toThrow(
+      new BadRequestException('Duplicate inventory date in payload.'),
+    );
     expect(prisma.hotel.findUnique).not.toHaveBeenCalled();
   });
 
@@ -485,21 +523,23 @@ describe('HotelsService', () => {
 
   it('upserts inventory and returns detail with remaining rooms', async () => {
     const prisma = createPrismaMock();
-    prisma.hotel.findUnique.mockResolvedValueOnce(hotelRecord).mockResolvedValueOnce({
-      ...hotelRecord,
-      inventoryDays: [
-        {
-          id: 'inventory_1',
-          hotelId: 'hotel_1',
-          date: new Date('2026-06-12T00:00:00.000Z'),
-          totalRooms: 12,
-          bookedRooms: 3,
-          status: 'open',
-          createdAt: new Date('2026-05-01T00:00:00.000Z'),
-          updatedAt: new Date('2026-05-01T00:00:00.000Z'),
-        },
-      ],
-    });
+    prisma.hotel.findUnique
+      .mockResolvedValueOnce(hotelRecord)
+      .mockResolvedValueOnce({
+        ...hotelRecord,
+        inventoryDays: [
+          {
+            id: 'inventory_1',
+            hotelId: 'hotel_1',
+            date: new Date('2026-06-12T00:00:00.000Z'),
+            totalRooms: 12,
+            bookedRooms: 3,
+            status: 'open',
+            createdAt: new Date('2026-05-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-05-01T00:00:00.000Z'),
+          },
+        ],
+      });
     prisma.hotelInventoryDay.findUnique
       .mockResolvedValueOnce({
         id: 'inventory_1',
@@ -516,7 +556,12 @@ describe('HotelsService', () => {
     await expect(
       service.upsertInventory('shining-riverside-hoi-an', {
         inventory: [
-          { id: 'inventory_1', date: '2026-06-12', totalRooms: 12, status: 'open' },
+          {
+            id: 'inventory_1',
+            date: '2026-06-12',
+            totalRooms: 12,
+            status: 'open',
+          },
         ],
       }),
     ).resolves.toMatchObject({
@@ -580,7 +625,6 @@ describe('HotelsService', () => {
           slug: 'hoi-an',
           title: 'Hoi An Ancient Town',
           href: '/destinations/hoi-an',
-          market: 'Vietnam',
         },
       ],
     });

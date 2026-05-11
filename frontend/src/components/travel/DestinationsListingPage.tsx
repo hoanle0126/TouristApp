@@ -6,7 +6,6 @@ import {
   Filter,
   MapPin,
   Sparkles,
-  Star,
 } from "lucide-react";
 
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
@@ -83,15 +82,6 @@ function DestinationCardView({ destination }: Readonly<{ destination: Destinatio
           sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
           src={destination.image}
         />
-        <div className="absolute inset-x-0 top-0 flex justify-between p-5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-stone-950 backdrop-blur-md">
-            <Star className="size-3.5 fill-amber-400 text-amber-400" />
-            {destination.rating}
-          </span>
-          <span className="rounded-full bg-stone-950/75 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white backdrop-blur-md">
-            From {destination.price}
-          </span>
-        </div>
       </div>
       <div className="space-y-5 px-1">
         <div>
@@ -104,10 +94,7 @@ function DestinationCardView({ destination }: Readonly<{ destination: Destinatio
           </h3>
         </div>
         <p className="text-sm leading-relaxed text-stone-600">{destination.description}</p>
-        <div className="flex items-center justify-between border-t border-stone-200 pt-5">
-          <span className="text-sm text-stone-500">
-            Starting from <strong className="text-lg text-stone-950">{destination.price}</strong> / person
-          </span>
+        <div className="flex items-center justify-end border-t border-stone-200 pt-5">
           <Button asChild className="text-xs uppercase tracking-widest" size="sm" variant="ghost">
             <Link href={destination.href}>
               Explore

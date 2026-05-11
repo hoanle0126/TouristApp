@@ -30,7 +30,9 @@ describe('SettingsService', () => {
   const previousKey = process.env.SETTINGS_ENCRYPTION_KEY;
 
   beforeEach(() => {
-    process.env.SETTINGS_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
+    process.env.SETTINGS_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString(
+      'base64',
+    );
   });
 
   afterEach(() => {
@@ -84,7 +86,9 @@ describe('SettingsService', () => {
     expect(upsertArgs.create.encryptedApiKey).toEqual(expect.any(String));
     expect(upsertArgs.create.encryptedApiKey).not.toContain('sk-test-secret');
     expect(upsertArgs.create.apiKeyLast4).toBe('cret');
-    expect(upsertArgs.update.encryptedApiKey).toBe(upsertArgs.create.encryptedApiKey);
+    expect(upsertArgs.update.encryptedApiKey).toBe(
+      upsertArgs.create.encryptedApiKey,
+    );
     expect(upsertArgs.update.apiKeyLast4).toBe('cret');
   });
 

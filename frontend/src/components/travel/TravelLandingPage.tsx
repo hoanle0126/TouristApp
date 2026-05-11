@@ -12,7 +12,6 @@ import {
   Search,
   Send,
   Sparkles,
-  Star,
   Users,
 } from "lucide-react";
 
@@ -272,17 +271,13 @@ function DestinationCardView({ destination }: Readonly<DestinationCardViewProps>
     <article className="group overflow-hidden rounded-2xl border border-stone-200/70 bg-white shadow-sm transition-all duration-500 hover:shadow-xl">
       <div className="relative h-80 overflow-hidden">
         <Image alt={destination.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes="(min-width: 1024px) 33vw, 100vw" src={destination.image} />
-        <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 backdrop-blur">
-          <Star className="size-4 fill-emerald-700 text-emerald-700" />
-          <span className="text-xs font-bold text-stone-950">{destination.rating}</span>
-        </div>
       </div>
       <div className="p-8">
         <h3 className="mb-2 text-2xl font-bold text-stone-950">{destination.title}</h3>
         <p className="mb-6 text-sm leading-relaxed text-stone-600">{destination.description}</p>
         <div className="flex items-center justify-between border-t border-stone-200 pt-6">
-          <span className="text-lg font-bold text-emerald-800">
-            {destination.price} <span className="text-xs font-normal text-stone-500">/ person</span>
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
+            Destination
           </span>
           <Button asChild className="rounded-full px-4" variant="ghost">
             <Link href={destination.href}>

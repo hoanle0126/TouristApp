@@ -1,11 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CreateMomentCapturedDto } from './dto/create-moment-captured.dto';
 import { UpdateMomentCapturedDto } from './dto/update-moment-captured.dto';
 import { MomentsCapturedService } from './moments-captured.service';
 
 @Controller('moments-captured')
 export class MomentsCapturedController {
-  constructor(private readonly momentsCapturedService: MomentsCapturedService) {}
+  constructor(
+    private readonly momentsCapturedService: MomentsCapturedService,
+  ) {}
 
   @Get()
   findAll() {

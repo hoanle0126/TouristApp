@@ -119,7 +119,9 @@ describe('MomentsCapturedService', () => {
         title: momentRecord.title,
         wide: momentRecord.wide,
       }),
-    ).rejects.toThrow(new NotFoundException('Captured moment missing was not found.'));
+    ).rejects.toThrow(
+      new NotFoundException('Captured moment missing was not found.'),
+    );
     expect(prisma.momentCaptured.update).not.toHaveBeenCalled();
   });
 

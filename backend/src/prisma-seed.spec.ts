@@ -31,26 +31,17 @@ describe('Prisma seed data', () => {
 
   it('keeps destination detail content as rich as the original client mock data', () => {
     const expectations = [
-      ['nordic-fjords', 2, 4, 3, 2, 1],
-      ['london-essence', 2, 4, 3, 2, 1],
-      ['bavarian-trails', 2, 4, 3, 2, 1],
+      ['nordic-fjords', 2, 4, 3],
+      ['london-essence', 2, 4, 3],
+      ['bavarian-trails', 2, 4, 3],
     ] as const;
 
-    for (const [
-      slug,
-      introCount,
-      factCount,
-      spotlightCount,
-      tourCount,
-      hotelCount,
-    ] of expectations) {
+    for (const [slug, introCount, factCount, spotlightCount] of expectations) {
       const destination = seedDestinations.find((item) => item.slug === slug);
 
       expect(destination?.intro).toHaveLength(introCount);
       expect(destination?.facts).toHaveLength(factCount);
       expect(destination?.spotlight).toHaveLength(spotlightCount);
-      expect(destination?.relatedTours).toHaveLength(tourCount);
-      expect(destination?.relatedHotels).toHaveLength(hotelCount);
     }
   });
 

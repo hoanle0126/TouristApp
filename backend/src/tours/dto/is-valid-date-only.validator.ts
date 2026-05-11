@@ -12,7 +12,10 @@ export function isValidDateOnly(value: unknown): value is string {
   }
 
   const parsed = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === value
+  );
 }
 
 @ValidatorConstraint({ name: 'isValidDateOnly', async: false })

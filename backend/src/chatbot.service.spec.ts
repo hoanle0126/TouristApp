@@ -70,7 +70,8 @@ describe('ChatbotService', () => {
         choices: [
           {
             message: {
-              content: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+              content:
+                'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
             },
           },
         ],
@@ -78,18 +79,24 @@ describe('ChatbotService', () => {
     });
     global.fetch = fetchMock as never;
 
-    const service = new ChatbotService(prisma as never, createSettingsMock({
-      getAiProviderRuntimeConfig: jest.fn().mockResolvedValue({
-        provider: 'openai-compatible',
-        baseUrl: 'https://api.example.com/v1',
-        model: 'claude-sonnet-4-6',
-        enabled: true,
-        apiKey: 'sk-test',
+    const service = new ChatbotService(
+      prisma as never,
+      createSettingsMock({
+        getAiProviderRuntimeConfig: jest.fn().mockResolvedValue({
+          provider: 'openai-compatible',
+          baseUrl: 'https://api.example.com/v1',
+          model: 'claude-sonnet-4-6',
+          enabled: true,
+          apiKey: 'sk-test',
+        }),
       }),
-    }));
+    );
 
-    await expect(service.respond({ message: 'Bay Mau Coconut Forest còn chỗ không?' })).resolves.toEqual({
-      answer: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+    await expect(
+      service.respond({ message: 'Bay Mau Coconut Forest còn chỗ không?' }),
+    ).resolves.toEqual({
+      answer:
+        'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
       sources: [
         {
           kind: 'tour',
@@ -134,7 +141,8 @@ describe('ChatbotService', () => {
         choices: [
           {
             message: {
-              content: 'Shining Riverside Hoi An still has 7 rooms available on 2026-06-13.',
+              content:
+                'Shining Riverside Hoi An still has 7 rooms available on 2026-06-13.',
             },
           },
         ],
@@ -144,7 +152,9 @@ describe('ChatbotService', () => {
 
     const service = new ChatbotService(prisma as never, createSettingsMock());
 
-    await service.respond({ message: 'Is Shining Riverside Hoi An still available?' });
+    await service.respond({
+      message: 'Is Shining Riverside Hoi An still available?',
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
@@ -155,7 +165,9 @@ describe('ChatbotService', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Use the supplied website context when answering this request.'),
+        body: expect.stringContaining(
+          'Use the supplied website context when answering this request.',
+        ),
       }),
     );
   });
@@ -237,13 +249,17 @@ describe('ChatbotService', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.'),
+        body: expect.stringContaining(
+          'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+        ),
       }),
     );
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Shining Riverside currently has 7 rooms left on 2026-06-13.'),
+        body: expect.stringContaining(
+          'Shining Riverside currently has 7 rooms left on 2026-06-13.',
+        ),
       }),
     );
   });
@@ -298,7 +314,6 @@ describe('ChatbotService', () => {
       {
         slug: 'hoi-an',
         title: 'Hoi An',
-        market: 'Vietnam',
         summary: 'Lantern-lit riverside heritage town.',
       },
     ]);
@@ -362,7 +377,9 @@ describe('ChatbotService', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Destination Hoi An in Vietnam: Lantern-lit riverside heritage town.'),
+        body: expect.stringContaining(
+          'Destination Hoi An: Lantern-lit riverside heritage town.',
+        ),
       }),
     );
   });
@@ -375,13 +392,11 @@ describe('ChatbotService', () => {
       {
         slug: 'hoi-an',
         title: 'Hoi An',
-        market: 'Vietnam',
         summary: 'Lantern-lit riverside heritage town.',
       },
       {
         slug: 'kyoto',
         title: 'Kyoto',
-        market: 'Japan',
         summary: 'Temple gardens and slow seasonal journeys.',
       },
     ]);
@@ -426,13 +441,17 @@ describe('ChatbotService', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Destination Hoi An in Vietnam: Lantern-lit riverside heritage town.'),
+        body: expect.stringContaining(
+          'Destination Hoi An: Lantern-lit riverside heritage town.',
+        ),
       }),
     );
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Destination Kyoto in Japan: Temple gardens and slow seasonal journeys.'),
+        body: expect.stringContaining(
+          'Destination Kyoto: Temple gardens and slow seasonal journeys.',
+        ),
       }),
     );
   });
@@ -502,7 +521,9 @@ describe('ChatbotService', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('No exact hotel location match was found'),
+        body: expect.stringContaining(
+          'No exact hotel location match was found',
+        ),
       }),
     );
   });
@@ -575,7 +596,8 @@ describe('ChatbotService', () => {
 
     await expect(
       service.respond({
-        message: 'Chi tiết booking TW-20260501-SEED của email linh@example.com là gì?',
+        message:
+          'Chi tiết booking TW-20260501-SEED của email linh@example.com là gì?',
       }),
     ).resolves.toEqual({
       answer:
@@ -690,7 +712,8 @@ describe('ChatbotService', () => {
         choices: [
           {
             message: {
-              content: 'Chào bạn! Mình có thể hỗ trợ thông tin tour, khách sạn và tình trạng còn chỗ trên website.',
+              content:
+                'Chào bạn! Mình có thể hỗ trợ thông tin tour, khách sạn và tình trạng còn chỗ trên website.',
             },
           },
         ],
@@ -719,7 +742,9 @@ describe('ChatbotService', () => {
     expect(fetchMock).not.toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('I do not know based on the current website data.'),
+        body: expect.stringContaining(
+          'I do not know based on the current website data.',
+        ),
       }),
     );
   });
@@ -751,7 +776,8 @@ describe('ChatbotService', () => {
         choices: [
           {
             message: {
-              content: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+              content:
+                'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
             },
           },
         ],
@@ -768,19 +794,25 @@ describe('ChatbotService', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.'),
+        body: expect.stringContaining(
+          'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+        ),
       }),
     );
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Answer the website question directly from the supplied website context when that context contains the answer.'),
+        body: expect.stringContaining(
+          'Answer the website question directly from the supplied website context when that context contains the answer.',
+        ),
       }),
     );
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.objectContaining({
-        body: expect.stringContaining('Do not say you do not know when the supplied website context already answers the question.'),
+        body: expect.stringContaining(
+          'Do not say you do not know when the supplied website context already answers the question.',
+        ),
       }),
     );
   });
@@ -812,7 +844,8 @@ describe('ChatbotService', () => {
         choices: [
           {
             message: {
-              content: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+              content:
+                'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
             },
           },
         ],
@@ -827,7 +860,8 @@ describe('ChatbotService', () => {
         message: 'có tour nào xịn ở địa điểm Cà Mau không bạn nhỉ',
       }),
     ).resolves.toEqual({
-      answer: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+      answer:
+        'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
       sources: [
         {
           kind: 'tour',
@@ -872,7 +906,8 @@ describe('ChatbotService', () => {
         choices: [
           {
             message: {
-              content: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+              content:
+                'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
             },
           },
         ],
@@ -887,7 +922,8 @@ describe('ChatbotService', () => {
         message: 'Bay Mau Coconut Forest còn chỗ không?',
       }),
     ).resolves.toEqual({
-      answer: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+      answer:
+        'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
       sources: [
         {
           kind: 'tour',
@@ -940,7 +976,8 @@ describe('ChatbotService', () => {
         message: 'Bay Mau Coconut Forest còn chỗ không?',
       }),
     ).resolves.toEqual({
-      answer: 'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
+      answer:
+        'Bay Mau Coconut Forest currently has 8 seats left on 2026-06-12.',
       sources: [
         {
           kind: 'tour',

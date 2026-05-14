@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { HeroImageCarousel } from "@/src/components/travel/HeroImageCarousel";
 import { SuggestionTabs } from "@/src/components/travel/SuggestionsSection";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { VisualDiaryCarousel } from "@/src/components/travel/VisualDiaryCarousel";
@@ -36,6 +37,33 @@ import {
 } from "@/src/data/mockData";
 import type { BlogPost, DestinationCard, VisualDiaryItem } from "@/src/types/travel";
 
+interface HeroImageSlide {
+  readonly alt: string;
+  readonly image: string;
+}
+
+function buildHeroSlides(items: readonly VisualDiaryItem[]): readonly HeroImageSlide[] {
+  const seenImages = new Set<string>();
+  const baseSlides = [
+    {
+      alt: "Misty mountains reflected in a crystal lake at first light",
+      image: heroImage,
+    },
+    ...items.slice(0, 3).map((item) => ({ alt: item.alt, image: item.image })),
+  ];
+
+  return baseSlides
+    .filter((slide) => {
+      if (seenImages.has(slide.image)) {
+        return false;
+      }
+
+      seenImages.add(slide.image);
+      return true;
+    })
+    .slice(0, 3);
+}
+
 interface SectionHeadingProps {
   readonly align?: "left" | "center";
   readonly eyebrow: string;
@@ -44,7 +72,7 @@ interface SectionHeadingProps {
 }
 
 interface HeroSectionProps {
-  readonly image: string;
+  readonly slides: readonly HeroImageSlide[];
 }
 
 interface VisualDiarySectionProps {
@@ -175,17 +203,11 @@ function DestinationSectionEmptyState({ destinations }: Readonly<{ destinations:
   return destinations.length === 0 ? <DestinationEmptyState /> : null;
 }
 
-function HeroSection({ image }: Readonly<HeroSectionProps>) {
+function HeroSection({ slides }: Readonly<HeroSectionProps>) {
   return (
-    <section className="relative flex min-h-[920px] items-center justify-center overflow-hidden">
-      <Image
-        alt="Misty mountains reflected in a crystal lake at first light"
-        className="object-cover brightness-75 scale-105"
-        fill
-        priority
-        sizes="100vw"
-        src={image}
-      />
+    <section className="relative flex min-h-[920px] w-full items-center justify-center overflow-hidden">
+      <HeroImageCarousel slides={slides} />
+      <div className="absolute inset-0 bg-black/20" />
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
         <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tighter text-white md:text-7xl">
           Crafting Your <span className="text-emerald-100">Personal Odyssey</span>
@@ -463,10 +485,12 @@ export default function TravelLandingPage({
   suggestionCards,
   visualDiaryItems,
 }: Readonly<TravelLandingPageProps>) {
+  const heroSlides = buildHeroSlides(visualDiaryItems);
+
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <TravelHeader activeItem="Home" />
-      <HeroSection image={heroImage} />
+      <HeroSection slides={heroSlides} />
       <VisualDiarySection items={visualDiaryItems} />
       <DestinationSection destinations={destinationCards} />
       <SuggestionsSection suggestions={suggestionCards} />

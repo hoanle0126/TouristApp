@@ -89,11 +89,49 @@ export const navigationItems = [
   "Destinations",
   "Tours",
   "Hotels",
-  "Booking history",
   "Blog",
   "About Us",
   "Contact",
 ] as const;
+
+export const travelTopBar = {
+  email: "inquiries@curator.travel",
+  hotline: "Hotline: +44 (0) 20 7123 4567",
+  note: "Private itinerary support, 24/7",
+} as const;
+
+export const travelPromoBar = {
+  cta: "View offers",
+  href: "/tours",
+  label: "Travel freely without worrying about the price",
+} as const;
+
+export const navigationDropdowns = {
+  Destinations: {
+    eyebrow: "Suggested escapes",
+    items: [
+      { description: "Heritage streets, blue shores, and the easy rhythm of central Vietnam.", href: "/destinations", title: "Da Nang - Hoi An" },
+      { description: "Mountain air, drifting clouds, and quiet villages in the north.", href: "/destinations", title: "Sa Pa - Ha Giang" },
+      { description: "A tropical island made for longer, slower stays.", href: "/destinations", title: "Phu Quoc" },
+    ],
+  },
+  Hotels: {
+    eyebrow: "Featured stays",
+    items: [
+      { description: "Beachfront resorts with family-friendly comforts.", href: "/hotels", title: "Beach Resorts" },
+      { description: "Boutique stays near old quarters and riverside walks.", href: "/hotels", title: "Heritage Stays" },
+      { description: "Private hideaways designed for honeymoon escapes.", href: "/hotels", title: "Private Retreats" },
+    ],
+  },
+  Tours: {
+    eyebrow: "Popular journeys",
+    items: [
+      { description: "Northern itineraries built around culture and nature.", href: "/tours", title: "Northern Vietnam" },
+      { description: "The easiest heritage route through Hue, Da Nang, and Hoi An.", href: "/tours", title: "Central Vietnam" },
+      { description: "Waterways, city energy, and island relaxation in one sweep.", href: "/tours", title: "Southern Vietnam" },
+    ],
+  },
+} as const;
 
 export const heroImage = "/thumbnail.jpg";
 
@@ -171,6 +209,131 @@ export const suggestionCards: readonly SuggestionCard[] = [
     price: "$120/xp",
     title: "Desert Stargazing",
   },
+] as const;
+
+export interface TravelEventCard {
+  readonly alt: string;
+  readonly badge: string;
+  readonly date: string;
+  readonly description: string;
+  readonly href: string;
+  readonly image: string;
+  readonly location: string;
+  readonly title: string;
+}
+
+export interface RegionalHighlight {
+  readonly alt: string;
+  readonly description: string;
+  readonly highlights: readonly string[];
+  readonly href: string;
+  readonly image: string;
+  readonly region: "North" | "Central" | "South";
+  readonly title: string;
+}
+
+export interface TravelerFeedback {
+  readonly name: string;
+  readonly quote: string;
+  readonly role: string;
+  readonly trip: string;
+}
+
+export interface TravelPartner {
+  readonly description: string;
+  readonly name: string;
+}
+
+export const featuredTravelEvents: readonly TravelEventCard[] = [
+  {
+    alt: "Hoi An ancient town glowing with lanterns in the evening",
+    badge: "Coming up",
+    date: "This weekend",
+    description: "A short escape blending food, culture, and relaxed comfort for couples or families.",
+    href: "/tours",
+    image: visualDiaryItems[2].image,
+    location: "Hoi An",
+    title: "Heritage Weekend Escape",
+  },
+  {
+    alt: "Luxury beachfront resort beside a tropical shoreline",
+    badge: "Featured",
+    date: "June - August",
+    description: "A summer collection of island journeys with flexible pacing and private service touches.",
+    href: "/hotels",
+    image: suggestionCards[1].image,
+    location: "Central Vietnam",
+    title: "Summer by the Coast",
+  },
+  {
+    alt: "Travelers sitting beside a campfire under a clear starry sky",
+    badge: "Special offer",
+    date: "Book early",
+    description: "Smart-value combinations of stays and experiences for small groups that still want quality.",
+    href: "/tours",
+    image: suggestionCards[3].image,
+    location: "Across Vietnam",
+    title: "Early Bird Travel Week",
+  },
+] as const;
+
+export const regionalHighlights: readonly RegionalHighlight[] = [
+  {
+    alt: "High mountains and a clear lake at first light",
+    description: "From elegant Hanoi to island bays and northern highlands, this region suits culture-led journeys and slower escapes.",
+    highlights: ["Hanoi", "Ha Long", "Sa Pa"],
+    href: "/destinations",
+    image: visualDiaryItems[3].image,
+    region: "North",
+    title: "Mountain light, old quarters, and cloud season",
+  },
+  {
+    alt: "A bright orange temple gate hinting at a heritage journey",
+    description: "Hue, Da Nang, and Hoi An create an easy route for travelers drawn to architecture, cuisine, and polished stays.",
+    highlights: ["Hue", "Da Nang", "Hoi An"],
+    href: "/tours",
+    image: visualDiaryItems[2].image,
+    region: "Central",
+    title: "Heritage routes, blue water, and coastal resorts",
+  },
+  {
+    alt: "A modern resort villa overlooking a lush green garden",
+    description: "Southern energy blends riverside life, urban rhythm, and soft island downtime in one trip.",
+    highlights: ["Ho Chi Minh City", "Mekong", "Phu Quoc"],
+    href: "/hotels",
+    image: suggestionCards[0].image,
+    region: "South",
+    title: "Rivers, city pace, and tropical island stays",
+  },
+] as const;
+
+export const travelerFeedback: readonly TravelerFeedback[] = [
+  {
+    name: "Minh Anh",
+    quote: "The itinerary felt thoughtful and private while still giving us a real sense of local culture.",
+    role: "Founder, Hanoi",
+    trip: "Hoi An private retreat",
+  },
+  {
+    name: "Quoc Huy",
+    quote: "The team handled every change quickly, so my family could simply enjoy the trip.",
+    role: "Family traveler",
+    trip: "Da Nang - Hue",
+  },
+  {
+    name: "Linh Pham",
+    quote: "The hotels, tours, and experiences all felt carefully chosen, never generic or mass-market.",
+    role: "Creative Director",
+    trip: "Northern Vietnam",
+  },
+] as const;
+
+export const travelPartners: readonly TravelPartner[] = [
+  { description: "Curated stays", name: "Heritage Hotels" },
+  { description: "Private experiences", name: "Local Guides Collective" },
+  { description: "Low-impact mobility", name: "Eco Transfer" },
+  { description: "Culinary access", name: "Taste Vietnam" },
+  { description: "Resort partners", name: "Boutique Retreats" },
 ] as const;
 
 export const cartItems: readonly CartItem[] = [

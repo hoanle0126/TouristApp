@@ -17,28 +17,53 @@ const suggestionTabs = [
 
 type SuggestionTabValue = (typeof suggestionTabs)[number]["value"];
 
+const categoryListingHref = {
+  destination: "/destinations",
+  hotel: "/hotels",
+  tour: "/tours",
+} satisfies Record<SuggestionCard["category"], string>;
+
+const categoryHoverItems = {
+  destination: ["Featured areas", "Best season to visit", "Matching tours"],
+  hotel: ["Room style guidance", "Standout amenities", "Stay packages"],
+  tour: ["Detailed itinerary", "Included services", "Departure advice"],
+} satisfies Record<SuggestionCard["category"], readonly string[]>;
+
 function SuggestionCardView({ suggestion }: { readonly suggestion: SuggestionCard }) {
   return (
     <article className="group">
-      <Link className="block" href={suggestion.href}>
-        <div className="relative mb-5 aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-stone-200">
-          <Image
-            alt={suggestion.alt}
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            fill
-            sizes="(min-width: 1024px) 25vw, 50vw"
-            src={suggestion.image}
-          />
+      <div className="relative mb-5 aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-stone-200">
+        <Image
+          alt={suggestion.alt}
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          fill
+          sizes="(min-width: 1024px) 25vw, 50vw"
+          src={suggestion.image}
+        />
+        <div className="absolute inset-0 flex translate-y-4 flex-col justify-end bg-gradient-to-t from-stone-950/88 via-stone-950/35 to-transparent p-5 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+          <ul className="mb-4 space-y-2 text-xs font-semibold text-white/90">
+            {categoryHoverItems[suggestion.category].map((item) => (
+              <li className="flex items-center gap-2" key={item}>
+                <span className="size-1.5 rounded-full bg-emerald-300" />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <Link className="inline-flex w-fit items-center rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-stone-950 transition-colors hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href={categoryListingHref[suggestion.category]}>
+            View listing
+          </Link>
         </div>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">{suggestion.category}</p>
-            <h3 className="mt-2 text-xl font-bold tracking-tight text-stone-950">{suggestion.title}</h3>
-            <p className="mt-1 text-sm text-stone-600">{suggestion.location}</p>
-          </div>
-          <p className="whitespace-nowrap text-sm font-bold text-emerald-800">{suggestion.price}</p>
+      </div>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">{suggestion.category}</p>
+          <Link className="mt-2 block text-xl font-bold tracking-tight text-stone-950 transition-colors hover:text-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700" href={suggestion.href}>
+            {suggestion.title}
+          </Link>
+          <p className="mt-1 text-sm text-stone-600">{suggestion.location}</p>
         </div>
-      </Link>
+        <p className="whitespace-nowrap text-sm font-bold text-emerald-800">{suggestion.price}</p>
+      </div>
     </article>
   );
 }

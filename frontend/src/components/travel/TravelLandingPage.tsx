@@ -15,10 +15,13 @@ import {
   Users,
 } from "lucide-react";
 
+import { CircularImageRailSection } from "@/src/components/travel/CircularImageRailSection";
+import { FeedbackPartnersSection } from "@/src/components/travel/FeedbackPartnersSection";
 import { HeroImageCarousel } from "@/src/components/travel/HeroImageCarousel";
+import { HomeEventsSection } from "@/src/components/travel/HomeEventsSection";
+import { RegionalHighlightsSection } from "@/src/components/travel/RegionalHighlightsSection";
 import { SuggestionTabs } from "@/src/components/travel/SuggestionsSection";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
-import { VisualDiaryCarousel } from "@/src/components/travel/VisualDiaryCarousel";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
@@ -32,10 +35,14 @@ import {
 } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 import {
+  featuredTravelEvents,
   heroImage,
+  regionalHighlights,
+  travelerFeedback,
+  travelPartners,
   type SuggestionCard,
 } from "@/src/data/mockData";
-import type { BlogPost, DestinationCard, VisualDiaryItem } from "@/src/types/travel";
+import type { BlogPost, DestinationCard, HotelCard, VisualDiaryItem } from "@/src/types/travel";
 
 interface HeroImageSlide {
   readonly alt: string;
@@ -75,16 +82,20 @@ interface HeroSectionProps {
   readonly slides: readonly HeroImageSlide[];
 }
 
-interface VisualDiarySectionProps {
-  readonly items: readonly VisualDiaryItem[];
-}
-
 interface DestinationSectionProps {
   readonly destinations: readonly DestinationCard[];
 }
 
 interface DestinationCardViewProps {
   readonly destination: DestinationCard;
+}
+
+interface HotelShowcaseSectionProps {
+  readonly hotels: readonly HotelCard[];
+}
+
+interface HotelShowcaseCardProps {
+  readonly hotel: HotelCard;
 }
 
 interface SuggestionsSectionProps {
@@ -280,14 +291,6 @@ function HeroSection({ slides }: Readonly<HeroSectionProps>) {
   );
 }
 
-function VisualDiarySection({ items }: Readonly<VisualDiarySectionProps>) {
-  return (
-    <section className="overflow-hidden bg-stone-50 py-24">
-      <VisualDiaryCarousel items={items} />
-    </section>
-  );
-}
-
 function DestinationCardView({ destination }: Readonly<DestinationCardViewProps>) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-stone-200/70 bg-white shadow-sm transition-all duration-500 hover:shadow-xl">
@@ -313,31 +316,60 @@ function DestinationCardView({ destination }: Readonly<DestinationCardViewProps>
   );
 }
 
-function DestinationSection({ destinations }: Readonly<DestinationSectionProps>) {
+function HotelShowcaseCard({ hotel }: Readonly<HotelShowcaseCardProps>) {
   return (
-    <section className="bg-stone-100 py-24" id="destinations">
+    <article className="group overflow-hidden rounded-2xl border border-stone-200/70 bg-white shadow-sm transition-all duration-500 hover:shadow-xl">
+      <div className="relative h-80 overflow-hidden">
+        <Image alt={hotel.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes="(min-width: 1024px) 33vw, 100vw" src={hotel.image} />
+      </div>
+      <div className="p-8">
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">{hotel.location}</p>
+          <p className="text-sm font-bold text-emerald-800">{hotel.price}</p>
+        </div>
+        <h3 className="mb-3 text-2xl font-bold text-stone-950">{hotel.name}</h3>
+        <p className="mb-6 text-sm leading-relaxed text-stone-600">{hotel.amenities.slice(0, 3).join(" • ")}</p>
+        <div className="flex items-center justify-between border-t border-stone-200 pt-6">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
+            Hotel
+          </span>
+          <Button asChild className="rounded-full px-4" variant="ghost">
+            <Link href={hotel.slug ? `/hotels/${hotel.slug}` : "/hotels"}>
+              Explore More
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function HotelShowcaseSection({ hotels }: Readonly<HotelShowcaseSectionProps>) {
+  return (
+    <section className="bg-stone-100 py-24" id="hotels">
       <div className="mx-auto max-w-screen-2xl px-8">
         <div className="mb-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <SectionHeading
-            eyebrow="Featured Escapes"
-            subtitle="Selected journeys that balance thoughtful pace, cinematic landscapes, and high-touch hospitality."
-            title="Curated Destinations"
+            eyebrow="Featured Stays"
+            subtitle="Architectural retreats and private sanctuaries selected for atmosphere, service, and sense of place."
+            title="Curated Hotels"
           />
           <Button asChild className="w-fit" size="pill" variant="outline">
-            <Link href="/destinations">
+            <Link href="/hotels">
               View all
               <ArrowRight className="size-4" />
             </Link>
           </Button>
         </div>
-        {destinations.length > 0 ? (
+        {hotels.length > 0 ? (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {destinations.map((destination) => (
-              <DestinationCardView destination={destination} key={destination.title} />
+            {hotels.slice(0, 3).map((hotel) => (
+              <HotelShowcaseCard hotel={hotel} key={hotel.slug ?? hotel.name} />
             ))}
           </div>
         ) : (
-          <DestinationSectionEmptyState destinations={destinations} />
+          <DestinationEmptyState />
         )}
       </div>
     </section>
@@ -475,6 +507,7 @@ function ContactSection() {
 interface TravelLandingPageProps {
   readonly blogPosts: readonly BlogPost[];
   readonly destinationCards: readonly DestinationCard[];
+  readonly hotelCards: readonly HotelCard[];
   readonly suggestionCards: readonly SuggestionCard[];
   readonly visualDiaryItems: readonly VisualDiaryItem[];
 }
@@ -482,6 +515,7 @@ interface TravelLandingPageProps {
 export default function TravelLandingPage({
   blogPosts,
   destinationCards,
+  hotelCards,
   suggestionCards,
   visualDiaryItems,
 }: Readonly<TravelLandingPageProps>) {
@@ -491,10 +525,13 @@ export default function TravelLandingPage({
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <TravelHeader activeItem="Home" />
       <HeroSection slides={heroSlides} />
-      <VisualDiarySection items={visualDiaryItems} />
-      <DestinationSection destinations={destinationCards} />
+      <HomeEventsSection events={featuredTravelEvents} />
+      <CircularImageRailSection items={destinationCards} />
+      <HotelShowcaseSection hotels={hotelCards} />
+      <RegionalHighlightsSection regions={regionalHighlights} />
       <SuggestionsSection suggestions={suggestionCards} />
       <BlogSection posts={blogPosts} />
+      <FeedbackPartnersSection feedback={travelerFeedback} partners={travelPartners} />
       <ContactSection />
       <TravelFooter />
     </main>

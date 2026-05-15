@@ -50,6 +50,7 @@ export default async function Home() {
     <TravelLandingPage
       blogPosts={blogPosts}
       destinationCards={destinations}
+      hotelCards={hotels}
       suggestionCards={suggestionCards}
       visualDiaryItems={momentsCaptured}
     />

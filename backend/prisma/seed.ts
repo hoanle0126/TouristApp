@@ -149,6 +149,19 @@ const obsoleteSeedTourSlugs = [
   'venetian-renaissance',
 ];
 
+const obsoleteSeedBlogSlugs = [
+  'kyotos-new-wave',
+  'dolomites-quietude',
+  'uncharted-shores-aegean',
+  'foragers-table',
+  'cinque-terre-light',
+  'ubud-rituals',
+  'remote-life-sweden',
+  'tokyo-getting-lost',
+  'dolomites-vertical-symphony',
+  'parisian-bistros-2024',
+];
+
 const destinationSpotlight = [
   {
     title: 'Private routing',
@@ -1048,151 +1061,614 @@ export const seedTours: SeedTour[] = [
     departures: genericTourDepartures,
   },
 ];
-export const seedBlogPosts: SeedBlogPost[] = [
+type SeedBlogImageSet = {
+  image: string;
+  heroImage: string;
+  inlineImage: string;
+  secondaryImage: string;
+};
+
+type SeedBlogPostDraft = Omit<
+  SeedBlogPost,
+  'image' | 'heroImage' | 'inlineImage' | 'secondaryFeature' | 'relatedPosts' | 'seo'
+> & {
+  relatedSlugs: string[];
+  seoDescription: string;
+  seoTitle?: string;
+  secondaryFeature: {
+    title: string;
+    body: string;
+  };
+};
+
+function requireDestination(slug: string) {
+  const destination = seedDestinations.find((item) => item.slug === slug);
+
+  if (!destination) {
+    throw new Error(`Missing destination seed ${slug}.`);
+  }
+
+  return destination;
+}
+
+function requireTour(slug: string) {
+  const tour = seedTours.find((item) => item.slug === slug);
+
+  if (!tour) {
+    throw new Error(`Missing tour seed ${slug}.`);
+  }
+
+  return tour;
+}
+
+function requireHotel(slug: string) {
+  const hotel = seedHotels.find((item) => item.slug === slug);
+
+  if (!hotel) {
+    throw new Error(`Missing hotel seed ${slug}.`);
+  }
+
+  return hotel;
+}
+
+function buildBlogSections(
+  openingHeading: string,
+  openingBody: [string, string],
+  middleHeading: string,
+  middleBody: [string, string],
+  closingHeading: string,
+  closingBody: string[],
+) {
+  return [
+    { heading: openingHeading, body: openingBody },
+    { heading: middleHeading, body: middleBody },
+    { heading: closingHeading, body: closingBody },
+  ];
+}
+
+const seedBlogImageSets = {
+  'hoi-an-lantern-mornings': {
+    image: requireDestination('hoi-an-riverside').image,
+    heroImage: requireHotel('shining-riverside-hoi-an').heroImage,
+    inlineImage: requireTour('bay-mau-coconut-forest').image,
+    secondaryImage: requireDestination('da-nang-coast').image,
+  },
+  'ninh-binh-weekend-notes': {
+    image: requireDestination('ninh-binh-karsts').image,
+    heroImage: requireTour('hanoi-ninh-binh-heritage-loop').heroImage,
+    inlineImage: requireDestination('hanoi-old-quarter').image,
+    secondaryImage: requireDestination('ninh-binh-karsts').heroImage,
+  },
+  'hue-da-nang-hoi-an-route': {
+    image: requireDestination('hue-imperial-city').image,
+    heroImage: requireTour('hue-da-nang-hoi-an-coastal-heritage').heroImage,
+    inlineImage: requireDestination('da-nang-coast').image,
+    secondaryImage: requireDestination('hoi-an-riverside').image,
+  },
+  'ha-giang-pass-mornings': {
+    image: requireDestination('ha-giang-loop').image,
+    heroImage: requireTour('sapa-ha-giang-highland-road').heroImage,
+    inlineImage: requireDestination('sa-pa-highlands').image,
+    secondaryImage: requireDestination('ha-giang-loop').heroImage,
+  },
+  'mekong-delta-slow-days': {
+    image: requireDestination('mekong-delta').image,
+    heroImage: requireTour('mekong-delta-slow-water-week').heroImage,
+    inlineImage: requireDestination('mekong-delta').heroImage,
+    secondaryImage: requireDestination('mekong-delta').image,
+  },
+  'phu-quoc-after-the-crowds': {
+    image: requireDestination('phu-quoc-island').image,
+    heroImage: requireTour('phu-quoc-island-retreat').heroImage,
+    inlineImage: requireHotel('soneva-jani').listingImage,
+    secondaryImage: requireDestination('phu-quoc-island').heroImage,
+  },
+  'hanoi-old-quarter-after-dark': {
+    image: requireDestination('hanoi-old-quarter').image,
+    heroImage: requireDestination('hanoi-old-quarter').heroImage,
+    inlineImage: requireTour('hanoi-ninh-binh-heritage-loop').image,
+    secondaryImage: requireDestination('ninh-binh-karsts').image,
+  },
+  'bay-mau-half-day-guide': {
+    image: requireTour('bay-mau-coconut-forest').image,
+    heroImage: requireDestination('hoi-an-riverside').heroImage,
+    inlineImage: requireHotel('shining-riverside-hoi-an').listingImage,
+    secondaryImage: requireDestination('hoi-an-riverside').image,
+  },
+  'london-gallery-weekend': {
+    image: requireDestination('london-essence').image,
+    heroImage: requireTour('london-design-and-gallery-week').heroImage,
+    inlineImage: requireDestination('london-essence').heroImage,
+    secondaryImage: requireTour('london-design-and-gallery-week').image,
+  },
+  'nordic-fjords-light-guide': {
+    image: requireDestination('nordic-fjords').image,
+    heroImage: requireTour('nordic-fjords-scenic-expedition').heroImage,
+    inlineImage: requireHotel('72-north-lodge').listingImage,
+    secondaryImage: requireDestination('nordic-fjords').heroImage,
+  },
+} satisfies Record<string, SeedBlogImageSet>;
+
+const seedBlogPostDrafts: SeedBlogPostDraft[] = [
   {
-    slug: 'kyotos-new-wave',
-    title: 'The Architectural Poetry of Kyoto’s New Wave',
+    slug: 'hoi-an-lantern-mornings',
+    title: '3 Days in Hoi An: Lantern Streets, Riverside Cafes, and Slow Mornings',
     excerpt:
-      'Exploring the intersection of traditional Machiya craftsmanship and modern Japanese minimalism.',
-    category: 'Lifestyle',
-    author: 'Elena Rostova',
+      'A practical Hoi An guide for travelers who want old-town atmosphere, the right riverside base, and enough free time to enjoy the city after dark.',
+    category: 'Guides',
+    author: 'TouristWeb Editorial',
     status: 'published',
-    publishedAt: new Date('2024-10-12T00:00:00.000Z'),
-    readingTime: '8 min read',
-    image: nordicFjordsImage,
-    heroImage: nordicFjordsImage,
+    publishedAt: new Date('2025-05-12T00:00:00.000Z'),
+    readingTime: '7 min read',
     intro:
-      'In Kyoto, traditional machiya are being reimagined by a new generation of architects.',
-    meta: '8 min read',
-    quote: 'We are not designing houses; we are designing vessels for shadows.',
-    sections: [
-      {
-        heading: 'The Vocabulary of Restraint',
-        body: [
-          'The newest Kyoto retreats begin with a familiar silhouette: narrow timber frontage, softened noren curtains, and a rhythm of thresholds that keeps the street at a respectful distance.',
-          'Inside, architects are editing rather than replacing tradition, using matte plaster, smoked cedar, and precise joinery to let light become the central material.',
-        ],
-      },
-      {
-        heading: 'The Modern Machiya',
-        body: [
-          'Traditional structures remain respectful outside and contemporary inside, pairing tatami proportions with open kitchens, sculptural baths, and concealed climate systems.',
-          'The strongest projects avoid museum nostalgia; they keep the scale intimate while making daily rituals feel quietly luxurious.',
-        ],
-      },
-      {
-        heading: 'Curation of Space',
-        body: [
-          'For travelers, these homes offer a slower way to understand Kyoto: mornings framed by garden moss, evenings filtered through paper screens, and neighborhoods experienced at walking pace.',
-        ],
-      },
-    ],
-    inlineImage: {
-      image: nordicFjordsImage,
-    },
+      'Hoi An works best when the itinerary is edited down. One riverside hotel, one half-day excursion, and plenty of room for lantern-lit evenings will usually outperform a schedule packed with checklists.',
+    meta: 'Central Vietnam guide • 7 min read',
+    quote:
+      'The most memorable Hoi An trip is rarely the busiest one; it is the one that leaves enough time to walk back across the bridge after dinner.',
+    sections: buildBlogSections(
+      'Base Yourself Where the Old Town Is Reachable',
+      [
+        'Staying close to the river keeps the Ancient Town walkable without trapping you in the busiest lanes all day. That balance is what makes Hoi An feel atmospheric rather than tiring.',
+        'A good base also changes the rhythm of the trip: sunrise coffee is easy, an afternoon reset is realistic, and dinner does not require logistics.',
+      ],
+      'Use One Half-Day for the Countryside',
+      [
+        'The smartest add-on is something compact like Bay Mau, where you get greenery, local contact, and a change of pace without losing a full day.',
+        'That keeps the rest of the itinerary light enough for tailoring appointments, market stops, and the slower evening hours that make Hoi An worth staying for.',
+      ],
+      'Protect the Evenings',
+      [
+        'Lantern time is the city’s real advantage. Leave the late afternoon open, return to the hotel if you need to, and come back out once the light softens and the riverfront starts to glow.',
+      ],
+    ),
     secondaryFeature: {
-      title: 'A Dialogue with Nature',
-      body: 'Pocket gardens remain the spiritual heart of the home.',
-      image: {
-        image: nordicFjordsImage,
-      },
+      title: 'The Riverside Hotel Question',
+      body: 'If you only optimize one part of the stay, optimize the base. A calm riverside hotel does more for the trip than adding one more day tour.',
     },
-    relatedPosts: [],
-    seo: {
-      title: 'The Architectural Poetry of Kyoto’s New Wave',
-      description: 'Modern Kyoto machiya architecture and design.',
+    relatedSlugs: ['bay-mau-half-day-guide', 'hue-da-nang-hoi-an-route', 'phu-quoc-after-the-crowds'],
+    seoDescription:
+      'A 3-day Hoi An travel guide covering where to stay, how to pace the old town, and which half-day experiences actually fit the city well.',
+    mentionedDestinationSlugs: ['hoi-an-riverside', 'da-nang-coast'],
+    mentionedTourSlugs: ['bay-mau-coconut-forest', 'hue-da-nang-hoi-an-coastal-heritage'],
+    mentionedHotelSlugs: ['shining-riverside-hoi-an'],
+  },
+  {
+    slug: 'ninh-binh-weekend-notes',
+    title: '2 Nights in Ninh Binh: Boats, Karsts, and the Right Base Near Hanoi',
+    excerpt:
+      'How to turn Ninh Binh into a clean overnight escape from Hanoi instead of a rushed day trip with too much driving and too little atmosphere.',
+    category: 'Planning',
+    author: 'Lan Nguyen',
+    status: 'published',
+    publishedAt: new Date('2025-05-04T00:00:00.000Z'),
+    readingTime: '6 min read',
+    intro:
+      'Ninh Binh is one of the easiest wins in northern Vietnam, but only if you stop treating it like a same-day detour. One overnight stay changes the whole feel of the place.',
+    meta: 'North Vietnam planning • 6 min read',
+    quote:
+      'The best Ninh Binh route is not the one that checks off the most stops; it is the one that gives the landscape enough time to do its work.',
+    sections: buildBlogSections(
+      'Why an Overnight Stay Matters',
+      [
+        'From Hanoi, the temptation is to force Ninh Binh into a single long day. That usually turns the scenery into a sequence of transfers rather than an experience.',
+        'Two nights is enough to split the boat ride, temple visits, and countryside views into smaller pieces that actually feel relaxed.',
+      ],
+      'Use Hanoi as the Urban Counterpoint',
+      [
+        'The route works especially well when paired with Hanoi. One city gives you density, food, and movement; the other gives you air, water, and visual distance.',
+        'That contrast is what makes the itinerary coherent. Without Hanoi, Ninh Binh can feel too quiet; without Ninh Binh, Hanoi can feel too compressed.',
+      ],
+      'Book the Scenic Hours, Not Every Hour',
+      [
+        'Prioritize morning boat departures and one late-afternoon viewpoint. Beyond that, the region rewards underplanning more than overplanning.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'Day Trip vs Overnight',
+      body: 'If your schedule allows it, the overnight version wins almost every time. It trades speed for atmosphere, and that is exactly what Ninh Binh is good at.',
     },
-    mentionedDestinationSlugs: [],
+    relatedSlugs: ['hanoi-old-quarter-after-dark', 'ha-giang-pass-mornings', 'mekong-delta-slow-days'],
+    seoDescription:
+      'A Ninh Binh weekend guide from Hanoi with practical advice on timing, overnight pacing, and which scenic windows are worth planning around.',
+    mentionedDestinationSlugs: ['ninh-binh-karsts', 'hanoi-old-quarter'],
     mentionedTourSlugs: ['hanoi-ninh-binh-heritage-loop'],
     mentionedHotelSlugs: [],
   },
-  ...[
-    [
-      'dolomites-quietude',
-      'Quietude in the High Alps: A Guide to Slow Living',
-      'Guides',
-    ],
-    [
-      'uncharted-shores-aegean',
-      'Uncharted Shores: 10 Secret Islands in the Aegean',
-      'Guides',
-    ],
-    [
-      'foragers-table',
-      'The Forager’s Table: A Morning with Chef Elias',
-      'Interviews',
-    ],
-    [
-      'cinque-terre-light',
-      'Chasing the Light: A Photographer&apos;s Cinque Terre',
-      'Destinations',
-    ],
-    [
-      'ubud-rituals',
-      'The Rituals of Ubud: Morning Prayer and Matcha',
-      'Lifestyle',
-    ],
-    [
-      'remote-life-sweden',
-      'The New Nomad: Designing a Remote Life in Sweden',
-      'Guides',
-    ],
-    ['tokyo-getting-lost', 'The Art of Getting Lost in Tokyo', 'Slow Travel'],
-    [
-      'dolomites-vertical-symphony',
-      'Dolomites: A Vertical Symphony',
-      'Adventure',
-    ],
-    ['parisian-bistros-2024', 'The Best Parisian Bistros of 2024', 'Lifestyle'],
-  ].map(([slug, title, category]) => ({
-    slug,
-    title,
-    excerpt: `${title} from the TouristWeb journal collection.`,
-    category,
+  {
+    slug: 'hue-da-nang-hoi-an-route',
+    title: 'How to Split One Week Between Hue, Da Nang, and Hoi An',
+    excerpt:
+      'A one-week Central Vietnam route that balances imperial history, beach downtime, and Hoi An evenings without turning the trip into constant hotel changes.',
+    category: 'Itineraries',
+    author: 'Minh Chau',
+    status: 'published',
+    publishedAt: new Date('2025-04-29T00:00:00.000Z'),
+    readingTime: '8 min read',
+    intro:
+      'This route works because each stop does something different. Hue gives the trip structure, Da Nang gives it breath, and Hoi An gives it atmosphere.',
+    meta: '1-week itinerary • 8 min read',
+    quote:
+      'Central Vietnam feels most polished when you let each city play its own role instead of asking one place to do everything.',
+    sections: buildBlogSections(
+      'Start in Hue for Context',
+      [
+        'Hue is not the stop to rush. Beginning there gives the trip a historical backbone and makes the food, architecture, and slower tone of the region much easier to read.',
+        'Two nights is usually enough to visit the major imperial sites while still keeping one evening for a garden-house dinner or a quieter river walk.',
+      ],
+      'Use Da Nang as Recovery Space',
+      [
+        'Da Nang is less about sightseeing density and more about making the route livable. A beach afternoon or a resort night keeps the middle of the trip from feeling overpacked.',
+        'That breathing room is what lets Hoi An land well later. Arriving there rested is very different from arriving after too many back-to-back touring days.',
+      ],
+      'End in Hoi An',
+      [
+        'Hoi An is strongest as the closing note because it holds the evenings so well. Save room for the riverfront, tailoring, cafés, and a final half-day in the nearby countryside.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'When to Move Hotels',
+      body: 'The route gets messy when you over-segment it. Keep Hue and Hoi An as the real anchors, and let Da Nang act as a flexible middle chapter.',
+    },
+    relatedSlugs: ['hoi-an-lantern-mornings', 'bay-mau-half-day-guide', 'phu-quoc-after-the-crowds'],
+    seoDescription:
+      'A practical one-week Central Vietnam itinerary covering Hue, Da Nang, and Hoi An with pacing advice for culture, coast, and slow evenings.',
+    mentionedDestinationSlugs: ['hue-imperial-city', 'da-nang-coast', 'hoi-an-riverside'],
+    mentionedTourSlugs: ['hue-da-nang-hoi-an-coastal-heritage'],
+    mentionedHotelSlugs: ['shining-riverside-hoi-an'],
+  },
+  {
+    slug: 'ha-giang-pass-mornings',
+    title: 'The Ha Giang Loop Without the Rush: Viewpoints, Villages, and Weather Windows',
+    excerpt:
+      'A calmer take on the Ha Giang route for travelers who want mountain drama without turning every day into a race against the next viewpoint.',
+    category: 'Adventure',
     author: 'TouristWeb Editorial',
     status: 'published',
-    publishedAt: new Date('2024-09-01T00:00:00.000Z'),
-    readingTime: '5 min read',
-    image: nordicFjordsImage,
-    heroImage: nordicFjordsImage,
-    intro: `${title} from the TouristWeb journal collection.`,
-    meta: '5 min read',
-    quote: 'Travel rewards the patient eye.',
-    sections: [
-      {
-        heading: 'A Slower Arrival',
-        body: [
-          `${title} begins with a quieter rhythm, inviting travelers to notice texture, light, and local rituals before chasing an itinerary.`,
-          'Our editors favor routes that leave space for unplanned markets, long lunches, and conversations that reveal the character of a place.',
-        ],
-      },
-      {
-        heading: 'The Curated Route',
-        body: [
-          'Each stop balances comfort with a strong sense of setting, from design-led stays to guides who can open doors usually missed by first-time visitors.',
-          'The result is a journey that feels composed without becoming rigid, with enough structure to travel confidently and enough openness to feel personal.',
-        ],
-      },
-      {
-        heading: 'What Stays With You',
-        body: [
-          'The best journeys linger through details: the sound of a harbor before breakfast, a table set with regional produce, or a viewpoint reached just as the crowds thin.',
-        ],
-      },
-    ],
-    inlineImage: { image: nordicFjordsImage },
+    publishedAt: new Date('2025-04-22T00:00:00.000Z'),
+    readingTime: '7 min read',
+    intro:
+      'Ha Giang becomes more impressive when you stop trying to conquer it. The mountain roads are already the spectacle; the smarter move is to pace the loop around weather and energy.',
+    meta: 'Highland road notes • 7 min read',
+    quote:
+      'Mountain travel gets better the moment you stop counting viewpoints and start paying attention to the quality of the hours between them.',
+    sections: buildBlogSections(
+      'Treat the Road as the Main Event',
+      [
+        'The strongest Ha Giang itineraries are built around driving windows, not only stop lists. Cloud, visibility, and how fresh the group feels matter more than squeezing in one extra pass.',
+        'That is why private pacing beats the rushed loop mentality. The scenery is too good to turn into a stopwatch exercise.',
+      ],
+      'Pair It with Sa Pa Carefully',
+      [
+        'Sa Pa and Ha Giang can work together, but only if you accept that they deliver different kinds of mountain days. Sa Pa is more settled and accessible; Ha Giang is more road-driven and open-ended.',
+        'Use Sa Pa as the softer approach and Ha Giang as the more dramatic second chapter, not the other way around.',
+      ],
+      'Leave Margin for Weather',
+      [
+        'The single most useful planning tool in the north is flexibility. A delayed start or an extra tea stop is often what protects the best mountain light later in the day.',
+      ],
+    ),
     secondaryFeature: {
-      title: 'Editor’s Field Note',
-      body: `A focused companion note for ${title}, pairing practical context with the sensory details that shape the experience.`,
-      image: { image: nordicFjordsImage },
+      title: 'Why One Spare Hour Matters',
+      body: 'In Ha Giang, an unallocated hour is not wasted time. It is what lets you wait for the clouds to lift or linger when the road suddenly becomes extraordinary.',
     },
-    relatedPosts: [],
-    seo: { title, description: `${title} travel journal.` },
-    mentionedDestinationSlugs: [],
-    mentionedTourSlugs: [],
+    relatedSlugs: ['ninh-binh-weekend-notes', 'nordic-fjords-light-guide', 'hanoi-old-quarter-after-dark'],
+    seoDescription:
+      'A practical Ha Giang Loop guide on pacing, weather, and how to combine the route with Sa Pa without exhausting the trip.',
+    mentionedDestinationSlugs: ['ha-giang-loop', 'sa-pa-highlands'],
+    mentionedTourSlugs: ['sapa-ha-giang-highland-road'],
     mentionedHotelSlugs: [],
-  })),
+  },
+  {
+    slug: 'mekong-delta-slow-days',
+    title: 'Mekong Delta at a Slower Pace: Floating Markets, Garden Houses, and Canal Mornings',
+    excerpt:
+      'A south Vietnam guide for travelers who want the Mekong as a lived-in region, not just a quick photo stop on the way back to the city.',
+    category: 'Slow Travel',
+    author: 'Thu Pham',
+    status: 'published',
+    publishedAt: new Date('2025-04-16T00:00:00.000Z'),
+    readingTime: '6 min read',
+    intro:
+      'The Mekong Delta is at its best when the schedule loosens. Boats, hammocks, orchard paths, and family-run meals all need more time than a standard “in-and-out” day tour usually allows.',
+    meta: 'South Vietnam guide • 6 min read',
+    quote:
+      'The Delta does not need embellishment; it needs enough time for the quiet details to become visible.',
+    sections: buildBlogSections(
+      'Go Early for the Water',
+      [
+        'Morning is not just cooler, it is also when the canals still feel like working space rather than scenery. That changes the whole tone of the visit.',
+        'If you start too late, the region flattens quickly. The best part of the Delta is its first few hours of movement.',
+      ],
+      'Sleep in the Region if You Can',
+      [
+        'An overnight stay gives the route a different depth. You get evening quiet, breakfast without transfers, and the chance to see the waterways before the day fully opens.',
+        'That is also when garden-house hospitality begins to matter. The best stays keep the pace modest and the setting personal.',
+      ],
+      'Let One Day Stay Light',
+      [
+        'You do not need nonstop activities here. One slower afternoon for tea, a short cycle, or a nap in the shade is often what makes the Delta memorable.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'The Garden House Advantage',
+      body: 'The Delta becomes more specific when you stay somewhere small enough to feel domestic. Big logistics can still work, but smaller hospitality fits the landscape better.',
+    },
+    relatedSlugs: ['phu-quoc-after-the-crowds', 'hoi-an-lantern-mornings', 'ninh-binh-weekend-notes'],
+    seoDescription:
+      'A Mekong Delta slow-travel guide on floating markets, overnight pacing, and the quieter experiences that make southern Vietnam feel distinct.',
+    mentionedDestinationSlugs: ['mekong-delta'],
+    mentionedTourSlugs: ['mekong-delta-slow-water-week'],
+    mentionedHotelSlugs: [],
+  },
+  {
+    slug: 'phu-quoc-after-the-crowds',
+    title: 'Phu Quoc Beyond the Resort Brochure: Quiet Beaches, Late Sunsets, and Easy Days',
+    excerpt:
+      'A Phu Quoc guide for travelers who want the island as a soft landing after a busier route, not as a schedule full of transfer-heavy excursions.',
+    category: 'Beach Escapes',
+    author: 'TouristWeb Editorial',
+    status: 'published',
+    publishedAt: new Date('2025-04-11T00:00:00.000Z'),
+    readingTime: '5 min read',
+    intro:
+      'Phu Quoc is strongest as a decompression stop. If you ask it to be a theme park, it disappoints. If you ask it to be your slow final chapter, it tends to deliver.',
+    meta: 'Island retreat • 5 min read',
+    quote:
+      'A good island ending is not defined by how much you did. It is defined by how little logistics you had to think about.',
+    sections: buildBlogSections(
+      'Use the Island as a Reset',
+      [
+        'Phu Quoc makes the most sense after a route with more movement. It is where you trade temple tickets and transfer times for long breakfasts and water views.',
+        'That only works if you choose a property that can hold the day well. On this island, the hotel is part of the itinerary.',
+      ],
+      'Keep One Optional Excursion',
+      [
+        'A private boat or snorkeling day is enough. The mistake is planning too many excursions on an island that is supposed to reduce friction.',
+        'One good outing plus generous hotel time usually feels more luxurious than trying to prove you used every daylight hour.',
+      ],
+      'Book for Sunset, Not Only for Price',
+      [
+        'The right side of the island and the right room orientation matter more here than squeezing for the lowest nightly rate. Sunsets are part of the product.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'Why the Room Matters More Here',
+      body: 'On a beach extension, the villa, suite, or deck becomes part of the emotional payoff. That is why Phu Quoc rewards better room selection more than many other stops.',
+    },
+    relatedSlugs: ['hoi-an-lantern-mornings', 'mekong-delta-slow-days', 'hue-da-nang-hoi-an-route'],
+    seoDescription:
+      'A Phu Quoc travel guide focused on quieter island pacing, better hotel choices, and how to use the island as a soft ending to a Vietnam trip.',
+    mentionedDestinationSlugs: ['phu-quoc-island'],
+    mentionedTourSlugs: ['phu-quoc-island-retreat'],
+    mentionedHotelSlugs: ['soneva-jani'],
+  },
+  {
+    slug: 'hanoi-old-quarter-after-dark',
+    title: 'A Hanoi Old Quarter Food Walk That Actually Leaves Time to Breathe',
+    excerpt:
+      'How to experience Hanoi at night without turning the Old Quarter into an exhausting sequence of reservations, queues, and hurried street-food stops.',
+    category: 'City Breaks',
+    author: 'Anh Dao',
+    status: 'published',
+    publishedAt: new Date('2025-04-02T00:00:00.000Z'),
+    readingTime: '5 min read',
+    intro:
+      'Hanoi at night is best discovered through a small radius. Pick one neighborhood, a few strong stops, and enough room to wander between them.',
+    meta: 'City food walk • 5 min read',
+    quote:
+      'The Old Quarter does not reward speed. It rewards appetite, patience, and the willingness to let one alley lead to the next.',
+    sections: buildBlogSections(
+      'Shrink the Map',
+      [
+        'Trying to cover all of Hanoi in one evening is the fastest way to flatten the city. A smaller loop gives you time to read the architecture, the traffic rhythm, and the food scene together.',
+        'That is why the best evenings are neighborhood-led rather than checklist-led. The city becomes more legible once the scale is manageable.',
+      ],
+      'Pair Street Stops with One Sit-Down Reset',
+      [
+        'An effective food walk alternates intensity. A bowl on the pavement, a coffee pause, a second quick bite, then one proper seated stop usually lands better than nonstop grazing.',
+        'That structure also makes Hanoi easier to pair with Ninh Binh or other northern routes because you finish energized rather than overloaded.',
+      ],
+      'Save the Last Hour for Wandering',
+      [
+        'The final part of the evening should be unscripted. That is often when you find the bookshop, tea room, or small corner bar you remember most.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'Street Food and Sequence',
+      body: 'The best Hanoi nights are edited, not maximalist. A strong sequence of three or four stops beats ten rushed ones almost every time.',
+    },
+    relatedSlugs: ['ninh-binh-weekend-notes', 'hoi-an-lantern-mornings', 'london-gallery-weekend'],
+    seoDescription:
+      'A Hanoi Old Quarter night guide with practical advice on food-walk pacing, neighborhood scale, and how to build a better evening route.',
+    mentionedDestinationSlugs: ['hanoi-old-quarter'],
+    mentionedTourSlugs: ['hanoi-ninh-binh-heritage-loop'],
+    mentionedHotelSlugs: [],
+  },
+  {
+    slug: 'bay-mau-half-day-guide',
+    title: 'Is Bay Mau Worth It? A Half-Day Coconut Forest Guide from Hoi An',
+    excerpt:
+      'A clear take on when the Bay Mau basket-boat trip works, when it feels too touristic, and how to fit it into a Hoi An stay without wasting the best hours in town.',
+    category: 'Experiences',
+    author: 'TouristWeb Editorial',
+    status: 'published',
+    publishedAt: new Date('2025-03-25T00:00:00.000Z'),
+    readingTime: '4 min read',
+    intro:
+      'Bay Mau is not a full-day headline experience, and that is exactly why it can work so well. Treat it as a compact countryside contrast to Hoi An, not as the center of the trip.',
+    meta: 'Half-day experience • 4 min read',
+    quote:
+      'The coconut forest is most useful as a change of texture, not as a reason to sacrifice the whole day.',
+    sections: buildBlogSections(
+      'Go with the Right Expectation',
+      [
+        'This is a short, accessible, photogenic outing. If you expect deep wilderness, you will be disappointed. If you expect a quick reset from the old town, it lands much better.',
+        'That framing matters because Hoi An already has strong evening value. Any daytime add-on needs to respect that.',
+      ],
+      'Keep It Tight',
+      [
+        'The smartest version is a morning or late-afternoon slot with easy transfer support. That gives you the greenery, the basket boats, and the local contact without bloating the day.',
+        'Afterward, a return to the hotel or a simple lunch nearby keeps the rest of the itinerary intact rather than fragmented.',
+      ],
+      'Use It to Support, Not Replace, Hoi An',
+      [
+        'Bay Mau is at its best when it supports a broader Hoi An stay: riverside hotel, old-town night, and one light countryside chapter.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'Best Pairing',
+      body: 'If Bay Mau is on the schedule, pair it with a slower hotel afternoon and a strong Hoi An evening. That combination makes the half-day feel intentional instead of filler.',
+    },
+    relatedSlugs: ['hoi-an-lantern-mornings', 'hue-da-nang-hoi-an-route', 'mekong-delta-slow-days'],
+    seoDescription:
+      'A practical Bay Mau Coconut Forest guide explaining how to fit the basket-boat experience into a Hoi An trip without overcommitting the day.',
+    mentionedDestinationSlugs: ['hoi-an-riverside'],
+    mentionedTourSlugs: ['bay-mau-coconut-forest'],
+    mentionedHotelSlugs: ['shining-riverside-hoi-an'],
+  },
+  {
+    slug: 'london-gallery-weekend',
+    title: 'A Long Weekend in London for Gallery Days and Design Hotels',
+    excerpt:
+      'A London city-break template for travelers who want museums, smaller galleries, good hotel pacing, and neighborhoods that still feel alive after the landmarks.',
+    category: 'City Breaks',
+    author: 'Oliver Hart',
+    status: 'published',
+    publishedAt: new Date('2025-03-12T00:00:00.000Z'),
+    readingTime: '6 min read',
+    intro:
+      'London gets better when you stop asking it to be a monuments sprint. Design hotels, one strong museum day, and two neighborhoods with different moods are enough for a polished long weekend.',
+    meta: 'Culture weekend • 6 min read',
+    quote:
+      'The best London weekends feel curated, not crowded: one exhibition, one reservation, one neighborhood you did not mean to leave so soon.',
+    sections: buildBlogSections(
+      'Use the Hotel as an Anchor',
+      [
+        'In a city this large, the hotel does more than provide a bed. It decides how much friction sits between breakfast, your first neighborhood, and the part of the city you want at night.',
+        'That is why location and atmosphere matter more than raw amenity count on a short London trip.',
+      ],
+      'One Major Museum Is Enough',
+      [
+        'Choose one primary institution for the day and let smaller galleries fill the edges. Trying to absorb too much visual material back to back usually flattens the experience.',
+        'The city is best read in layers: museum, café, street, bookstore, dinner. Not museum after museum after museum.',
+      ],
+      'Finish in a Neighborhood, Not a Queue',
+      [
+        'Reserve your final evening for a district that still feels social after the day crowd disappears. London is strongest when the cultural route blends into ordinary city life.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'Why London Needs Editing',
+      body: 'London offers almost too many viable options. The trick is not finding enough to do, but choosing a sequence that still leaves the weekend feeling composed.',
+    },
+    relatedSlugs: ['nordic-fjords-light-guide', 'hanoi-old-quarter-after-dark', 'phu-quoc-after-the-crowds'],
+    seoDescription:
+      'A London long-weekend guide covering gallery pacing, neighborhood choices, and how to use a design-led hotel as the anchor for the route.',
+    mentionedDestinationSlugs: ['london-essence'],
+    mentionedTourSlugs: ['london-design-and-gallery-week'],
+    mentionedHotelSlugs: [],
+  },
+  {
+    slug: 'nordic-fjords-light-guide',
+    title: 'Nordic Fjords in Long Light: When to Go, Where to Stay, and How to Pace the Route',
+    excerpt:
+      'A practical fjords guide on seasonality, drive times, lodge choices, and why scenic routes in Scandinavia work best when the calendar stays generous.',
+    category: 'Destination Guides',
+    author: 'Freja Solberg',
+    status: 'published',
+    publishedAt: new Date('2025-02-20T00:00:00.000Z'),
+    readingTime: '7 min read',
+    intro:
+      'The Nordic fjords are not difficult to love, but they are easy to mis-time. Long light, reasonable drive days, and one or two lodge bases do more for the route than trying to over-cover the map.',
+    meta: 'Scenic expedition guide • 7 min read',
+    quote:
+      'Fjord travel is not about seeing every branch of the coastline. It is about giving one branch enough time to become immersive.',
+    sections: buildBlogSections(
+      'Plan for Light, Not Only for Temperature',
+      [
+        'The strongest fjord trips are built around daylight length as much as season. The extra evening hours change what is possible on the road and on the water.',
+        'That also affects mood. Long northern light makes arrivals calmer and scenic stops less rushed.',
+      ],
+      'Choose Fewer Bases, Better Views',
+      [
+        'A route with two excellent stays usually performs better than one with four average ones. The lodges are part of the reward, not only a place to recover from driving.',
+        'Once the hotels are chosen well, the whole trip feels more spacious. Meals improve, weather days become usable, and the landscape can breathe around the logistics.',
+      ],
+      'Let Water and Road Alternate',
+      [
+        'The route is strongest when you move between road perspective and water perspective. Seeing the same landscape from both scales is what gives the fjords their full effect.',
+      ],
+    ),
+    secondaryFeature: {
+      title: 'The Lodge Standard',
+      body: 'In the fjords, a view-only hotel is not enough. The better properties also understand warmth, quiet public rooms, and the kind of pacing that suits long scenic days.',
+    },
+    relatedSlugs: ['ha-giang-pass-mornings', 'london-gallery-weekend', 'phu-quoc-after-the-crowds'],
+    seoDescription:
+      'A Nordic fjords travel guide with advice on long-light seasonality, lodge selection, and how to pace a scenic Scandinavia route properly.',
+    mentionedDestinationSlugs: ['nordic-fjords'],
+    mentionedTourSlugs: ['nordic-fjords-scenic-expedition'],
+    mentionedHotelSlugs: ['72-north-lodge'],
+  },
 ];
+
+const seedBlogDraftBySlug = new Map(
+  seedBlogPostDrafts.map((post) => [post.slug, post] as const),
+);
+
+export const seedBlogPosts: SeedBlogPost[] = seedBlogPostDrafts.map((post) => {
+  const {
+    relatedSlugs,
+    seoDescription,
+    seoTitle,
+    secondaryFeature,
+    ...data
+  } = post;
+
+  const imageSet = seedBlogImageSets[post.slug];
+
+  if (!imageSet) {
+    throw new Error(`Missing image set for blog seed ${post.slug}.`);
+  }
+
+  return {
+    ...data,
+    image: imageSet.image,
+    heroImage: imageSet.heroImage,
+    inlineImage: {
+      image: imageSet.inlineImage,
+    },
+    secondaryFeature: {
+      ...secondaryFeature,
+      image: {
+        image: imageSet.secondaryImage,
+      },
+    },
+    relatedPosts: relatedSlugs.map((relatedSlug) => {
+      const relatedPost = seedBlogDraftBySlug.get(relatedSlug);
+      const relatedImageSet = seedBlogImageSets[relatedSlug];
+
+      if (!relatedPost || !relatedImageSet) {
+        throw new Error(
+          `Missing related blog seed data for ${post.slug} -> ${relatedSlug}.`,
+        );
+      }
+
+      return {
+        href: `/blog/${relatedPost.slug}`,
+        title: relatedPost.title,
+        excerpt: relatedPost.excerpt,
+        category: relatedPost.category,
+        image: relatedImageSet.image,
+      };
+    }),
+    seo: {
+      title: seoTitle ?? post.title,
+      description: seoDescription,
+      ogImage: imageSet.heroImage,
+    },
+  };
+});
 
 export const seedEvents: SeedEvent[] = [
   {
@@ -1423,6 +1899,11 @@ async function main() {
         },
       });
     }
+
+    await prisma.blogPost.deleteMany({
+      where: { slug: { in: obsoleteSeedBlogSlugs } },
+    });
+
     for (const post of seedBlogPosts) {
       const {
         mentionedDestinationSlugs,

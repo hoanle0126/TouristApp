@@ -16,16 +16,16 @@ describe('Prisma seed data', () => {
     );
     expect(seedTours.map((tour) => tour.slug)).toEqual(
       expect.arrayContaining([
-        'the-soul-of-kyoto',
-        'amalfi-coast-discovery',
         'bay-mau-coconut-forest',
+        'hanoi-ninh-binh-heritage-loop',
+        'nordic-fjords-scenic-expedition',
       ]),
     );
     expect(seedHotels.map((hotel) => hotel.slug)).toEqual(
       expect.arrayContaining(['shining-riverside-hoi-an', 'aman-tokyo']),
     );
     expect(seedBlogPosts.map((post) => post.slug)).toEqual(
-      expect.arrayContaining(['kyotos-new-wave', 'dolomites-quietude']),
+      expect.arrayContaining(['hoi-an-lantern-mornings', 'nordic-fjords-light-guide']),
     );
   });
 
@@ -56,6 +56,35 @@ describe('Prisma seed data', () => {
     }
   });
 
+  it('enriches every seeded journal post with discovery metadata and editorial cross-links', () => {
+    for (const post of seedBlogPosts) {
+      expect(post.image).toContain('images.unsplash.com');
+      expect(post.heroImage).toContain('images.unsplash.com');
+      expect(post.inlineImage).toMatchObject({
+        image: expect.stringContaining('images.unsplash.com'),
+      });
+      expect(post.secondaryFeature).toMatchObject({
+        image: {
+          image: expect.stringContaining('images.unsplash.com'),
+        },
+      });
+      expect(post.seo).toMatchObject({
+        title: expect.any(String),
+        description: expect.any(String),
+        ogImage: expect.stringContaining('images.unsplash.com'),
+      });
+      expect(post.relatedPosts).toHaveLength(3);
+      expect(
+        post.relatedPosts.every((relatedPost) => relatedPost.href !== `/blog/${post.slug}`),
+      ).toBe(true);
+      expect(
+        post.mentionedDestinationSlugs.length +
+          post.mentionedTourSlugs.length +
+          post.mentionedHotelSlugs.length,
+      ).toBeGreaterThan(0);
+    }
+  });
+
   it('includes enough gallery and booking data for the Shining Riverside detail layout', () => {
     const shiningRiverside = seedHotels.find(
       (hotel) => hotel.slug === 'shining-riverside-hoi-an',
@@ -72,8 +101,9 @@ describe('Prisma seed data', () => {
 
   it('includes gallery imagery for every seeded tour detail page', () => {
     for (const tour of seedTours) {
-      expect(tour.gallery.length).toBeGreaterThanOrEqual(1);
-      expect(tour.gallery[0]).toMatchObject({ layout: 'portrait' });
+      expect(tour.gallery.length).toBeGreaterThanOrEqual(3);
+      expect(tour.gallery.some((item) => item.layout === 'portrait')).toBe(true);
+      expect(tour.gallery.some((item) => item.layout === 'landscape')).toBe(true);
     }
   });
 

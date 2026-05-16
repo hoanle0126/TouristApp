@@ -11,7 +11,6 @@ import {
   Phone,
   Search,
   Send,
-  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -20,7 +19,6 @@ import { FeedbackPartnersSection } from "@/src/components/travel/FeedbackPartner
 import { HeroImageCarousel } from "@/src/components/travel/HeroImageCarousel";
 import { HomeEventsSection } from "@/src/components/travel/HomeEventsSection";
 import { RegionalHighlightsSection } from "@/src/components/travel/RegionalHighlightsSection";
-import { SuggestionTabs } from "@/src/components/travel/SuggestionsSection";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
@@ -38,7 +36,6 @@ import {
   heroImage,
   travelerFeedback,
   travelPartners,
-  type SuggestionCard,
 } from "@/src/data/mockData";
 import type { BlogPost, DestinationCard, HotelCard, TourCard, TravelEventCard, VisualDiaryItem } from "@/src/types/travel";
 
@@ -96,10 +93,6 @@ interface HotelShowcaseCardProps {
   readonly hotel: HotelCard;
 }
 
-interface SuggestionsSectionProps {
-  readonly suggestions: readonly SuggestionCard[];
-}
-
 interface BlogSectionProps {
   readonly posts: readonly BlogPost[];
 }
@@ -108,6 +101,33 @@ interface BlogCardProps {
   readonly post: BlogPost;
 }
 
+function buildTourHighlightItems(tours: readonly TourCard[]) {
+  return tours.map((tour) => ({
+    alt: tour.alt,
+    badge: tour.badge,
+    category: tour.destination.title,
+    description: tour.description,
+    href: tour.slug ? `/tours/${tour.slug}` : "/tours",
+    image: tour.image,
+    meta: [tour.destination.title, tour.duration, tour.guests].filter(Boolean),
+    price: tour.price,
+    title: tour.title,
+  }));
+}
+
+function buildHotelHighlightItems(hotels: readonly HotelCard[]) {
+  return hotels.map((hotel) => ({
+    alt: hotel.alt,
+    badge: hotel.badge,
+    category: hotel.location,
+    description: hotel.amenities.length > 0 ? hotel.amenities.slice(0, 3).join(", ") : `Curated stay in ${hotel.location}.`,
+    href: hotel.slug ? `/hotels/${hotel.slug}` : "/hotels",
+    image: hotel.image,
+    meta: hotel.amenities.slice(0, 3),
+    price: hotel.price,
+    title: hotel.name,
+  }));
+}
 
 function SectionHeading({ align = "left", eyebrow, subtitle, title }: Readonly<SectionHeadingProps>) {
   return (
@@ -157,25 +177,6 @@ function LandingEmptyState({
   );
 }
 
-function SuggestionEmptyState({ activeTab }: Readonly<{ activeTab: "all" | "hotel" | "tour" | "destination" }>) {
-  const labels = {
-    all: "new ideas",
-    destination: "destinations",
-    hotel: "stays",
-    tour: "experiences",
-  } as const;
-
-  return (
-    <LandingEmptyState
-      actionHref="/search"
-      actionLabel="Explore the catalog"
-      description={`We do not have any curated ${labels[activeTab]} to show for this filter yet. Try another tab or browse the full catalog for more options.`}
-      icon={<Sparkles className="size-7" />}
-      title="Fresh recommendations are on the way"
-    />
-  );
-}
-
 function BlogEmptyState() {
   return (
     <LandingEmptyState
@@ -198,10 +199,6 @@ function DestinationEmptyState() {
       title="Featured escapes are being refreshed"
     />
   );
-}
-
-function SuggestionSectionEmptyState({ suggestions }: Readonly<{ suggestions: readonly SuggestionCard[] }>) {
-  return suggestions.length === 0 ? <SuggestionEmptyState activeTab="all" /> : null;
 }
 
 function BlogSectionEmptyState({ posts }: Readonly<{ posts: readonly BlogPost[] }>) {
@@ -374,16 +371,6 @@ function HotelShowcaseSection({ hotels }: Readonly<HotelShowcaseSectionProps>) {
   );
 }
 
-function SuggestionsSection({ suggestions }: Readonly<SuggestionsSectionProps>) {
-  return (
-    <section className="bg-stone-50 py-24">
-      <div className="mx-auto max-w-screen-2xl px-8">
-        {suggestions.length > 0 ? <SuggestionTabs suggestions={suggestions} /> : <SuggestionSectionEmptyState suggestions={suggestions} />}
-      </div>
-    </section>
-  );
-}
-
 function BlogCard({ post }: Readonly<BlogCardProps>) {
   return (
     <article className="flex flex-col">
@@ -507,7 +494,6 @@ interface TravelLandingPageProps {
   readonly destinationCards: readonly DestinationCard[];
   readonly eventCards: readonly TravelEventCard[];
   readonly hotelCards: readonly HotelCard[];
-  readonly suggestionCards: readonly SuggestionCard[];
   readonly tourCards: readonly TourCard[];
   readonly visualDiaryItems: readonly VisualDiaryItem[];
 }
@@ -517,11 +503,12 @@ export default function TravelLandingPage({
   destinationCards,
   eventCards,
   hotelCards,
-  suggestionCards,
   tourCards,
   visualDiaryItems,
 }: Readonly<TravelLandingPageProps>) {
   const heroSlides = buildHeroSlides(visualDiaryItems);
+  const featuredTourItems = buildTourHighlightItems(tourCards);
+  const featuredHotelItems = buildHotelHighlightItems(hotelCards);
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
@@ -530,8 +517,15 @@ export default function TravelLandingPage({
       <HomeEventsSection events={eventCards} />
       <CircularImageRailSection items={destinationCards} />
       <HotelShowcaseSection hotels={hotelCards} />
-      <RegionalHighlightsSection tours={tourCards} />
-      <SuggestionsSection suggestions={suggestionCards} />
+      <RegionalHighlightsSection items={featuredTourItems} />
+      <RegionalHighlightsSection
+        ctaHref="/hotels"
+        ctaLabel="Browse stays"
+        description="Private villas, design-led resorts, and high-touch stays arranged in a mirrored carousel for faster browsing."
+        items={featuredHotelItems}
+        reverse
+        title="Featured Stays"
+      />
       <BlogSection posts={blogPosts} />
       <FeedbackPartnersSection feedback={travelerFeedback} partners={travelPartners} />
       <ContactSection />

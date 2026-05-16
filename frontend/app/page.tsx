@@ -18,43 +18,12 @@ export default async function Home() {
     getTours(),
   ]);
 
-  const suggestionCards = [
-    ...destinations.map((destination) => ({
-      alt: destination.alt,
-      category: "destination" as const,
-      href: destination.href,
-      image: destination.image,
-      location: destination.title,
-      price: "Explore",
-      title: destination.title,
-    })),
-    ...tours.slice(0, 2).map((tour) => ({
-      alt: tour.alt,
-      category: "tour" as const,
-      href: tour.slug ? `/tours/${tour.slug}` : "/tours",
-      image: tour.image,
-      location: tour.duration,
-      price: tour.price,
-      title: tour.title,
-    })),
-    ...hotels.slice(0, 2).map((hotel) => ({
-      alt: hotel.alt,
-      category: "hotel" as const,
-      href: hotel.slug ? `/hotels/${hotel.slug}` : "/hotels",
-      image: hotel.image,
-      location: hotel.location,
-      price: hotel.price,
-      title: hotel.name,
-    })),
-  ];
-
   return (
     <TravelLandingPage
       blogPosts={blogPosts}
       destinationCards={destinations}
       eventCards={events}
       hotelCards={hotels}
-      suggestionCards={suggestionCards}
       tourCards={tours}
       visualDiaryItems={momentsCaptured}
     />

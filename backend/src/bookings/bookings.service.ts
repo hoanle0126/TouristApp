@@ -24,6 +24,7 @@ import {
   AiBookingSummaryService,
 } from './ai-booking-summary.service';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { SettingsService } from '../settings/settings.service';
 
 type BookingRecord = Booking & { items: BookingItem[] };
 type PrismaTransaction = Prisma.TransactionClient;
@@ -66,6 +67,7 @@ export class BookingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
+    private readonly settingsService: SettingsService,
     private readonly aiBookingSummaryService?: AiBookingSummaryService,
   ) {}
 
@@ -121,12 +123,20 @@ export class BookingsService {
       throw new BadRequestException('Booking must contain at least one item.');
     }
 
+    const shopPaymentSettings =
+      dto.paymentMethod === 'bank-transfer'
+        ? await this.settingsService.getShopPaymentRuntimeConfig()
+        : null;
+
     const booking = await this.prisma.$transaction(async (tx) => {
+      const bookingCode = this.generateBookingCode();
       const items = await Promise.all(
         dto.items.map((item) => this.prepareItem(item, tx)),
       );
       await this.reserveInventory(items, tx);
-      const bookingItems = items.map(({ ...item }) => item);
+      const bookingItems = items.map((item) =>
+        this.toBookingItemCreateData(item),
+      );
       const subtotal = items.reduce(
         (total, item) => total + item.lineTotal.toNumber(),
         0,
@@ -136,7 +146,7 @@ export class BookingsService {
 
       return tx.booking.create({
         data: {
-          bookingCode: this.generateBookingCode(),
+          bookingCode,
           fullName: dto.fullName,
           email: dto.email,
           phone: dto.phone,
@@ -155,6 +165,9 @@ export class BookingsService {
           arrivalFlight: dto.arrivalFlight,
           specialRequests: dto.specialRequests,
           internalNotes: dto.internalNotes,
+          bankTransfer: shopPaymentSettings
+            ? this.buildBankTransferPayload(shopPaymentSettings, bookingCode, total)
+            : Prisma.JsonNull,
           paymentMethod: dto.paymentMethod,
           subtotal: new Prisma.Decimal(subtotal),
           taxesAndFees: new Prisma.Decimal(taxesAndFees),
@@ -685,6 +698,87 @@ export class BookingsService {
     return `TW-${date}-${suffix}`;
   }
 
+  private buildBankTransferPayload(
+    bankTransfer: {
+      bankBin: string;
+      bankName: string;
+      accountNumber: string;
+      accountName: string;
+    },
+    bookingCode: string,
+    total: number,
+  ) {
+    const bankBin = bankTransfer.bankBin.trim();
+    const bankName = bankTransfer.bankName.trim();
+    const accountNumber = bankTransfer.accountNumber.trim();
+    const accountName = bankTransfer.accountName.trim();
+    const transferNote = `CURATOR ${bookingCode}`;
+    const qrAmount = Math.max(Math.round(total), 0);
+
+    return {
+      bankBin,
+      bankName,
+      accountNumber,
+      accountName,
+      amount: qrAmount,
+      transferNote,
+      qrUrl: this.buildVietQrUrl({
+        accountName,
+        accountNumber,
+        amount: qrAmount,
+        bankBin,
+        transferNote,
+      }),
+      qrTemplate: 'compact2',
+    } satisfies Prisma.InputJsonObject;
+  }
+
+  private buildVietQrUrl(input: {
+    bankBin: string;
+    accountNumber: string;
+    accountName: string;
+    amount: number;
+    transferNote: string;
+  }) {
+    const query = new URLSearchParams({
+      accountName: input.accountName,
+      addInfo: input.transferNote,
+    });
+
+    if (input.amount > 0) {
+      query.set('amount', String(input.amount));
+    }
+
+    return `https://img.vietqr.io/image/${encodeURIComponent(input.bankBin)}-${encodeURIComponent(input.accountNumber)}-compact2.png?${query.toString()}`;
+  }
+
+  private toBookingItemCreateData(item: PreparedBookingItem) {
+    return {
+      itemType: item.itemType,
+      ...(item.tourId ? { tour: { connect: { id: item.tourId } } } : {}),
+      ...(item.tourDepartureId
+        ? { tourDeparture: { connect: { id: item.tourDepartureId } } }
+        : {}),
+      ...(item.hotelId ? { hotel: { connect: { id: item.hotelId } } } : {}),
+      snapshotSlug: item.snapshotSlug,
+      snapshotTitle: item.snapshotTitle,
+      snapshotImage: item.snapshotImage,
+      snapshotAlt: item.snapshotAlt,
+      snapshotMeta: item.snapshotMeta,
+      snapshotPriceLabel: item.snapshotPriceLabel,
+      date: item.date,
+      checkIn: item.checkIn,
+      checkOut: item.checkOut,
+      guests: item.guests,
+      nights: item.nights,
+      roomType: item.roomType,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      lineTotal: item.lineTotal,
+      currency: item.currency,
+    };
+  }
+
   private toResponse(booking: BookingRecord) {
     return {
       id: booking.id,
@@ -693,6 +787,7 @@ export class BookingsService {
       paymentStatus: booking.paymentStatus,
       paymentMethod: booking.paymentMethod,
       aiSummary: booking.aiSummary,
+      bankTransfer: booking.bankTransfer,
       customer: {
         fullName: booking.fullName,
         email: booking.email,

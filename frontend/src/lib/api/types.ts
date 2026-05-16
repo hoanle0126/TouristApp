@@ -5,13 +5,20 @@ export type ApiDestinationLink = {
   readonly market?: string;
 };
 
-export type ApiMomentCaptured = {
-  readonly country: string;
+export type ApiPartner = {
+  readonly description: string;
   readonly id: string;
-  readonly image: string;
+  readonly name: string;
   readonly sortOrder: number;
-  readonly title: string;
-  readonly wide: boolean;
+};
+
+export type ApiTravelerReview = {
+  readonly id: string;
+  readonly name: string;
+  readonly quote: string;
+  readonly role: string;
+  readonly sortOrder: number;
+  readonly trip: string;
 };
 
 export type ApiEvent = {
@@ -73,9 +80,19 @@ export type ApiTourDetail = Omit<ApiTourCard, "description"> & {
   readonly image: string;
   readonly heroImage: string;
   readonly subtitle: string;
-  readonly highlights: readonly { readonly icon?: string; readonly title: string; readonly description: string }[];
-  readonly itinerary: readonly { readonly title: string; readonly description: string }[];
-  readonly gallery: readonly { readonly image: string; readonly layout?: "portrait" | "landscape" }[];
+  readonly highlights: readonly {
+    readonly icon?: string;
+    readonly title: string;
+    readonly description: string;
+  }[];
+  readonly itinerary: readonly {
+    readonly title: string;
+    readonly description: string;
+  }[];
+  readonly gallery: readonly {
+    readonly image: string;
+    readonly layout?: "portrait" | "landscape";
+  }[];
   readonly inclusions: readonly string[];
   readonly exclusions: readonly string[];
   readonly departures: readonly ApiTourDeparture[];
@@ -90,12 +107,31 @@ export type ApiDestinationDetail = {
   readonly summary: string;
   readonly intro: readonly string[];
   readonly facts: readonly { readonly label: string; readonly value: string }[];
-  readonly spotlight: readonly { readonly title: string; readonly description: string }[];
-  readonly relatedTours: readonly { readonly href: string; readonly label: string; readonly meta: string; readonly title: string }[];
-  readonly relatedHotels: readonly { readonly href: string; readonly label: string; readonly meta: string; readonly title: string }[];
+  readonly spotlight: readonly {
+    readonly title: string;
+    readonly description: string;
+  }[];
+  readonly relatedTours: readonly {
+    readonly href: string;
+    readonly label: string;
+    readonly meta: string;
+    readonly title: string;
+  }[];
+  readonly relatedHotels: readonly {
+    readonly href: string;
+    readonly label: string;
+    readonly meta: string;
+    readonly title: string;
+  }[];
 };
 
-export type ApiHotelAmenity = string | { readonly label?: string; readonly title?: string; readonly icon?: string };
+export type ApiHotelAmenity =
+  | string
+  | {
+      readonly label?: string;
+      readonly title?: string;
+      readonly icon?: string;
+    };
 
 export type ApiHotelCard = {
   readonly slug: string;
@@ -177,7 +213,10 @@ export type ApiBlogDetail = ApiBlogCard & {
   readonly intro: string;
   readonly meta: string;
   readonly quote: string;
-  readonly sections: readonly { readonly heading?: string; readonly body: readonly string[] }[];
+  readonly sections: readonly {
+    readonly heading?: string;
+    readonly body: readonly string[];
+  }[];
   readonly inlineImage: { readonly image: string };
   readonly secondaryFeature: {
     readonly title: string;
@@ -185,7 +224,11 @@ export type ApiBlogDetail = ApiBlogCard & {
     readonly image: { readonly image: string };
   };
   readonly relatedPosts: readonly ApiBlogRelatedPost[];
-  readonly seo?: { readonly title?: string; readonly description?: string; readonly ogImage?: string };
+  readonly seo?: {
+    readonly title?: string;
+    readonly description?: string;
+    readonly ogImage?: string;
+  };
 };
 
 export type ApiBookingItemInput = {
@@ -211,7 +254,11 @@ export type CreateBookingInput = {
   readonly city?: string;
   readonly address?: string;
   readonly travelers: number;
-  readonly paymentMethod: "credit-card" | "bank-transfer" | "apple-pay" | "cash";
+  readonly paymentMethod:
+    | "credit-card"
+    | "bank-transfer"
+    | "apple-pay"
+    | "cash";
   readonly specialRequests?: string;
   readonly items: readonly ApiBookingItemInput[];
 };
@@ -239,6 +286,56 @@ export type UpdateAiProviderSettingsInput = {
   readonly clearApiKey?: boolean;
 };
 
+export type ApiShopPaymentSettings = {
+  readonly bankBin: string;
+  readonly bankName: string;
+  readonly accountNumber: string;
+  readonly accountName: string;
+};
+
+export type UpdateShopPaymentSettingsInput = {
+  readonly bankBin?: string;
+  readonly bankName?: string;
+  readonly accountNumber?: string;
+  readonly accountName?: string;
+};
+
+export type ApiSiteContentSettings = {
+  readonly siteName: string;
+  readonly siteTagline: string;
+  readonly siteDescription: string;
+  readonly contactEmail: string;
+  readonly hotline: string;
+  readonly topBarNote: string;
+  readonly promoLabel: string;
+  readonly promoCta: string;
+  readonly promoHref: string;
+  readonly homeHeroImage: string;
+  readonly homeHeroAlt: string;
+  readonly heroImageTwo: string;
+  readonly heroImageTwoAlt: string;
+  readonly heroImageThree: string;
+  readonly heroImageThreeAlt: string;
+};
+
+export type UpdateSiteContentSettingsInput = {
+  readonly siteName?: string;
+  readonly siteTagline?: string;
+  readonly siteDescription?: string;
+  readonly contactEmail?: string;
+  readonly hotline?: string;
+  readonly topBarNote?: string;
+  readonly promoLabel?: string;
+  readonly promoCta?: string;
+  readonly promoHref?: string;
+  readonly homeHeroImage?: string;
+  readonly homeHeroAlt?: string;
+  readonly heroImageTwo?: string;
+  readonly heroImageTwoAlt?: string;
+  readonly heroImageThree?: string;
+  readonly heroImageThreeAlt?: string;
+};
+
 export type TestAiProviderSettingsInput = {
   readonly provider: "openai-compatible";
   readonly baseUrl: string;
@@ -261,6 +358,16 @@ export type ApiBooking = {
   readonly status: string;
   readonly paymentStatus: string;
   readonly paymentMethod: string;
+  readonly bankTransfer?: {
+    readonly bankBin: string;
+    readonly bankName: string;
+    readonly accountNumber: string;
+    readonly accountName: string;
+    readonly amount: number;
+    readonly transferNote: string;
+    readonly qrUrl: string;
+    readonly qrTemplate: string;
+  } | null;
   readonly aiSummary?: string | null;
   readonly customer: {
     readonly fullName: string;

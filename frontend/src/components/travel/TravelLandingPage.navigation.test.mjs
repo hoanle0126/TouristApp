@@ -21,7 +21,6 @@ const expectedLabels = [
   "Destinations",
   "Tours",
   "Hotels",
-  "Booking history",
   "Blog",
   "About Us",
   "Contact",
@@ -32,5 +31,9 @@ for (const label of expectedLabels) {
   assert.match(mockDataSource, new RegExp(`"${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
 }
 assert.match(travelShellSource, /navigationItems\.map\(/);
+assert.match(travelShellSource, /getDestinations\(\{ perPage: 3 \}\)/);
+assert.match(travelShellSource, /getTours\(\{ perPage: 3 \}\)/);
+assert.match(travelShellSource, /getHotels\(\{ perPage: 3 \}\)/);
+assert.match(travelShellSource, /slice\(0, 3\)/);
 
 console.log("Travel landing navigation smoke test passed");

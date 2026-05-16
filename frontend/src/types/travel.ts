@@ -72,6 +72,22 @@ export interface VisualDiaryItem {
   readonly wide?: boolean;
 }
 
+export interface TravelerFeedback {
+  readonly id?: string;
+  readonly name: string;
+  readonly quote: string;
+  readonly role: string;
+  readonly sortOrder?: number;
+  readonly trip: string;
+}
+
+export interface TravelPartner {
+  readonly description: string;
+  readonly id?: string;
+  readonly name: string;
+  readonly sortOrder?: number;
+}
+
 export interface TravelEventCard {
   readonly alt: string;
   readonly badge: string;
@@ -169,7 +185,15 @@ export interface HotelDetailImage {
 }
 
 export interface HotelDetailAmenity {
-  readonly icon: "pool" | "spa" | "dining" | "gym" | "wifi" | "coffee" | "parking" | "beach";
+  readonly icon:
+    | "pool"
+    | "spa"
+    | "dining"
+    | "gym"
+    | "wifi"
+    | "coffee"
+    | "parking"
+    | "beach";
   readonly title: string;
 }
 
@@ -228,7 +252,19 @@ export interface TourDeparture {
 
 export interface TourDetailHighlight {
   readonly description: string;
-  readonly icon: "boat" | "fish" | "food" | "eco" | "camera" | "map" | "mountain" | "sparkles" | "hotel" | "walk" | "coffee" | "compass";
+  readonly icon:
+    | "boat"
+    | "fish"
+    | "food"
+    | "eco"
+    | "camera"
+    | "map"
+    | "mountain"
+    | "sparkles"
+    | "hotel"
+    | "walk"
+    | "coffee"
+    | "compass";
   readonly title: string;
 }
 

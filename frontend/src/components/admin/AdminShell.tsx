@@ -5,7 +5,6 @@ import {
   Bell,
   CalendarRange,
   CalendarDays,
-  Camera,
   ChevronRight,
   Clock3,
   Compass,
@@ -14,6 +13,7 @@ import {
   LayoutDashboard,
   MapPinned,
   Menu,
+  Quote,
   Search,
   Settings2,
   SquarePen,
@@ -54,7 +54,7 @@ const adminNavItems: readonly AdminNavItem[] = [
   { href: "/admin/bookings", icon: CreditCard, label: "Bookings" },
   { href: "/admin/blogs", icon: SquarePen, label: "Blogs" },
   { href: "/admin/events", icon: CalendarDays, label: "Events" },
-  { href: "/admin/moments-captured", icon: Camera, label: "Moments" },
+  { href: "/admin/feedback", icon: Quote, label: "Feedback" },
   { href: "/admin/settings", icon: Settings2, label: "Settings" },
 ] as const;
 
@@ -99,7 +99,9 @@ export function AdminShell({
             sectionLabel={sectionLabel}
             teamValue={teamValue}
           />
-          <div className="space-y-6 px-5 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</div>
+          <div className="space-y-6 px-5 py-6 sm:px-6 lg:px-8 lg:py-8">
+            {children}
+          </div>
         </div>
       </div>
     </main>
@@ -131,7 +133,10 @@ function AdminTopBar({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button className="bg-white text-stone-700 hover:bg-stone-100 hover:text-stone-950" variant="outline">
+          <Button
+            className="bg-white text-stone-700 hover:bg-stone-100 hover:text-stone-950"
+            variant="outline"
+          >
             <CalendarRange className="size-4" />
             This month
           </Button>
@@ -168,7 +173,11 @@ function AdminTopBar({
 
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-stone-500">{sectionLabel}</p>
-        <Button className="bg-white text-stone-700 hover:bg-stone-100 hover:text-stone-950" size="icon" variant="outline">
+        <Button
+          className="bg-white text-stone-700 hover:bg-stone-100 hover:text-stone-950"
+          size="icon"
+          variant="outline"
+        >
           <Bell className="size-4" />
         </Button>
       </div>
@@ -210,7 +219,13 @@ function AdminSidebarContent({
 }: Readonly<{ activePath: string; mobile?: boolean }>) {
   return (
     <>
-      <div className={mobile ? "border-b border-stone-200/80 px-6 py-6" : "border-b border-stone-200/80 px-8 py-7"}>
+      <div
+        className={
+          mobile
+            ? "border-b border-stone-200/80 px-6 py-6"
+            : "border-b border-stone-200/80 px-8 py-7"
+        }
+      >
         <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-emerald-800">
           CURATOR Admin
         </p>
@@ -272,11 +287,14 @@ function AdminSidebarContent({
                 14 guest arrivals this week
               </p>
               <p className="mt-2 text-sm leading-relaxed text-white/65">
-                Most movement is concentrated in Hoi An and Kyoto. Transfer teams
-                should be fully staffed by Thursday.
+                Most movement is concentrated in Hoi An and Kyoto. Transfer
+                teams should be fully staffed by Thursday.
               </p>
             </div>
-            <Button className="w-full bg-white text-stone-950 hover:bg-emerald-100" variant="secondary">
+            <Button
+              className="w-full bg-white text-stone-950 hover:bg-emerald-100"
+              variant="secondary"
+            >
               View arrival plan
             </Button>
           </CardContent>

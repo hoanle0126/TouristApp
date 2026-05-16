@@ -7,6 +7,8 @@ import {
   CheckCheck,
   Circle,
   Download,
+  Landmark,
+  QrCode,
 } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
@@ -93,6 +95,8 @@ export default function PaymentSuccessPage({
 }: Readonly<{
   booking: ApiBooking | null;
 }>) {
+  const bankTransfer = booking?.bankTransfer ?? null;
+  const hasQrPayment = booking?.paymentMethod === "bank-transfer" && !!bankTransfer?.qrUrl;
   const bookingSummary = booking
     ? {
         bookingDate: formatBookingDate(booking.createdAt),
@@ -136,7 +140,7 @@ export default function PaymentSuccessPage({
                 "mb-4 text-4xl font-extrabold tracking-[-0.06em] text-stone-950 md:text-5xl",
               )}
             >
-              Your Journey Awaits
+              {hasQrPayment ? "Scan to Pay" : "Your Journey Awaits"}
             </h1>
             <h2
               className={cn(
@@ -144,10 +148,12 @@ export default function PaymentSuccessPage({
                 "mb-6 text-xl font-semibold text-emerald-800 md:text-2xl",
               )}
             >
-              Booking Confirmed
+              {hasQrPayment ? "Booking Received" : "Booking Confirmed"}
             </h2>
             <p className="mx-auto mb-12 max-w-md leading-7 text-stone-500">
-              {successPageData.intro}
+              {hasQrPayment
+                ? "Your booking has been created. Scan the VietQR code below to open your banking app with the shop account, amount, and booking reference filled in automatically. We will respond after the transfer is confirmed."
+                : successPageData.intro}
             </p>
 
             <Card className="mb-12 rounded-xl border-none bg-stone-100 text-left shadow-none">
@@ -203,6 +209,54 @@ export default function PaymentSuccessPage({
                 </div>
               </CardContent>
             </Card>
+
+            {hasQrPayment && bankTransfer ? (
+              <Card className="mb-12 rounded-xl border border-emerald-200 bg-emerald-50/60 text-left shadow-none">
+                <CardContent className="grid gap-8 p-8 md:grid-cols-[280px_minmax(0,1fr)] md:items-center">
+                  <div className="mx-auto w-full max-w-[280px] rounded-xl bg-white p-4 shadow-[0_20px_50px_-35px_rgba(6,78,59,0.5)]">
+                    <img
+                      alt={`VietQR payment code for booking ${booking.bookingCode}`}
+                      className="h-auto w-full rounded-lg"
+                      src={bankTransfer.qrUrl}
+                    />
+                  </div>
+                  <div>
+                    <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
+                      <QrCode className="size-4" />
+                      VietQR ready
+                    </div>
+                    <h3 className={cn(headlineFont.className, "text-2xl font-bold tracking-[-0.04em] text-stone-950")}>
+                      Scan to pay instantly
+                    </h3>
+                    <p className="mt-3 max-w-xl text-sm leading-7 text-stone-600">
+                      The QR includes the receiving account, booking reference, and preset amount so the transfer form opens ready to review in the customer&apos;s banking app.
+                    </p>
+                    <div className="mt-4 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/70 px-4 py-3 text-sm leading-6 text-emerald-950">
+                      After payment is confirmed, our team will follow up with your itinerary and next steps.
+                    </div>
+                    <div className="mt-6 space-y-4 rounded-xl bg-white/80 p-5">
+                      <div className="flex items-center gap-3">
+                        <Landmark className="size-4 text-emerald-800" />
+                        <span className="text-sm text-stone-600">Receiving bank</span>
+                        <span className="ml-auto text-right text-sm font-bold text-stone-950">{bankTransfer.bankName}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-stone-600">Account number</span>
+                        <span className="ml-auto text-right text-sm font-bold text-stone-950">{bankTransfer.accountNumber}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-stone-600">Account name</span>
+                        <span className="ml-auto text-right text-sm font-bold uppercase text-stone-950">{bankTransfer.accountName}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-stone-600">Transfer note</span>
+                        <span className="ml-auto text-right text-sm font-bold text-stone-950">{bankTransfer.transferNote}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
 
             <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
               <Button asChild className="w-full px-10 py-4 md:w-auto" size={null}>

@@ -32,25 +32,40 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
-import {
-  heroImage,
-  travelerFeedback,
-  travelPartners,
-} from "@/src/data/mockData";
-import type { BlogPost, DestinationCard, HotelCard, TourCard, TravelEventCard, VisualDiaryItem } from "@/src/types/travel";
+import type { ApiSiteContentSettings } from "@/src/lib/api/types";
+import type {
+  BlogPost,
+  DestinationCard,
+  HotelCard,
+  TourCard,
+  TravelEventCard,
+  TravelPartner,
+  TravelerFeedback,
+  VisualDiaryItem,
+} from "@/src/types/travel";
 
 interface HeroImageSlide {
   readonly alt: string;
   readonly image: string;
 }
 
-function buildHeroSlides(items: readonly VisualDiaryItem[]): readonly HeroImageSlide[] {
+function buildHeroSlides(
+  items: readonly VisualDiaryItem[],
+  siteContent: Pick<
+    ApiSiteContentSettings,
+    | "homeHeroAlt"
+    | "homeHeroImage"
+    | "heroImageTwo"
+    | "heroImageTwoAlt"
+    | "heroImageThree"
+    | "heroImageThreeAlt"
+  >,
+): readonly HeroImageSlide[] {
   const seenImages = new Set<string>();
   const baseSlides = [
-    {
-      alt: "Misty mountains reflected in a crystal lake at first light",
-      image: heroImage,
-    },
+    { alt: siteContent.homeHeroAlt, image: siteContent.homeHeroImage },
+    { alt: siteContent.heroImageTwoAlt, image: siteContent.heroImageTwo },
+    { alt: siteContent.heroImageThreeAlt, image: siteContent.heroImageThree },
     ...items.slice(0, 3).map((item) => ({ alt: item.alt, image: item.image })),
   ];
 
@@ -75,14 +90,10 @@ interface SectionHeadingProps {
 
 interface HeroSectionProps {
   readonly slides: readonly HeroImageSlide[];
-}
-
-interface DestinationSectionProps {
-  readonly destinations: readonly DestinationCard[];
-}
-
-interface DestinationCardViewProps {
-  readonly destination: DestinationCard;
+  readonly siteContent: Pick<
+    ApiSiteContentSettings,
+    "siteName" | "siteTagline" | "siteDescription"
+  >;
 }
 
 interface HotelShowcaseSectionProps {
@@ -120,7 +131,10 @@ function buildHotelHighlightItems(hotels: readonly HotelCard[]) {
     alt: hotel.alt,
     badge: hotel.badge,
     category: hotel.location,
-    description: hotel.amenities.length > 0 ? hotel.amenities.slice(0, 3).join(", ") : `Curated stay in ${hotel.location}.`,
+    description:
+      hotel.amenities.length > 0
+        ? hotel.amenities.slice(0, 3).join(", ")
+        : `Curated stay in ${hotel.location}.`,
     href: hotel.slug ? `/hotels/${hotel.slug}` : "/hotels",
     image: hotel.image,
     meta: hotel.amenities.slice(0, 3),
@@ -129,7 +143,12 @@ function buildHotelHighlightItems(hotels: readonly HotelCard[]) {
   }));
 }
 
-function SectionHeading({ align = "left", eyebrow, subtitle, title }: Readonly<SectionHeadingProps>) {
+function SectionHeading({
+  align = "left",
+  eyebrow,
+  subtitle,
+  title,
+}: Readonly<SectionHeadingProps>) {
   return (
     <div className={align === "center" ? "text-center" : ""}>
       <span className="mb-4 block text-sm font-bold uppercase tracking-[0.2em] text-emerald-700">
@@ -163,7 +182,9 @@ function LandingEmptyState({
       <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
         {icon}
       </div>
-      <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">{title}</h3>
+      <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">
+        {title}
+      </h3>
       <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
         {description}
       </p>
@@ -201,25 +222,26 @@ function DestinationEmptyState() {
   );
 }
 
-function BlogSectionEmptyState({ posts }: Readonly<{ posts: readonly BlogPost[] }>) {
+function BlogSectionEmptyState({
+  posts,
+}: Readonly<{ posts: readonly BlogPost[] }>) {
   return posts.length === 0 ? <BlogEmptyState /> : null;
 }
 
-function DestinationSectionEmptyState({ destinations }: Readonly<{ destinations: readonly DestinationCard[] }>) {
-  return destinations.length === 0 ? <DestinationEmptyState /> : null;
-}
-
-function HeroSection({ slides }: Readonly<HeroSectionProps>) {
+function HeroSection({ slides, siteContent }: Readonly<HeroSectionProps>) {
   return (
     <section className="relative flex min-h-[920px] w-full items-center justify-center overflow-hidden">
       <HeroImageCarousel slides={slides} />
       <div className="absolute inset-0 bg-black/20" />
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
+        <p className="mb-5 text-sm font-black uppercase tracking-[0.32em] text-white/85">
+          {siteContent.siteTagline}
+        </p>
         <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tighter text-white md:text-7xl">
-          Crafting Your <span className="text-emerald-100">Personal Odyssey</span>
+          Discover <span className="text-emerald-100">{siteContent.siteName}</span>
         </h1>
         <p className="mx-auto mb-12 max-w-2xl text-xl font-light tracking-wide text-white/90 md:text-2xl">
-          A digital monograph of the world&apos;s most curated destinations and exclusive experiences.
+          {siteContent.siteDescription}
         </p>
         <Card className="mx-auto max-w-5xl rounded-3xl border-white/60 bg-white/95 p-2 shadow-2xl shadow-black/25 backdrop-blur-xl">
           <form action="/search" className="flex flex-col gap-2 md:flex-row">
@@ -286,44 +308,29 @@ function HeroSection({ slides }: Readonly<HeroSectionProps>) {
   );
 }
 
-function DestinationCardView({ destination }: Readonly<DestinationCardViewProps>) {
-  return (
-    <article className="group overflow-hidden rounded-2xl border border-stone-200/70 bg-white shadow-sm transition-all duration-500 hover:shadow-xl">
-      <div className="relative h-80 overflow-hidden">
-        <Image alt={destination.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes="(min-width: 1024px) 33vw, 100vw" src={destination.image} />
-      </div>
-      <div className="p-8">
-        <h3 className="mb-2 text-2xl font-bold text-stone-950">{destination.title}</h3>
-        <p className="mb-6 text-sm leading-relaxed text-stone-600">{destination.description}</p>
-        <div className="flex items-center justify-between border-t border-stone-200 pt-6">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
-            Destination
-          </span>
-          <Button asChild className="rounded-full px-4" variant="ghost">
-            <Link href={destination.href}>
-              Explore More
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
 function HotelShowcaseCard({ hotel }: Readonly<HotelShowcaseCardProps>) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-stone-200/70 bg-white shadow-sm transition-all duration-500 hover:shadow-xl">
       <div className="relative h-80 overflow-hidden">
-        <Image alt={hotel.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes="(min-width: 1024px) 33vw, 100vw" src={hotel.image} />
+        <Image
+          alt={hotel.alt}
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          fill
+          sizes="(min-width: 1024px) 33vw, 100vw"
+          src={hotel.image}
+        />
       </div>
       <div className="p-8">
         <div className="mb-3 flex items-center justify-between gap-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">{hotel.location}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
+            {hotel.location}
+          </p>
           <p className="text-sm font-bold text-emerald-800">{hotel.price}</p>
         </div>
         <h3 className="mb-3 text-2xl font-bold text-stone-950">{hotel.name}</h3>
-        <p className="mb-6 text-sm leading-relaxed text-stone-600">{hotel.amenities.slice(0, 3).join(" • ")}</p>
+        <p className="mb-6 text-sm leading-relaxed text-stone-600">
+          {hotel.amenities.slice(0, 3).join(" • ")}
+        </p>
         <div className="flex items-center justify-between border-t border-stone-200 pt-6">
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
             Hotel
@@ -375,12 +382,27 @@ function BlogCard({ post }: Readonly<BlogCardProps>) {
   return (
     <article className="flex flex-col">
       <div className="relative mb-6 aspect-[16/10] overflow-hidden rounded-2xl">
-        <Image alt={post.title} className="object-cover" fill sizes="(min-width: 768px) 33vw, 100vw" src={post.image} />
+        <Image
+          alt={post.title}
+          className="object-cover"
+          fill
+          sizes="(min-width: 768px) 33vw, 100vw"
+          src={post.image}
+        />
       </div>
-      <span className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-700">{post.category}</span>
-      <h3 className="mb-4 text-2xl font-bold leading-snug text-stone-950">{post.title}</h3>
-      <p className="mb-6 flex-grow text-sm leading-relaxed text-stone-600">{post.excerpt}</p>
-      <Link className="group inline-flex items-center gap-2 text-sm font-bold text-emerald-800" href={post.slug ? `/blog/${post.slug}` : "/blog"}>
+      <span className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-700">
+        {post.category}
+      </span>
+      <h3 className="mb-4 text-2xl font-bold leading-snug text-stone-950">
+        {post.title}
+      </h3>
+      <p className="mb-6 flex-grow text-sm leading-relaxed text-stone-600">
+        {post.excerpt}
+      </p>
+      <Link
+        className="group inline-flex items-center gap-2 text-sm font-bold text-emerald-800"
+        href={post.slug ? `/blog/${post.slug}` : "/blog"}
+      >
         Read More <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </Link>
     </article>
@@ -408,15 +430,27 @@ function BlogSection({ posts }: Readonly<BlogSectionProps>) {
   );
 }
 
-function ContactSection() {
+function ContactSection({
+  siteContent,
+}: Readonly<{
+  siteContent: Pick<ApiSiteContentSettings, "contactEmail" | "hotline" | "siteName">;
+}>) {
   return (
     <section className="bg-stone-50 py-32">
       <div className="mx-auto grid max-w-screen-2xl grid-cols-1 gap-24 px-8 lg:grid-cols-2">
         <div>
-          <h2 className="mb-8 text-5xl font-extrabold tracking-tighter text-stone-950">Let&apos;s Design Your Journey</h2>
-          <p className="mb-12 text-xl font-light text-stone-600">Have a specific vision for your next escape? Our curators are ready to bring it to life with unparalleled detail.</p>
+          <h2 className="mb-8 text-5xl font-extrabold tracking-tighter text-stone-950">
+            Let&apos;s Design Your Journey
+          </h2>
+          <p className="mb-12 text-xl font-light text-stone-600">
+            Have a specific vision for your next escape? Our curators are ready to bring it to life with unparalleled detail.
+          </p>
           <div className="space-y-8">
-            {[['Global Headquarters', '124 Curated Way, London, UK'], ['Direct Line', '+44 20 7946 0123'], ['General Inquiries', 'hello@curator.travel']].map(([label, value]) => (
+            {[
+              ["Global Headquarters", `124 ${siteContent.siteName} Way, London, UK`],
+              ["Direct Line", siteContent.hotline],
+              ["General Inquiries", siteContent.contactEmail],
+            ].map(([label, value]) => (
               <div className="flex items-start gap-6" key={label}>
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
                   {label === "Global Headquarters" ? <MapPin className="size-5" /> : null}
@@ -494,7 +528,23 @@ interface TravelLandingPageProps {
   readonly destinationCards: readonly DestinationCard[];
   readonly eventCards: readonly TravelEventCard[];
   readonly hotelCards: readonly HotelCard[];
+  readonly siteContent: Pick<
+    ApiSiteContentSettings,
+    | "siteName"
+    | "siteTagline"
+    | "siteDescription"
+    | "contactEmail"
+    | "hotline"
+    | "homeHeroAlt"
+    | "homeHeroImage"
+    | "heroImageTwo"
+    | "heroImageTwoAlt"
+    | "heroImageThree"
+    | "heroImageThreeAlt"
+  >;
   readonly tourCards: readonly TourCard[];
+  readonly travelPartners: readonly TravelPartner[];
+  readonly travelerFeedback: readonly TravelerFeedback[];
   readonly visualDiaryItems: readonly VisualDiaryItem[];
 }
 
@@ -503,17 +553,20 @@ export default function TravelLandingPage({
   destinationCards,
   eventCards,
   hotelCards,
+  siteContent,
   tourCards,
+  travelPartners,
+  travelerFeedback,
   visualDiaryItems,
 }: Readonly<TravelLandingPageProps>) {
-  const heroSlides = buildHeroSlides(visualDiaryItems);
+  const heroSlides = buildHeroSlides(visualDiaryItems, siteContent);
   const featuredTourItems = buildTourHighlightItems(tourCards);
   const featuredHotelItems = buildHotelHighlightItems(hotelCards);
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <TravelHeader activeItem="Home" />
-      <HeroSection slides={heroSlides} />
+      <HeroSection siteContent={siteContent} slides={heroSlides} />
       <HomeEventsSection events={eventCards} />
       <CircularImageRailSection items={destinationCards} />
       <HotelShowcaseSection hotels={hotelCards} />
@@ -527,8 +580,11 @@ export default function TravelLandingPage({
         title="Featured Stays"
       />
       <BlogSection posts={blogPosts} />
-      <FeedbackPartnersSection feedback={travelerFeedback} partners={travelPartners} />
-      <ContactSection />
+      <FeedbackPartnersSection
+        feedback={travelerFeedback}
+        partners={travelPartners}
+      />
+      <ContactSection siteContent={siteContent} />
       <TravelFooter />
     </main>
   );

@@ -7,11 +7,8 @@ import { FormEvent, useMemo, useState, useTransition } from "react";
 import {
   CalendarDays,
   CreditCard,
-  Landmark,
   Leaf,
-  Lock,
   ShieldCheck,
-  Smartphone,
   Users,
   X,
 } from "lucide-react";
@@ -21,8 +18,10 @@ import { Card, CardContent } from "@/src/components/ui/card";
 import { useCart } from "@/src/components/travel/CartProvider";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
+import { getTour } from "@/src/lib/api/tours";
 import { cn } from "@/src/lib/utils";
 import { createBooking } from "@/src/lib/api/bookings";
+import type { CartItem } from "@/src/types/travel";
 
 const headlineFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -33,26 +32,6 @@ const bodyFont = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
-
-const paymentOptions = [
-  {
-    description: "Credit Card",
-    icon: CreditCard,
-    value: "credit-card",
-  },
-  {
-    description: "Apple Pay",
-    icon: Smartphone,
-    value: "apple-pay",
-  },
-  {
-    description: "Bank Transfer",
-    icon: Landmark,
-    value: "bank-transfer",
-  },
-] as const;
-
-type PaymentMethod = (typeof paymentOptions)[number]["value"];
 
 function SectionHeading({
   index,
@@ -74,38 +53,6 @@ function SectionHeading({
       >
         {title}
       </h2>
-    </div>
-  );
-}
-
-function PaymentOptionCard({
-  checked,
-  icon: Icon,
-  label,
-}: Readonly<{
-  checked: boolean;
-  icon: typeof CreditCard;
-  label: string;
-}>) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col items-center gap-4 rounded-xl border px-6 py-7 transition-all",
-        checked
-          ? "border-emerald-800 bg-emerald-100/45 shadow-[0_18px_40px_-32px_rgba(6,78,59,0.55)]"
-          : "border-stone-200/80 bg-white hover:border-stone-300 hover:bg-stone-50/80",
-      )}
-    >
-      <Icon
-        className={cn(
-          "size-7",
-          checked ? "text-emerald-800" : "text-stone-700",
-        )}
-        strokeWidth={2}
-      />
-      <span className="text-center text-[11px] font-bold uppercase tracking-[0.24em] text-stone-950">
-        {label}
-      </span>
     </div>
   );
 }
@@ -136,10 +83,62 @@ function SummaryRow({
   );
 }
 
+function formatTourDepartureDate(value: string) {
+  const parsedDate = new Date(`${value}T00:00:00`);
+
+  return new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(parsedDate);
+}
+
+async function resolveCheckoutItem(item: CartItem) {
+  if (item.itemType !== "tour" || !item.slug) {
+    return {
+      itemType: item.itemType ?? "tour",
+      checkIn: item.checkIn,
+      checkOut: item.checkOut,
+      date: item.date,
+      meta: item.meta,
+      nights: item.nights,
+      quantity: item.quantity ?? 1,
+      roomType: item.roomType,
+      tourDepartureId: item.tourDepartureId,
+      slug: item.slug ?? item.id,
+      unitPrice: item.unitPrice ?? Number(item.price.replace(/[^0-9.]/g, "")),
+    } as const;
+  }
+
+  const latestTour = await getTour(item.slug);
+  const matchedDeparture = latestTour.departures.find(
+    (departure) =>
+      departure.status === "open" &&
+      departure.remaining > 0 &&
+      formatTourDepartureDate(departure.date) === item.date,
+  );
+
+  if (!matchedDeparture) {
+    throw new Error("The selected tour departure is no longer available. Please remove it from the cart and choose another date.");
+  }
+
+  return {
+    itemType: item.itemType,
+    checkIn: item.checkIn,
+    checkOut: item.checkOut,
+    date: item.date,
+    meta: item.meta,
+    nights: item.nights,
+    quantity: item.quantity ?? 1,
+    roomType: item.roomType,
+    tourDepartureId: matchedDeparture.id,
+    slug: item.slug,
+    unitPrice: item.unitPrice ?? Number(item.price.replace(/[^0-9.]/g, "")),
+  } as const;
+}
+
 export default function CheckoutPage() {
   const { clearCart, items, subtotal } = useCart();
-  const [paymentMethod, setPaymentMethod] =
-    useState<PaymentMethod>("credit-card");
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const primaryItem = items[0];
@@ -170,7 +169,7 @@ export default function CheckoutPage() {
   }, [items, primaryItem, subtotal]);
 
   const securePaymentLabel = useMemo(() => {
-    return `Secure Payment - ${journey.totalPrice}`;
+    return `Place Booking & Generate QR - ${journey.totalPrice}`;
   }, [journey.totalPrice]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -195,24 +194,13 @@ export default function CheckoutPage() {
 
     startTransition(async () => {
       try {
+        const resolvedItems = await Promise.all(items.map((item) => resolveCheckoutItem(item)));
         const booking = await createBooking({
           country,
           email,
           fullName,
-          items: items.map((item) => ({
-            itemType: item.itemType ?? "tour",
-            checkIn: item.checkIn,
-            checkOut: item.checkOut,
-            date: item.date,
-            meta: item.meta,
-            nights: item.nights,
-            quantity: item.quantity ?? 1,
-            roomType: item.roomType,
-            tourDepartureId: item.tourDepartureId,
-            slug: item.slug ?? item.id,
-            unitPrice: item.unitPrice ?? Number(item.price.replace(/[^0-9.]/g, "")),
-          })),
-          paymentMethod,
+          items: resolvedItems,
+          paymentMethod: "bank-transfer",
           phone,
           travelers: Math.max(items.reduce((total, item) => total + (item.quantity ?? 1), 0), 1),
         });
@@ -315,71 +303,10 @@ export default function CheckoutPage() {
                     placeholder="Vietnam"
                   />
                 </div>
+                <div className="rounded-xl border border-dashed border-emerald-800/30 bg-white px-5 py-4 text-sm leading-6 text-stone-600">
+                  After you submit this booking, you will be taken to a VietQR payment page with the shop account, total amount, and booking reference filled in automatically.
+                </div>
               </div>
-            </section>
-
-            <section>
-              <SectionHeading index="02" title="Payment Method" />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {paymentOptions.map((option) => (
-                  <label className="cursor-pointer rounded-xl focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-emerald-800" key={option.value}>
-                    <input
-                      checked={paymentMethod === option.value}
-                      className="sr-only"
-                      name="payment-method"
-                      onChange={() => setPaymentMethod(option.value)}
-                      type="radio"
-                      value={option.value}
-                    />
-                    <PaymentOptionCard
-                      checked={paymentMethod === option.value}
-                      icon={option.icon}
-                      label={option.description}
-                    />
-                  </label>
-                ))}
-              </div>
-
-              <Card className="mt-8 rounded-xl border-none bg-stone-100 shadow-none">
-                <CardContent className="space-y-6 p-6 md:p-8">
-                  <div>
-                    <Label className="text-stone-500" htmlFor="card-number">
-                      Card Number
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        className="h-14 rounded-xl border-none bg-white px-6 pr-14 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
-                        id="card-number"
-                        inputMode="numeric"
-                        placeholder="0000 0000 0000 0000"
-                      />
-                      <Lock className="pointer-events-none absolute right-5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <div>
-                      <Label className="text-stone-500" htmlFor="expiry-date">
-                        Expiry Date
-                      </Label>
-                      <Input
-                        className="h-14 rounded-xl border-none bg-white px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
-                        id="expiry-date"
-                        placeholder="MM/YY"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-stone-500" htmlFor="cvv">
-                        CVV
-                      </Label>
-                      <Input
-                        className="h-14 rounded-xl border-none bg-white px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
-                        id="cvv"
-                        placeholder="123"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </section>
 
             <section className="pt-2">
@@ -390,7 +317,7 @@ export default function CheckoutPage() {
               ) : null}
               <Button className="h-auto w-full rounded-xl py-6 text-lg font-bold shadow-[0_24px_50px_-28px_rgba(6,78,59,0.6)]" disabled={isPending || items.length === 0} size={null} type="submit">
                 <ShieldCheck className="size-5" />
-                {isPending ? "Creating Booking..." : securePaymentLabel}
+                {isPending ? "Preparing QR Payment..." : securePaymentLabel}
               </Button>
               <p className="mt-6 text-center text-xs leading-6 tracking-[0.04em] text-stone-500">
                 By completing this booking, you agree to the Curator{" "}

@@ -7,6 +7,7 @@ import { Label } from "@/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 import { contactPageData, type ContactOffice } from "@/src/data/mockData";
+import type { ApiSiteContentSettings } from "@/src/lib/api/types";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
 function ContactHero() {
@@ -40,7 +41,11 @@ function OfficeItem({ office }: Readonly<{ office: ContactOffice }>) {
   );
 }
 
-function ContactSidebar() {
+function ContactSidebar({
+  siteContent,
+}: Readonly<{
+  siteContent: Pick<ApiSiteContentSettings, "contactEmail" | "hotline">;
+}>) {
   return (
     <aside className="space-y-16 lg:col-span-5">
       <section className="rounded-[2rem] bg-stone-100 p-10">
@@ -61,13 +66,13 @@ function ContactSidebar() {
             <li>
               <a className="group flex items-center gap-3 font-bold text-stone-950 transition-colors hover:text-emerald-800" href="tel:+442071234567">
                 <Phone className="size-5 text-stone-400 transition-colors group-hover:text-emerald-800" />
-                {contactPageData.directLines.phone}
+                {siteContent.hotline}
               </a>
             </li>
             <li>
-              <a className="group flex items-center gap-3 font-bold text-stone-950 transition-colors hover:text-emerald-800" href={`mailto:${contactPageData.directLines.email}`}>
+              <a className="group flex items-center gap-3 font-bold text-stone-950 transition-colors hover:text-emerald-800" href={`mailto:${siteContent.contactEmail}`}>
                 <Mail className="size-5 text-stone-400 transition-colors group-hover:text-emerald-800" />
-                {contactPageData.directLines.email}
+                {siteContent.contactEmail}
               </a>
             </li>
           </ul>
@@ -170,13 +175,17 @@ function MapSection() {
   );
 }
 
-export default function ContactPage() {
+export default function ContactPage({
+  siteContent,
+}: Readonly<{
+  siteContent: Pick<ApiSiteContentSettings, "contactEmail" | "hotline">;
+}>) {
   return (
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Contact" />
       <ContactHero />
       <section className="mx-auto grid max-w-screen-2xl grid-cols-1 gap-12 px-8 pb-32 lg:grid-cols-12 lg:gap-16 lg:px-24">
-        <ContactSidebar />
+        <ContactSidebar siteContent={siteContent} />
         <ContactForm />
       </section>
       <MapSection />

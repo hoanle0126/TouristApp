@@ -14,3 +14,5 @@ docs/superpowers/
 
 # Local backup files
 *.pre-merge-backup
+node_modules/
+*.docx

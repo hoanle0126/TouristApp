@@ -5,7 +5,9 @@ import {
   Bell,
   CheckCircle2,
   CircleAlert,
+  Globe2,
   KeyRound,
+  Landmark,
   LoaderCircle,
   Save,
   ShieldCheck,
@@ -19,8 +21,21 @@ import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { getAiProviderSettings, testAiProviderSettings, updateAiProviderSettings } from "@/src/lib/api/settings";
-import type { ApiAiProviderSettings } from "@/src/lib/api/types";
+import { Textarea } from "@/src/components/ui/textarea";
+import {
+  getAiProviderSettings,
+  getShopPaymentSettings,
+  getSiteContentSettings,
+  testAiProviderSettings,
+  updateAiProviderSettings,
+  updateShopPaymentSettings,
+  updateSiteContentSettings,
+} from "@/src/lib/api/settings";
+import type {
+  ApiAiProviderSettings,
+  ApiShopPaymentSettings,
+  ApiSiteContentSettings,
+} from "@/src/lib/api/types";
 
 const settingSections = [
   {
@@ -57,6 +72,31 @@ type FormState = {
   apiKey: string;
 };
 
+type ShopPaymentFormState = {
+  bankBin: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+};
+
+type SiteContentFormState = {
+  siteName: string;
+  siteTagline: string;
+  siteDescription: string;
+  contactEmail: string;
+  hotline: string;
+  topBarNote: string;
+  promoLabel: string;
+  promoCta: string;
+  promoHref: string;
+  homeHeroImage: string;
+  homeHeroAlt: string;
+  heroImageTwo: string;
+  heroImageTwoAlt: string;
+  heroImageThree: string;
+  heroImageThreeAlt: string;
+};
+
 type StatusState = {
   type: "success" | "error";
   message: string;
@@ -70,6 +110,31 @@ const defaultForm: FormState = {
   apiKey: "",
 };
 
+const defaultShopPaymentForm: ShopPaymentFormState = {
+  bankBin: "",
+  bankName: "",
+  accountNumber: "",
+  accountName: "",
+};
+
+const defaultSiteContentForm: SiteContentFormState = {
+  siteName: "",
+  siteTagline: "",
+  siteDescription: "",
+  contactEmail: "",
+  hotline: "",
+  topBarNote: "",
+  promoLabel: "",
+  promoCta: "",
+  promoHref: "",
+  homeHeroImage: "",
+  homeHeroAlt: "",
+  heroImageTwo: "",
+  heroImageTwoAlt: "",
+  heroImageThree: "",
+  heroImageThreeAlt: "",
+};
+
 function createFormFromSettings(settings: ApiAiProviderSettings): FormState {
   return {
     provider: settings.provider,
@@ -80,14 +145,42 @@ function createFormFromSettings(settings: ApiAiProviderSettings): FormState {
   };
 }
 
+function createSiteContentForm(settings: ApiSiteContentSettings): SiteContentFormState {
+  return {
+    siteName: settings.siteName,
+    siteTagline: settings.siteTagline,
+    siteDescription: settings.siteDescription,
+    contactEmail: settings.contactEmail,
+    hotline: settings.hotline,
+    topBarNote: settings.topBarNote,
+    promoLabel: settings.promoLabel,
+    promoCta: settings.promoCta,
+    promoHref: settings.promoHref,
+    homeHeroImage: settings.homeHeroImage,
+    homeHeroAlt: settings.homeHeroAlt,
+    heroImageTwo: settings.heroImageTwo,
+    heroImageTwoAlt: settings.heroImageTwoAlt,
+    heroImageThree: settings.heroImageThree,
+    heroImageThreeAlt: settings.heroImageThreeAlt,
+  };
+}
+
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<ApiAiProviderSettings | null>(null);
+  const [shopPaymentSettings, setShopPaymentSettings] = useState<ApiShopPaymentSettings | null>(null);
+  const [siteContentSettings, setSiteContentSettings] = useState<ApiSiteContentSettings | null>(null);
   const [form, setForm] = useState<FormState>(defaultForm);
+  const [shopPaymentForm, setShopPaymentForm] = useState<ShopPaymentFormState>(defaultShopPaymentForm);
+  const [siteContentForm, setSiteContentForm] = useState<SiteContentFormState>(defaultSiteContentForm);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingShopPayment, setIsSavingShopPayment] = useState(false);
+  const [isSavingSiteContent, setIsSavingSiteContent] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [wantsToClearKey, setWantsToClearKey] = useState(false);
   const [saveStatus, setSaveStatus] = useState<StatusState | null>(null);
+  const [shopPaymentStatus, setShopPaymentStatus] = useState<StatusState | null>(null);
+  const [siteContentStatus, setSiteContentStatus] = useState<StatusState | null>(null);
   const [testStatus, setTestStatus] = useState<StatusState | null>(null);
 
   const readiness = useMemo(
@@ -118,9 +211,17 @@ export default function AdminSettingsPage() {
       setSaveStatus(null);
 
       try {
-        const nextSettings = await getAiProviderSettings();
+        const [nextSettings, nextShopPaymentSettings, nextSiteContentSettings] = await Promise.all([
+          getAiProviderSettings(),
+          getShopPaymentSettings(),
+          getSiteContentSettings(),
+        ]);
         setSettings(nextSettings);
         setForm(createFormFromSettings(nextSettings));
+        setShopPaymentSettings(nextShopPaymentSettings);
+        setShopPaymentForm(nextShopPaymentSettings);
+        setSiteContentSettings(nextSiteContentSettings);
+        setSiteContentForm(createSiteContentForm(nextSiteContentSettings));
         setWantsToClearKey(false);
       } catch (error) {
         setSaveStatus({
@@ -139,6 +240,22 @@ export default function AdminSettingsPage() {
     setForm((current) => ({ ...current, [field]: value }));
     setSaveStatus(null);
     setTestStatus(null);
+  }
+
+  function updateShopPaymentField<K extends keyof ShopPaymentFormState>(
+    field: K,
+    value: ShopPaymentFormState[K],
+  ) {
+    setShopPaymentForm((current) => ({ ...current, [field]: value }));
+    setShopPaymentStatus(null);
+  }
+
+  function updateSiteContentField<K extends keyof SiteContentFormState>(
+    field: K,
+    value: SiteContentFormState[K],
+  ) {
+    setSiteContentForm((current) => ({ ...current, [field]: value }));
+    setSiteContentStatus(null);
   }
 
   function validateForSubmit() {
@@ -184,9 +301,17 @@ export default function AdminSettingsPage() {
   }
 
   async function refreshSettings() {
-    const nextSettings = await getAiProviderSettings();
+    const [nextSettings, nextShopPaymentSettings, nextSiteContentSettings] = await Promise.all([
+      getAiProviderSettings(),
+      getShopPaymentSettings(),
+      getSiteContentSettings(),
+    ]);
     setSettings(nextSettings);
     setForm(createFormFromSettings(nextSettings));
+    setShopPaymentSettings(nextShopPaymentSettings);
+    setShopPaymentForm(nextShopPaymentSettings);
+    setSiteContentSettings(nextSiteContentSettings);
+    setSiteContentForm(createSiteContentForm(nextSiteContentSettings));
     setWantsToClearKey(false);
   }
 
@@ -249,6 +374,111 @@ export default function AdminSettingsPage() {
     }
   }
 
+  async function handleShopPaymentSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setShopPaymentStatus(null);
+
+    if (
+      !shopPaymentForm.bankBin.trim() ||
+      !shopPaymentForm.bankName.trim() ||
+      !shopPaymentForm.accountNumber.trim() ||
+      !shopPaymentForm.accountName.trim()
+    ) {
+      setShopPaymentStatus({
+        type: "error",
+        message: "Complete the VietQR bank bin, bank name, account number, and account name before saving.",
+      });
+      return;
+    }
+
+    setIsSavingShopPayment(true);
+    try {
+      await updateShopPaymentSettings({
+        bankBin: shopPaymentForm.bankBin.trim(),
+        bankName: shopPaymentForm.bankName.trim(),
+        accountNumber: shopPaymentForm.accountNumber.trim(),
+        accountName: shopPaymentForm.accountName.trim(),
+      });
+      await refreshSettings();
+      setShopPaymentStatus({
+        type: "success",
+        message: "Shop payment settings saved.",
+      });
+    } catch (error) {
+      setShopPaymentStatus({
+        type: "error",
+        message: error instanceof Error ? error.message : "Unable to save shop payment settings.",
+      });
+    } finally {
+      setIsSavingShopPayment(false);
+    }
+  }
+
+  async function handleSiteContentSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSiteContentStatus(null);
+
+    const requiredFields: Array<[string, string]> = [
+      ["Site name", siteContentForm.siteName],
+      ["Site tagline", siteContentForm.siteTagline],
+      ["Site description", siteContentForm.siteDescription],
+      ["Contact email", siteContentForm.contactEmail],
+      ["Hotline", siteContentForm.hotline],
+      ["Top bar note", siteContentForm.topBarNote],
+      ["Promo label", siteContentForm.promoLabel],
+      ["Promo CTA", siteContentForm.promoCta],
+      ["Promo link", siteContentForm.promoHref],
+      ["Hero image 1", siteContentForm.homeHeroImage],
+      ["Hero image 1 alt", siteContentForm.homeHeroAlt],
+      ["Hero image 2", siteContentForm.heroImageTwo],
+      ["Hero image 2 alt", siteContentForm.heroImageTwoAlt],
+      ["Hero image 3", siteContentForm.heroImageThree],
+      ["Hero image 3 alt", siteContentForm.heroImageThreeAlt],
+    ];
+
+    const missingField = requiredFields.find(([, value]) => value.trim().length === 0);
+    if (missingField) {
+      setSiteContentStatus({
+        type: "error",
+        message: `${missingField[0]} is required before saving the website content settings.`,
+      });
+      return;
+    }
+
+    setIsSavingSiteContent(true);
+    try {
+      await updateSiteContentSettings({
+        siteName: siteContentForm.siteName.trim(),
+        siteTagline: siteContentForm.siteTagline.trim(),
+        siteDescription: siteContentForm.siteDescription.trim(),
+        contactEmail: siteContentForm.contactEmail.trim(),
+        hotline: siteContentForm.hotline.trim(),
+        topBarNote: siteContentForm.topBarNote.trim(),
+        promoLabel: siteContentForm.promoLabel.trim(),
+        promoCta: siteContentForm.promoCta.trim(),
+        promoHref: siteContentForm.promoHref.trim(),
+        homeHeroImage: siteContentForm.homeHeroImage.trim(),
+        homeHeroAlt: siteContentForm.homeHeroAlt.trim(),
+        heroImageTwo: siteContentForm.heroImageTwo.trim(),
+        heroImageTwoAlt: siteContentForm.heroImageTwoAlt.trim(),
+        heroImageThree: siteContentForm.heroImageThree.trim(),
+        heroImageThreeAlt: siteContentForm.heroImageThreeAlt.trim(),
+      });
+      await refreshSettings();
+      setSiteContentStatus({
+        type: "success",
+        message: "Website content settings saved.",
+      });
+    } catch (error) {
+      setSiteContentStatus({
+        type: "error",
+        message: error instanceof Error ? error.message : "Unable to save website content settings.",
+      });
+    } finally {
+      setIsSavingSiteContent(false);
+    }
+  }
+
   return (
     <AdminShell
       activePath="/admin/settings"
@@ -273,9 +503,10 @@ export default function AdminSettingsPage() {
         ))}
       </section>
 
-      <form className="grid gap-6 2xl:grid-cols-[minmax(0,1.55fr)_420px]" onSubmit={handleSubmit}>
+      <div className="grid gap-6 2xl:grid-cols-[minmax(0,1.55fr)_420px]">
         <div className="space-y-6">
-          <Card>
+          <form id="ai-settings-form" onSubmit={handleSubmit}>
+            <Card>
             <CardContent className="space-y-6 p-6 sm:p-7">
               <SectionHeader
                 eyebrow="Bring your own key"
@@ -375,6 +606,256 @@ export default function AdminSettingsPage() {
                 </>
               )}
             </CardContent>
+            </Card>
+          </form>
+
+          <Card>
+            <CardContent className="space-y-6 p-6 sm:p-7">
+              <SectionHeader
+                eyebrow="Checkout payment"
+                title="Shop VietQR configuration"
+                description="These account details are used after checkout to generate the VietQR code customers scan in their banking app."
+              />
+
+              {isLoading ? (
+                <LoadingState />
+              ) : (
+                <form className="space-y-6" onSubmit={handleShopPaymentSubmit}>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="shop-bank-bin">Bank BIN</Label>
+                      <Input
+                        id="shop-bank-bin"
+                        onChange={(event) => updateShopPaymentField("bankBin", event.target.value)}
+                        placeholder="970436"
+                        value={shopPaymentForm.bankBin}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="shop-bank-name">Bank name</Label>
+                      <Input
+                        id="shop-bank-name"
+                        onChange={(event) => updateShopPaymentField("bankName", event.target.value)}
+                        placeholder="Vietcombank"
+                        value={shopPaymentForm.bankName}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="shop-account-number">Account number</Label>
+                      <Input
+                        id="shop-account-number"
+                        onChange={(event) => updateShopPaymentField("accountNumber", event.target.value)}
+                        placeholder="0123456789"
+                        value={shopPaymentForm.accountNumber}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="shop-account-name">Account name</Label>
+                      <Input
+                        id="shop-account-name"
+                        onChange={(event) => updateShopPaymentField("accountName", event.target.value)}
+                        placeholder="CURATOR TRAVEL LTD"
+                        value={shopPaymentForm.accountName}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-relaxed text-emerald-950">
+                    The booking code is added automatically to the transfer note. Customers only see the QR code after they complete traveler details and submit checkout.
+                  </div>
+
+                  {shopPaymentStatus ? <StatusCard status={shopPaymentStatus} /> : null}
+
+                  <div className="flex justify-end">
+                    <Button disabled={isSavingShopPayment || isLoading} type="submit">
+                      {isSavingShopPayment ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
+                      {isSavingShopPayment ? "Saving..." : "Save VietQR settings"}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-6 p-6 sm:p-7">
+              <SectionHeader
+                eyebrow="Website content"
+                title="Brand, contact, and hero settings"
+                description="Non-technical admins can update the homepage hero images, website branding, and public contact details from here."
+              />
+
+              {isLoading ? (
+                <LoadingState />
+              ) : (
+                <form className="space-y-6" onSubmit={handleSiteContentSubmit}>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="site-name">Site name</Label>
+                      <Input
+                        id="site-name"
+                        onChange={(event) => updateSiteContentField("siteName", event.target.value)}
+                        placeholder="CURATOR"
+                        value={siteContentForm.siteName}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="site-tagline">Site tagline</Label>
+                      <Input
+                        id="site-tagline"
+                        onChange={(event) => updateSiteContentField("siteTagline", event.target.value)}
+                        placeholder="High-End Travel Monograph"
+                        value={siteContentForm.siteTagline}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="site-description">Site description</Label>
+                    <Textarea
+                      id="site-description"
+                      onChange={(event) => updateSiteContentField("siteDescription", event.target.value)}
+                      placeholder="Curated destinations and exclusive travel experiences."
+                      rows={4}
+                      value={siteContentForm.siteDescription}
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="contact-email">Contact email</Label>
+                      <Input
+                        id="contact-email"
+                        onChange={(event) => updateSiteContentField("contactEmail", event.target.value)}
+                        placeholder="inquiries@curator.travel"
+                        value={siteContentForm.contactEmail}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="hotline">Hotline</Label>
+                      <Input
+                        id="hotline"
+                        onChange={(event) => updateSiteContentField("hotline", event.target.value)}
+                        placeholder="Hotline: +44 (0) 20 7123 4567"
+                        value={siteContentForm.hotline}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="top-bar-note">Top bar note</Label>
+                      <Input
+                        id="top-bar-note"
+                        onChange={(event) => updateSiteContentField("topBarNote", event.target.value)}
+                        placeholder="Private itinerary support, 24/7"
+                        value={siteContentForm.topBarNote}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="promo-label">Promo label</Label>
+                      <Input
+                        id="promo-label"
+                        onChange={(event) => updateSiteContentField("promoLabel", event.target.value)}
+                        placeholder="Travel freely without worrying about the price"
+                        value={siteContentForm.promoLabel}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="promo-cta">Promo CTA</Label>
+                      <Input
+                        id="promo-cta"
+                        onChange={(event) => updateSiteContentField("promoCta", event.target.value)}
+                        placeholder="View offers"
+                        value={siteContentForm.promoCta}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="promo-href">Promo link</Label>
+                      <Input
+                        id="promo-href"
+                        onChange={(event) => updateSiteContentField("promoHref", event.target.value)}
+                        placeholder="/tours"
+                        value={siteContentForm.promoHref}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 rounded-3xl border border-stone-200 bg-stone-50 p-5">
+                    <p className="text-sm font-bold text-stone-950">Homepage hero images</p>
+                    <p className="text-sm leading-relaxed text-stone-500">
+                      These three images rotate in the hero carousel on the homepage. Use direct image URLs.
+                    </p>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="hero-image-one">Hero image 1 URL</Label>
+                        <Input
+                          id="hero-image-one"
+                          onChange={(event) => updateSiteContentField("homeHeroImage", event.target.value)}
+                          placeholder="https://..."
+                          value={siteContentForm.homeHeroImage}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hero-image-one-alt">Hero image 1 alt text</Label>
+                        <Input
+                          id="hero-image-one-alt"
+                          onChange={(event) => updateSiteContentField("homeHeroAlt", event.target.value)}
+                          placeholder="Describe the first hero image"
+                          value={siteContentForm.homeHeroAlt}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hero-image-two">Hero image 2 URL</Label>
+                        <Input
+                          id="hero-image-two"
+                          onChange={(event) => updateSiteContentField("heroImageTwo", event.target.value)}
+                          placeholder="https://..."
+                          value={siteContentForm.heroImageTwo}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hero-image-two-alt">Hero image 2 alt text</Label>
+                        <Input
+                          id="hero-image-two-alt"
+                          onChange={(event) => updateSiteContentField("heroImageTwoAlt", event.target.value)}
+                          placeholder="Describe the second hero image"
+                          value={siteContentForm.heroImageTwoAlt}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hero-image-three">Hero image 3 URL</Label>
+                        <Input
+                          id="hero-image-three"
+                          onChange={(event) => updateSiteContentField("heroImageThree", event.target.value)}
+                          placeholder="https://..."
+                          value={siteContentForm.heroImageThree}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hero-image-three-alt">Hero image 3 alt text</Label>
+                        <Input
+                          id="hero-image-three-alt"
+                          onChange={(event) => updateSiteContentField("heroImageThreeAlt", event.target.value)}
+                          placeholder="Describe the third hero image"
+                          value={siteContentForm.heroImageThreeAlt}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {siteContentStatus ? <StatusCard status={siteContentStatus} /> : null}
+
+                  <div className="flex justify-end">
+                    <Button disabled={isSavingSiteContent || isLoading} type="submit">
+                      {isSavingSiteContent ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
+                      {isSavingSiteContent ? "Saving..." : "Save website content"}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </CardContent>
           </Card>
         </div>
 
@@ -441,15 +922,60 @@ export default function AdminSettingsPage() {
                   {isTesting ? <LoaderCircle className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
                   {isTesting ? "Testing..." : "Test connection"}
                 </Button>
-                <Button disabled={isSaving || isLoading} type="submit">
+                <Button disabled={isSaving || isLoading} form="ai-settings-form" type="submit">
                   {isSaving ? <LoaderCircle className="size-4 animate-spin" /> : <Save className="size-4" />}
                   {isSaving ? "Saving..." : "Save settings"}
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="space-y-5 p-6 sm:p-7">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                    Customer payment
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
+                    VietQR checkout
+                  </h3>
+                </div>
+                <Landmark className="size-5 text-emerald-800" />
+              </div>
+
+              <SummaryPill label="Bank BIN" value={shopPaymentSettings?.bankBin ?? "Not set"} />
+              <SummaryPill label="Bank name" value={shopPaymentSettings?.bankName ?? "Not set"} />
+              <SummaryPill label="Account number" value={shopPaymentSettings?.accountNumber ?? "Not set"} />
+              <SummaryPill label="Account name" value={shopPaymentSettings?.accountName ?? "Not set"} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-5 p-6 sm:p-7">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                    Public website
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
+                    Editable site content
+                  </h3>
+                </div>
+                <Globe2 className="size-5 text-emerald-800" />
+              </div>
+
+              <SummaryPill label="Site name" value={siteContentSettings?.siteName ?? "Not set"} />
+              <SummaryPill label="Contact email" value={siteContentSettings?.contactEmail ?? "Not set"} />
+              <SummaryPill label="Hotline" value={siteContentSettings?.hotline ?? "Not set"} />
+              <SummaryPill label="Hero carousel" value="3 managed images" />
+              <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-4 text-sm leading-relaxed text-stone-500">
+                The homepage logo, hero carousel, top bars, metadata, and public contact blocks now read from backend-managed settings.
+              </div>
+            </CardContent>
+          </Card>
         </aside>
-      </form>
+      </div>
     </AdminShell>
   );
 }
@@ -458,7 +984,7 @@ function LoadingState() {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4 text-sm font-medium text-stone-600">
       <LoaderCircle className="size-4 animate-spin" />
-      Loading AI provider settings...
+      Loading settings...
     </div>
   );
 }

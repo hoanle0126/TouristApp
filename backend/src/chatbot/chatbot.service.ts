@@ -97,7 +97,8 @@ export class ChatbotService {
       ? [[], [], [], []]
       : await Promise.all([
           this.prisma.tour.findMany({
-            take: 3,
+            take: 12,
+            orderBy: { title: 'asc' },
             include: {
               departures: {
                 orderBy: { date: 'asc' },
@@ -105,15 +106,16 @@ export class ChatbotService {
             },
           }),
           this.prisma.hotel.findMany({
-            take: 3,
+            take: 12,
+            orderBy: { name: 'asc' },
             include: {
               inventoryDays: {
                 orderBy: { date: 'asc' },
               },
             },
           }),
-          this.prisma.destination.findMany({ take: 3 }),
-          this.prisma.blogPost.findMany({ take: 3 }),
+          this.prisma.destination.findMany({ take: 12, orderBy: { title: 'asc' } }),
+          this.prisma.blogPost.findMany({ take: 12, orderBy: { title: 'asc' } }),
         ]);
 
     const shouldGroundResponse = this.requiresWebsiteContext(message);
@@ -284,6 +286,7 @@ export class ChatbotService {
   ) {
     if (
       this.isBroadCatalogRequest(message) ||
+      this.isTourCatalogRequest(message) ||
       this.isDestinationAwareRequest(message)
     ) {
       const summaryParts: string[] = [];
@@ -304,19 +307,21 @@ export class ChatbotService {
         });
       }
 
-      const availableHotel =
-        hotels.find((hotel) =>
-          hotel.inventoryDays.some((day) => day.status === 'open'),
-        ) ?? hotels[0];
-      if (availableHotel) {
-        summaryParts.push(
-          this.describeHotelAvailability(availableHotel, message),
-        );
-        sources.push({
-          kind: 'hotel' as const,
-          label: `Hotel: ${availableHotel.name}`,
-          slug: availableHotel.slug,
-        });
+      if (this.isBroadCatalogRequest(message) || this.isHotelRequest(message)) {
+        const availableHotel =
+          hotels.find((hotel) =>
+            hotel.inventoryDays.some((day) => day.status === 'open'),
+          ) ?? hotels[0];
+        if (availableHotel) {
+          summaryParts.push(
+            this.describeHotelAvailability(availableHotel, message),
+          );
+          sources.push({
+            kind: 'hotel' as const,
+            label: `Hotel: ${availableHotel.name}`,
+            slug: availableHotel.slug,
+          });
+        }
       }
 
       if (this.isDestinationAwareRequest(message)) {
@@ -584,15 +589,27 @@ export class ChatbotService {
   }
 
   private isBroadCatalogRequest(message: string) {
-    const normalizedMessage = message.toLowerCase();
-    const asksForTours = ['tour', 'tours'].some((keyword) =>
-      normalizedMessage.includes(keyword),
-    );
-    const asksForHotels = ['hotel', 'hotels', 'khách sạn'].some((keyword) =>
-      normalizedMessage.includes(keyword),
-    );
+    return this.isTourCatalogRequest(message) && this.isHotelRequest(message);
+  }
 
-    return asksForTours && asksForHotels;
+  private isTourCatalogRequest(message: string) {
+    const normalizedMessage = message.toLowerCase();
+    return [
+      'các tour',
+      'các tours',
+      'những tour',
+      'những tours',
+      'danh sách tour',
+      'tour nào shop phục vụ',
+      'tours nào shop phục vụ',
+      'tour mà shop phục vụ',
+      'tours mà shop phục vụ',
+      'tour hiện có',
+      'tours hiện có',
+      'available tours',
+      'tour list',
+      'tours list',
+    ].some((keyword) => normalizedMessage.includes(keyword));
   }
 
   private normalizeForMatch(value: string) {

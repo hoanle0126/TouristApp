@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { CartProvider } from "@/src/components/travel/CartProvider";
 import { FloatingActionStack } from "@/src/components/ui/FloatingActionStack";
+import { getSiteContentSettings } from "@/src/lib/api/settings";
 
 import "./globals.css";
 
@@ -16,10 +17,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "CURATOR | High-End Travel Monograph",
-  description: "Curated destinations and exclusive travel experiences.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const siteContent = await getSiteContentSettings();
+    return {
+      title: `${siteContent.siteName} | ${siteContent.siteTagline}`,
+      description: siteContent.siteDescription,
+    };
+  } catch {
+    return {
+      title: "CURATOR | High-End Travel Monograph",
+      description: "Curated destinations and exclusive travel experiences.",
+    };
+  }
+}
 
 export default function RootLayout({
   children,

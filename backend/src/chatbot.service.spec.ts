@@ -262,6 +262,72 @@ describe('ChatbotService', () => {
     );
   });
 
+  it('grounds broad tour-only list questions with tour data', async () => {
+    const prisma = createPrismaMock();
+    prisma.tour.findMany.mockResolvedValue([
+      {
+        slug: 'hanoi-ninh-binh-heritage-loop',
+        title: 'Hanoi and Ninh Binh Heritage Loop',
+        shortDescription:
+          'A five-day private journey through Hanoi food culture and Ninh Binh scenery.',
+        availability: 'Weekly private starts',
+        departures: [
+          {
+            date: new Date('2026-06-15T00:00:00.000Z'),
+            capacity: 12,
+            booked: 0,
+            status: 'open',
+          },
+        ],
+      },
+    ]);
+    prisma.hotel.findMany.mockResolvedValue([]);
+    prisma.destination.findMany.mockResolvedValue([]);
+    prisma.blogPost.findMany.mockResolvedValue([]);
+
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content:
+                'Website hiện có tour Hanoi and Ninh Binh Heritage Loop, còn 12 chỗ ngày 2026-06-15.',
+            },
+          },
+        ],
+      }),
+    });
+    global.fetch = fetchMock as never;
+
+    const service = new ChatbotService(prisma as never, createSettingsMock());
+
+    await expect(
+      service.respond({
+        message: 'tôi muốn tìm hiểu về các tours mà shop phục vụ ạ',
+      }),
+    ).resolves.toEqual({
+      answer:
+        'Website hiện có tour Hanoi and Ninh Binh Heritage Loop, còn 12 chỗ ngày 2026-06-15.',
+      sources: [
+        {
+          kind: 'tour',
+          label: 'Tour: Hanoi and Ninh Binh Heritage Loop',
+          slug: 'hanoi-ninh-binh-heritage-loop',
+        },
+      ],
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.openai.com/v1/chat/completions',
+      expect.objectContaining({
+        body: expect.stringContaining(
+          'Hanoi and Ninh Binh Heritage Loop currently has 12 seats left on 2026-06-15.',
+        ),
+      }),
+    );
+  });
+
   it('grounds website questions with destination data and full tour and hotel schedules', async () => {
     const prisma = createPrismaMock();
     prisma.tour.findMany.mockResolvedValue([

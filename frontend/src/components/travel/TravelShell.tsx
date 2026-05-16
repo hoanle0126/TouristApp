@@ -4,11 +4,29 @@ import { ArrowRight, Navigation, Phone, Search, Sparkles } from "lucide-react";
 import { CartSidebar } from "@/src/components/travel/CartSidebar";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
-import { navigationDropdowns, navigationItems, travelPromoBar, travelTopBar } from "@/src/data/mockData";
+import { getDestinations } from "@/src/lib/api/destinations";
+import { getHotels } from "@/src/lib/api/hotels";
+import { getSiteContentSettings } from "@/src/lib/api/settings";
+import { getTours } from "@/src/lib/api/tours";
+import type { DestinationCard, HotelCard, TourCard } from "@/src/types/travel";
+import { navigationItems } from "@/src/data/mockData";
 
 interface TravelHeaderProps {
   readonly activeItem?: string;
 }
+
+type NavigationDropdownItem = {
+  readonly description: string;
+  readonly href: string;
+  readonly title: string;
+};
+
+type NavigationDropdownData = {
+  readonly eyebrow: string;
+  readonly items: readonly NavigationDropdownItem[];
+};
+
+type NavigationDropdownMap = Partial<Record<"Destinations" | "Tours" | "Hotels", NavigationDropdownData>>;
 
 function itemHref(item: string) {
   if (item === "Home") {
@@ -42,43 +60,60 @@ function itemHref(item: string) {
   return "#";
 }
 
-function TravelTopBar() {
-  return (
-    <div className="bg-stone-950 text-white">
-      <div className="mx-auto flex max-w-screen-2xl flex-col gap-1 px-6 py-2 text-[10px] font-bold uppercase tracking-[0.18em] sm:flex-row sm:items-center sm:justify-between lg:px-8">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span className="inline-flex items-center gap-2">
-            <Phone className="size-3.5 text-emerald-300" />
-            {travelTopBar.hotline}
-          </span>
-          <span className="hidden h-1 w-1 rounded-full bg-white/35 sm:inline-block" />
-          <span className="text-white/65">{travelTopBar.note}</span>
-        </div>
-        <a className="w-fit text-white/65 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href={`mailto:${travelTopBar.email}`}>
-          {travelTopBar.email}
-        </a>
-      </div>
-    </div>
-  );
+function buildDestinationDropdownItems(destinations: readonly DestinationCard[]): readonly NavigationDropdownItem[] {
+  return destinations.slice(0, 3).map((destination) => ({
+    description: destination.description,
+    href: destination.slug ? `/destinations/${destination.slug}` : destination.href,
+    title: destination.title,
+  }));
 }
 
-function TravelPromoBar() {
-  return (
-    <div className="bg-violet-700 text-white shadow-sm shadow-violet-950/20">
-      <div className="mx-auto flex max-w-screen-2xl items-center justify-center gap-3 px-6 py-2 text-center text-[11px] font-black uppercase tracking-[0.2em] lg:px-8">
-        <span>{travelPromoBar.label}</span>
-        <Link className="hidden rounded-full bg-white/15 px-3 py-1 text-[10px] transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:inline-flex" href={travelPromoBar.href}>
-          {travelPromoBar.cta}
-        </Link>
-      </div>
-    </div>
-  );
+function buildTourDropdownItems(tours: readonly TourCard[]): readonly NavigationDropdownItem[] {
+  return tours.slice(0, 3).map((tour) => ({
+    description: tour.description,
+    href: tour.slug ? `/tours/${tour.slug}` : "/tours",
+    title: tour.title,
+  }));
 }
 
-function NavigationDropdown({ item }: Readonly<{ item: string }>) {
-  const dropdown = navigationDropdowns[item as keyof typeof navigationDropdowns];
+function buildHotelDropdownItems(hotels: readonly HotelCard[]): readonly NavigationDropdownItem[] {
+  return hotels.slice(0, 3).map((hotel) => ({
+    description: hotel.location,
+    href: hotel.slug ? `/hotels/${hotel.slug}` : "/hotels",
+    title: hotel.name,
+  }));
+}
 
-  if (!dropdown) {
+async function getNavigationDropdowns(): Promise<NavigationDropdownMap> {
+  const [destinationsResult, toursResult, hotelsResult] = await Promise.allSettled([
+    getDestinations({ perPage: 3 }),
+    getTours({ perPage: 3 }),
+    getHotels({ perPage: 3 }),
+  ]);
+
+  return {
+    Destinations: {
+      eyebrow: "Suggested escapes",
+      items: destinationsResult.status === "fulfilled" ? buildDestinationDropdownItems(destinationsResult.value) : [],
+    },
+    Tours: {
+      eyebrow: "Popular journeys",
+      items: toursResult.status === "fulfilled" ? buildTourDropdownItems(toursResult.value) : [],
+    },
+    Hotels: {
+      eyebrow: "Featured stays",
+      items: hotelsResult.status === "fulfilled" ? buildHotelDropdownItems(hotelsResult.value) : [],
+    },
+  };
+}
+
+function NavigationDropdown({
+  dropdowns,
+  item,
+}: Readonly<{ dropdowns: NavigationDropdownMap; item: string }>) {
+  const dropdown = dropdowns[item as keyof NavigationDropdownMap];
+
+  if (!dropdown || dropdown.items.length === 0) {
     return null;
   }
 
@@ -104,7 +139,10 @@ function NavigationDropdown({ item }: Readonly<{ item: string }>) {
   );
 }
 
-function DesktopNavigation({ activeItem }: Readonly<TravelHeaderProps>) {
+function DesktopNavigation({
+  activeItem,
+  dropdowns,
+}: Readonly<TravelHeaderProps & { dropdowns: NavigationDropdownMap }>) {
   return (
     <div className="hidden items-center gap-4 lg:flex xl:gap-6">
       {navigationItems.map((item) => {
@@ -123,7 +161,7 @@ function DesktopNavigation({ activeItem }: Readonly<TravelHeaderProps>) {
             >
               {item}
             </Link>
-            <NavigationDropdown item={item} />
+            <NavigationDropdown dropdowns={dropdowns} item={item} />
           </div>
         );
       })}
@@ -131,18 +169,52 @@ function DesktopNavigation({ activeItem }: Readonly<TravelHeaderProps>) {
   );
 }
 
-export function TravelHeader({ activeItem = "Home" }: Readonly<TravelHeaderProps>) {
+export async function TravelHeader({ activeItem = "Home" }: Readonly<TravelHeaderProps>) {
+  const [dropdowns, siteContent] = await Promise.all([
+    getNavigationDropdowns(),
+    getSiteContentSettings().catch(() => null),
+  ]);
+
+  const brandName = siteContent?.siteName ?? "CURATOR";
+  const hotline = siteContent?.hotline ?? "Hotline: +44 (0) 20 7123 4567";
+  const topBarNote = siteContent?.topBarNote ?? "Private itinerary support, 24/7";
+  const contactEmail = siteContent?.contactEmail ?? "inquiries@curator.travel";
+  const promoLabel = siteContent?.promoLabel ?? "Travel freely without worrying about the price";
+  const promoCta = siteContent?.promoCta ?? "View offers";
+  const promoHref = siteContent?.promoHref ?? "/tours";
+
   return (
     <header className="fixed top-0 z-50 w-full">
-      <TravelTopBar />
-      <TravelPromoBar />
+      <div className="bg-stone-950 text-white">
+        <div className="mx-auto flex max-w-screen-2xl flex-col gap-1 px-6 py-2 text-[10px] font-bold uppercase tracking-[0.18em] sm:flex-row sm:items-center sm:justify-between lg:px-8">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="inline-flex items-center gap-2">
+              <Phone className="size-3.5 text-emerald-300" />
+              {hotline}
+            </span>
+            <span className="hidden h-1 w-1 rounded-full bg-white/35 sm:inline-block" />
+            <span className="text-white/65">{topBarNote}</span>
+          </div>
+          <a className="w-fit text-white/65 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href={`mailto:${contactEmail}`}>
+            {contactEmail}
+          </a>
+        </div>
+      </div>
+      <div className="bg-violet-700 text-white shadow-sm shadow-violet-950/20">
+        <div className="mx-auto flex max-w-screen-2xl items-center justify-center gap-3 px-6 py-2 text-center text-[11px] font-black uppercase tracking-[0.2em] lg:px-8">
+          <span>{promoLabel}</span>
+          <Link className="hidden rounded-full bg-white/15 px-3 py-1 text-[10px] transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:inline-flex" href={promoHref}>
+            {promoCta}
+          </Link>
+        </div>
+      </div>
       <nav className="bg-white/85 shadow-sm shadow-emerald-900/5 backdrop-blur-xl">
         <div className="mx-auto flex max-w-screen-2xl items-center justify-between px-6 py-5 lg:px-8">
           <Link className="inline-flex items-center gap-2 text-xl font-bold uppercase tracking-tighter text-stone-950 sm:text-2xl" href="/">
             <Navigation className="size-6 text-emerald-800" strokeWidth={2.4} />
-            CURATOR
+            {brandName}
           </Link>
-          <DesktopNavigation activeItem={activeItem} />
+          <DesktopNavigation activeItem={activeItem} dropdowns={dropdowns} />
           <div className="flex items-center gap-3 sm:gap-4">
             <CartSidebar />
             <Button asChild aria-label="Search" className="hidden text-stone-600 hover:text-emerald-800 md:inline-flex" size="icon" variant="ghost">
@@ -163,17 +235,22 @@ export function TravelHeader({ activeItem = "Home" }: Readonly<TravelHeaderProps
   );
 }
 
-export function TravelFooter() {
+export async function TravelFooter() {
+  const siteContent = await getSiteContentSettings().catch(() => null);
+  const brandName = siteContent?.siteName ?? "CURATOR";
+  const siteDescription =
+    siteContent?.siteDescription ??
+    "Curated destinations and exclusive travel experiences.";
   return (
     <footer className="border-t border-stone-200/70 bg-stone-100">
       <div className="mx-auto grid max-w-screen-2xl grid-cols-1 gap-12 px-8 py-16 md:grid-cols-4 lg:grid-cols-6">
         <div className="space-y-6 md:col-span-2">
           <Link className="inline-flex items-center gap-2 text-xl font-bold uppercase tracking-tighter text-stone-950" href="/">
             <Navigation className="size-5 text-emerald-800" />
-            CURATOR TRAVEL
+            {brandName}
           </Link>
           <p className="max-w-xs text-sm leading-relaxed text-stone-600">
-            Defining the future of luxury exploration through intentional design and authentic local connection.
+            {siteDescription}
           </p>
         </div>
         <div>
@@ -202,7 +279,7 @@ export function TravelFooter() {
         </div>
       </div>
       <div className="mx-auto max-w-screen-2xl border-t border-stone-200 px-8 py-8">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-stone-400">© 2024 CURATOR TRAVEL. The digital curator experience.</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-stone-400">© 2024 {brandName}. The digital curator experience.</p>
       </div>
     </footer>
   );

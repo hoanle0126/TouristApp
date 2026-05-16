@@ -10,17 +10,39 @@ import type {
   TourDetail,
   TourDetailHighlight,
   TravelEventCard,
+  TravelPartner,
+  TravelerFeedback,
   VisualDiaryItem,
 } from "@/src/types/travel";
-import type { ApiBlogCard, ApiBlogDetail, ApiDestinationDetail, ApiEvent, ApiHotelCard, ApiHotelDetail, ApiMomentCaptured, ApiTourCard, ApiTourDetail, ApiDestinationLink } from "@/src/lib/api/types";
+import type {
+  ApiBlogCard,
+  ApiBlogDetail,
+  ApiDestinationDetail,
+  ApiDestinationLink,
+  ApiEvent,
+  ApiHotelCard,
+  ApiHotelDetail,
+  ApiPartner,
+  ApiTourCard,
+  ApiTourDetail,
+  ApiTravelerReview,
+} from "@/src/lib/api/types";
 
-function resolveTourDestination(tour: ApiTourCard | ApiTourDetail): ApiDestinationLink {
-  const legacyDestination = (tour as ApiTourCard & { readonly destinations?: readonly ApiDestinationLink[] }).destinations?.[0];
+function resolveTourDestination(
+  tour: ApiTourCard | ApiTourDetail,
+): ApiDestinationLink {
+  const legacyDestination = (
+    tour as ApiTourCard & {
+      readonly destinations?: readonly ApiDestinationLink[];
+    }
+  ).destinations?.[0];
   return tour.destination ?? legacyDestination ?? { slug: "", title: "" };
 }
 
 function resolveTourDescription(tour: ApiTourCard | ApiTourDetail) {
-  return Array.isArray(tour.description) ? tour.description : [tour.description];
+  return Array.isArray(tour.description)
+    ? tour.description
+    : [tour.description];
 }
 
 function formatDate(date: string) {
@@ -31,14 +53,40 @@ function formatDate(date: string) {
   }).format(new Date(date));
 }
 
-const highlightIcons = ["boat", "fish", "food", "eco", "camera", "map", "mountain", "sparkles", "hotel", "walk", "coffee", "compass"] as const;
-const hotelAmenityIcons = ["pool", "spa", "dining", "gym", "wifi", "coffee", "parking", "beach"] as const;
+const highlightIcons = [
+  "boat",
+  "fish",
+  "food",
+  "eco",
+  "camera",
+  "map",
+  "mountain",
+  "sparkles",
+  "hotel",
+  "walk",
+  "coffee",
+  "compass",
+] as const;
+const hotelAmenityIcons = [
+  "pool",
+  "spa",
+  "dining",
+  "gym",
+  "wifi",
+  "coffee",
+  "parking",
+  "beach",
+] as const;
 
-function toHighlightIcon(icon: string | undefined): TourDetailHighlight["icon"] {
+function toHighlightIcon(
+  icon: string | undefined,
+): TourDetailHighlight["icon"] {
   return highlightIcons.find((item) => item === icon) ?? "eco";
 }
 
-function toHotelAmenityIcon(icon: string | undefined): HotelDetail["amenities"][number]["icon"] {
+function toHotelAmenityIcon(
+  icon: string | undefined,
+): HotelDetail["amenities"][number]["icon"] {
   return hotelAmenityIcons.find((item) => item === icon) ?? "pool";
 }
 
@@ -50,7 +98,9 @@ export function toTourCard(tour: ApiTourCard): TourCard {
   return {
     alt: imageAlt(tour.title, "tour image"),
     badge: tour.badge,
-    description: Array.isArray(tour.description) ? tour.description[0] ?? "" : tour.description,
+    description: Array.isArray(tour.description)
+      ? (tour.description[0] ?? "")
+      : tour.description,
     destination: resolveTourDestination(tour),
     duration: tour.duration,
     guests: tour.guests,
@@ -92,7 +142,9 @@ export function toTourDetail(tour: ApiTourDetail): TourDetail {
   };
 }
 
-export function toDestinationCard(destination: ApiDestinationDetail): DestinationCard {
+export function toDestinationCard(
+  destination: ApiDestinationDetail,
+): DestinationCard {
   return {
     alt: imageAlt(destination.title, "destination image"),
     description: destination.description,
@@ -103,7 +155,9 @@ export function toDestinationCard(destination: ApiDestinationDetail): Destinatio
   };
 }
 
-export function toDestinationDetail(destination: ApiDestinationDetail): DestinationDetail {
+export function toDestinationDetail(
+  destination: ApiDestinationDetail,
+): DestinationDetail {
   return {
     card: toDestinationCard(destination),
     facts: destination.facts,
@@ -118,7 +172,11 @@ export function toDestinationDetail(destination: ApiDestinationDetail): Destinat
 
 export function toHotelCard(hotel: ApiHotelCard): HotelCard {
   return {
-    amenities: hotel.amenities.map((amenity) => (typeof amenity === "string" ? amenity : amenity.label ?? amenity.title ?? "Amenity")),
+    amenities: hotel.amenities.map((amenity) =>
+      typeof amenity === "string"
+        ? amenity
+        : (amenity.label ?? amenity.title ?? "Amenity"),
+    ),
     alt: imageAlt(hotel.name, "hotel image"),
     badge: hotel.badge,
     image: hotel.image ?? "",
@@ -147,8 +205,10 @@ export function toHotelDetail(hotel: ApiHotelDetail): HotelDetail {
       checkOut: hotel.booking.checkOut ?? "",
       fee: hotel.booking.fee ?? "",
       nightlyTotal: hotel.booking.nightlyTotal ?? "",
-      nights: hotel.booking.nights === undefined ? "" : String(hotel.booking.nights),
-      rating: hotel.booking.rating === undefined ? "" : String(hotel.booking.rating),
+      nights:
+        hotel.booking.nights === undefined ? "" : String(hotel.booking.nights),
+      rating:
+        hotel.booking.rating === undefined ? "" : String(hotel.booking.rating),
       travelers: hotel.booking.travelers ?? "",
       total: hotel.booking.total ?? "",
     },
@@ -201,15 +261,25 @@ export function toBlogPost(blog: ApiBlogCard): BlogPost {
   };
 }
 
-export function toVisualDiaryItem(moment: ApiMomentCaptured): VisualDiaryItem {
+export function toTravelPartner(partner: ApiPartner): TravelPartner {
   return {
-    alt: imageAlt(moment.title, "travel moment image"),
-    country: moment.country,
-    id: moment.id,
-    image: moment.image,
-    sortOrder: moment.sortOrder,
-    title: moment.title,
-    wide: moment.wide,
+    description: partner.description,
+    id: partner.id,
+    name: partner.name,
+    sortOrder: partner.sortOrder,
+  };
+}
+
+export function toTravelerFeedback(
+  review: ApiTravelerReview,
+): TravelerFeedback {
+  return {
+    id: review.id,
+    name: review.name,
+    quote: review.quote,
+    role: review.role,
+    sortOrder: review.sortOrder,
+    trip: review.trip,
   };
 }
 
@@ -235,7 +305,10 @@ export function toJournalDetail(blog: ApiBlogDetail): JournalDetail {
     date: formatDate(blog.publishedAt),
     heroAlt: imageAlt(blog.title, "hero image"),
     heroImage: blog.heroImage,
-    inlineImage: { ...blog.inlineImage, alt: imageAlt(blog.title, "inline image") },
+    inlineImage: {
+      ...blog.inlineImage,
+      alt: imageAlt(blog.title, "inline image"),
+    },
     intro: blog.intro,
     meta: blog.meta || blog.readingTime,
     quote: blog.quote,

@@ -7,9 +7,10 @@ import { DestinationsModule } from './destinations/destinations.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { HotelsModule } from './hotels/hotels.module';
 import { EventsModule } from './events/events.module';
-import { MomentsCapturedModule } from './moments-captured/moments-captured.module';
+import { PartnersModule } from './partners/partners.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
+import { TravelerReviewsModule } from './traveler-reviews/traveler-reviews.module';
 import { ToursModule } from './tours/tours.module';
 
 @Module({
@@ -19,7 +20,8 @@ import { ToursModule } from './tours/tours.module';
     DestinationsModule,
     HotelsModule,
     EventsModule,
-    MomentsCapturedModule,
+    PartnersModule,
+    TravelerReviewsModule,
     BlogsModule,
     BookingsModule,
     ChatbotModule,

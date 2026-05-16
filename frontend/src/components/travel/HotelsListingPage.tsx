@@ -1,16 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, MapPin, Search, SlidersHorizontal, Users } from "lucide-react";
+import { ArrowRight, MapPin, Search } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import type { HotelCard } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
-const hotelFilters = [
-  { icon: MapPin, label: "Location", value: "Global Collection" },
-  { icon: CalendarDays, label: "Dates", value: "Select timeframe" },
-  { icon: Users, label: "Guests", value: "2 Travelers" },
-  { icon: SlidersHorizontal, label: "Budget", value: "From $500" },
+const hotelFilterGroups = [
+  {
+    options: ["Hotel name", "Stay location", "Address"],
+    title: "Find your stay",
+  },
+  {
+    options: ["Linked destination", "Linked tour"],
+    title: "Related inventory",
+  },
+  {
+    options: ["Check-in date", "Guest count"],
+    title: "Booking needs",
+  },
 ] as const;
 
 function HotelsHero() {
@@ -33,42 +41,46 @@ function HotelsHero() {
   );
 }
 
-function HotelsFilterBar() {
+function HotelsSidebarFilters() {
   return (
-    <section className="mx-auto max-w-screen-2xl px-8 lg:px-24">
-      <div className="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-[0_30px_80px_-45px_rgba(28,25,23,0.45)]">
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
-          {hotelFilters.map(({ icon: Icon, label, value }) => (
-            <Button
-              aria-label={`Filter hotels by ${label}`}
-              aria-haspopup="listbox"
-              className="h-auto justify-start gap-4 rounded-[1.35rem] bg-stone-50 px-5 py-4 text-left text-stone-950 hover:bg-stone-100"
-              key={label}
-              type="button"
-              variant="ghost"
-            >
-              <span className="flex size-11 items-center justify-center rounded-full bg-white text-emerald-800 shadow-sm">
-                <Icon className="size-5" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[10px] font-black uppercase tracking-[0.24em] text-stone-400">{label}</span>
-                <span className="mt-1 block truncate text-sm font-bold text-stone-950">{value}</span>
-              </span>
-            </Button>
+    <aside className="w-full shrink-0 lg:w-72">
+      <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_30px_80px_-55px_rgba(28,25,23,0.45)] lg:sticky lg:top-28">
+        <div className="mb-6 flex items-center justify-between border-b border-stone-100 pb-5">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Filters</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-stone-950">Refine stays</h2>
+          </div>
+          <Search aria-hidden="true" className="size-5 text-emerald-800" />
+        </div>
+        <div className="space-y-7">
+          {hotelFilterGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-stone-500">{group.title}</h3>
+              <div className="flex flex-wrap gap-2">
+                {group.options.map((option) => (
+                  <Button
+                    aria-label={`Filter hotels by ${option}`}
+                    className="rounded-xl border border-stone-200 bg-stone-50 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50 hover:text-stone-950"
+                    key={option}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </div>
+            </div>
           ))}
-          <Button aria-label="Search curated stays" className="h-full min-h-20 rounded-[1.35rem] bg-stone-950 px-8 text-white hover:bg-emerald-900" type="button">
-            <Search className="size-5" />
-            <span className="text-xs font-bold uppercase tracking-widest xl:sr-only 2xl:not-sr-only">Search</span>
-          </Button>
         </div>
       </div>
-    </section>
+    </aside>
   );
 }
 
-function HotelCardView({ hotel, index }: Readonly<{ hotel: HotelCard; index: number }>) {
+function HotelCardView({ hotel }: Readonly<{ hotel: HotelCard }>) {
   return (
-    <article className={index % 3 === 1 ? "group lg:mt-12" : "group"}>
+    <article className="group">
       <div className="relative mb-6 aspect-[4/5] overflow-hidden rounded-[2rem] bg-stone-200 shadow-[0_28px_80px_-50px_rgba(28,25,23,0.65)]">
         <Image
           alt={hotel.alt}
@@ -117,22 +129,24 @@ function HotelCardView({ hotel, index }: Readonly<{ hotel: HotelCard; index: num
   );
 }
 
-function HotelsGrid({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
+function HotelsListingContent({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
   return (
-    <section className="mx-auto max-w-screen-2xl px-8 py-24 lg:px-24 lg:py-32">
-      <div className="mb-12 flex flex-col justify-between gap-6 border-b border-stone-200 pb-8 md:flex-row md:items-end">
+    <div className="min-w-0 flex-1">
+      <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Editorial Selection</p>
           <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Architectural retreats</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-500">Showing {hotels.length} stays</p>
         </div>
-        <p className="max-w-md text-sm leading-relaxed text-stone-500">
-          Six handpicked properties where spatial drama, cultural context, and hospitality craft become the destination.
-        </p>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">View:</span>
+          <span className="text-sm font-semibold text-stone-950">Latest collection</span>
+        </div>
       </div>
       {hotels.length > 0 ? (
-        <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
-          {hotels.map((hotel, index) => (
-            <HotelCardView hotel={hotel} index={index} key={hotel.slug ?? hotel.name} />
+        <div className="grid grid-cols-1 gap-8 gap-y-16 md:grid-cols-2 xl:grid-cols-3">
+          {hotels.map((hotel) => (
+            <HotelCardView hotel={hotel} key={hotel.slug ?? hotel.name} />
           ))}
         </div>
       ) : (
@@ -152,7 +166,7 @@ function HotelsGrid({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
           </Button>
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -191,8 +205,12 @@ export default function HotelsListingPage({ hotels }: Readonly<{ hotels: readonl
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Hotels" />
       <HotelsHero />
-      <HotelsFilterBar />
-      <HotelsGrid hotels={hotels} />
+      <section className="mx-auto max-w-screen-2xl px-8 pb-24 pt-8 lg:px-24 lg:pb-32">
+        <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
+          <HotelsSidebarFilters />
+          <HotelsListingContent hotels={hotels} />
+        </div>
+      </section>
       <PrivateCurationCta />
       <TravelFooter />
     </main>

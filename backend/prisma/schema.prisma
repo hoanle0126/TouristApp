@@ -86,6 +86,23 @@ model MomentCaptured {
   @@index([sortOrder])
 }
 
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  badge       String
+  date        String
+  location    String
+  description String
+  href        String
+  image       String
+  alt         String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sortOrder])
+}
+
 model Hotel {
   id               String              @id @default(cuid())
   slug             String              @unique

@@ -35,14 +35,12 @@ import {
 } from "@/src/components/ui/select";
 import { Textarea } from "@/src/components/ui/textarea";
 import {
-  featuredTravelEvents,
   heroImage,
-  regionalHighlights,
   travelerFeedback,
   travelPartners,
   type SuggestionCard,
 } from "@/src/data/mockData";
-import type { BlogPost, DestinationCard, HotelCard, VisualDiaryItem } from "@/src/types/travel";
+import type { BlogPost, DestinationCard, HotelCard, TourCard, TravelEventCard, VisualDiaryItem } from "@/src/types/travel";
 
 interface HeroImageSlide {
   readonly alt: string;
@@ -507,16 +505,20 @@ function ContactSection() {
 interface TravelLandingPageProps {
   readonly blogPosts: readonly BlogPost[];
   readonly destinationCards: readonly DestinationCard[];
+  readonly eventCards: readonly TravelEventCard[];
   readonly hotelCards: readonly HotelCard[];
   readonly suggestionCards: readonly SuggestionCard[];
+  readonly tourCards: readonly TourCard[];
   readonly visualDiaryItems: readonly VisualDiaryItem[];
 }
 
 export default function TravelLandingPage({
   blogPosts,
   destinationCards,
+  eventCards,
   hotelCards,
   suggestionCards,
+  tourCards,
   visualDiaryItems,
 }: Readonly<TravelLandingPageProps>) {
   const heroSlides = buildHeroSlides(visualDiaryItems);
@@ -525,10 +527,10 @@ export default function TravelLandingPage({
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <TravelHeader activeItem="Home" />
       <HeroSection slides={heroSlides} />
-      <HomeEventsSection events={featuredTravelEvents} />
+      <HomeEventsSection events={eventCards} />
       <CircularImageRailSection items={destinationCards} />
       <HotelShowcaseSection hotels={hotelCards} />
-      <RegionalHighlightsSection regions={regionalHighlights} />
+      <RegionalHighlightsSection tours={tourCards} />
       <SuggestionsSection suggestions={suggestionCards} />
       <BlogSection posts={blogPosts} />
       <FeedbackPartnersSection feedback={travelerFeedback} partners={travelPartners} />

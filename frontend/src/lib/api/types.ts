@@ -14,6 +14,19 @@ export type ApiMomentCaptured = {
   readonly wide: boolean;
 };
 
+export type ApiEvent = {
+  readonly alt: string;
+  readonly badge: string;
+  readonly date: string;
+  readonly description: string;
+  readonly href: string;
+  readonly id: string;
+  readonly image: string;
+  readonly location: string;
+  readonly sortOrder: number;
+  readonly title: string;
+};
+
 export type ApiHotelLink = {
   readonly slug: string;
   readonly name: string;

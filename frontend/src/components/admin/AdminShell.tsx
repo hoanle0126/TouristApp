@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   Bell,
   CalendarRange,
+  CalendarDays,
   Camera,
   ChevronRight,
   Clock3,
@@ -52,6 +53,7 @@ const adminNavItems: readonly AdminNavItem[] = [
   { href: "/admin/hotels", icon: Hotel, label: "Hotels" },
   { href: "/admin/bookings", icon: CreditCard, label: "Bookings" },
   { href: "/admin/blogs", icon: SquarePen, label: "Blogs" },
+  { href: "/admin/events", icon: CalendarDays, label: "Events" },
   { href: "/admin/moments-captured", icon: Camera, label: "Moments" },
   { href: "/admin/settings", icon: Settings2, label: "Settings" },
 ] as const;

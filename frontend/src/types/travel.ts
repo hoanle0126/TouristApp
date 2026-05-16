@@ -72,6 +72,19 @@ export interface VisualDiaryItem {
   readonly wide?: boolean;
 }
 
+export interface TravelEventCard {
+  readonly alt: string;
+  readonly badge: string;
+  readonly date: string;
+  readonly description: string;
+  readonly href: string;
+  readonly id?: string;
+  readonly image: string;
+  readonly location: string;
+  readonly sortOrder?: number;
+  readonly title: string;
+}
+
 export interface JournalPost {
   readonly alt: string;
   readonly category: string;

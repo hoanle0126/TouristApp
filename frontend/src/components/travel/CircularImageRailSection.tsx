@@ -4,10 +4,11 @@ import Link from "next/link";
 import type { DestinationCard } from "@/src/types/travel";
 
 export function CircularImageRailSection({ items }: Readonly<{ items: readonly DestinationCard[] }>) {
-  if (items.length === 0) {
+  const visibleItems = items.slice(0, 9);
+
+  if (visibleItems.length === 0) {
     return null;
   }
-
 
   return (
     <section className="overflow-hidden border-y border-stone-200 bg-white py-10">
@@ -23,7 +24,7 @@ export function CircularImageRailSection({ items }: Readonly<{ items: readonly D
         </div>
         <div className="-mx-8 overflow-x-auto px-8 pb-2 hide-scrollbar">
           <ul className="flex min-w-max snap-x gap-6 motion-safe:animate-[none] md:gap-8">
-            {items.map((item) => (
+            {visibleItems.map((item) => (
               <li className="w-32 shrink-0 snap-start text-center" key={item.title}>
                 <Link className="group block" href={item.href}>
                   <div className="relative mx-auto size-28 overflow-hidden rounded-full bg-stone-200 ring-4 ring-stone-100 transition-transform duration-300 group-hover:-translate-y-1 group-hover:ring-emerald-100 md:size-32">

@@ -1,38 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ChevronDown, Filter } from "lucide-react";
+import { ArrowLeft, ArrowRight, Filter } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import type { TourCard } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
-const filters = ["Destination", "Duration", "Travel Style", "Price Range"] as const;
+const filterGroups = [
+  {
+    options: ["Tour name", "Linked destination", "Linked hotel"],
+    title: "Find your tour",
+  },
+  {
+    options: ["Travel style", "Trip length"],
+    title: "Journey details",
+  },
+  {
+    options: ["Departure date", "Availability"],
+    title: "Booking needs",
+  },
+] as const;
 
-function FilterBar() {
+function ToursSidebarFilters() {
   return (
-    <section className="mx-auto mb-16 max-w-screen-2xl px-8 lg:px-24">
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-stone-100 p-2 shadow-[0_20px_40px_-20px_rgba(26,28,26,0.12)]">
-        {filters.map((filter) => (
-          <Button
-            aria-label={`Filter by ${filter}`}
-            aria-haspopup="listbox"
-            className={
-              filter === "Travel Style"
-                ? "min-w-[200px] flex-1 justify-between bg-emerald-700 px-6 py-4 text-sm font-medium text-white hover:bg-emerald-800"
-                : "min-w-[200px] flex-1 justify-between bg-white px-6 py-4 text-sm font-medium text-stone-600 hover:bg-stone-50"
-            }
-            key={filter}
-            type="button"
-          >
-            <span>{filter}</span>
-            <ChevronDown className="size-4" />
-          </Button>
-        ))}
-        <Button aria-label="Apply filters" className="size-14 bg-stone-950 text-stone-50 hover:bg-emerald-900" size="icon">
-          <Filter className="size-5" />
-        </Button>
+    <aside className="w-full shrink-0 lg:w-72">
+      <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_30px_80px_-55px_rgba(28,25,23,0.45)] lg:sticky lg:top-28">
+        <div className="mb-6 flex items-center justify-between border-b border-stone-100 pb-5">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Filters</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-stone-950">Refine journeys</h2>
+          </div>
+          <Filter aria-hidden="true" className="size-5 text-emerald-800" />
+        </div>
+        <div className="space-y-7">
+          {filterGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-stone-500">{group.title}</h3>
+              <div className="flex flex-wrap gap-2">
+                {group.options.map((option) => (
+                  <Button
+                    aria-label={`Filter tours by ${option}`}
+                    className="rounded-xl border border-stone-200 bg-stone-50 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50 hover:text-stone-950"
+                    key={option}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </section>
+    </aside>
   );
 }
 
@@ -95,12 +117,23 @@ function ToursHero() {
   );
 }
 
-function ToursGrid({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
+function ToursListingContent({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
   return (
-    <section className="mx-auto mb-24 max-w-screen-2xl px-8 lg:px-24">
+    <div className="min-w-0 flex-1">
+      <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Curated Collection</p>
+          <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Tours &amp; Journeys</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-500">Showing {tours.length} journeys</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">View:</span>
+          <span className="text-sm font-semibold text-stone-950">Latest collection</span>
+        </div>
+      </div>
       {tours.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 gap-y-16 md:grid-cols-2 xl:grid-cols-3">
             {tours.map((tour) => (
               <TourCardView key={tour.slug ?? tour.title} tour={tour} />
             ))}
@@ -141,7 +174,7 @@ function ToursGrid({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
           </Button>
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -150,8 +183,12 @@ export default function ToursListingPage({ tours }: Readonly<{ tours: readonly T
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Tours" />
       <ToursHero />
-      <FilterBar />
-      <ToursGrid tours={tours} />
+      <section className="mx-auto mb-24 max-w-screen-2xl px-8 lg:px-24">
+        <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
+          <ToursSidebarFilters />
+          <ToursListingContent tours={tours} />
+        </div>
+      </section>
       <TravelFooter />
     </main>
   );

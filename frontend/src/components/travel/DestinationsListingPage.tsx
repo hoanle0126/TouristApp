@@ -15,11 +15,15 @@ import {
   type TourCard,
 } from "@/src/types/travel";
 
-const destinationFilters = [
-  "Region",
-  "Travel Mood",
-  "Best Season",
-  "Budget Range",
+const destinationFilterGroups = [
+  {
+    options: ["Destination name", "Travel highlights", "Trip inspiration"],
+    title: "Find a destination",
+  },
+  {
+    options: ["Linked tours", "Linked hotels"],
+    title: "Related inventory",
+  },
 ] as const;
 
 function DestinationsHero() {
@@ -43,31 +47,41 @@ function DestinationsHero() {
   );
 }
 
-function DestinationsFilterBar() {
+function DestinationsSidebarFilters() {
   return (
-    <section className="mx-auto max-w-screen-2xl px-8 lg:px-24">
-      <div className="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-[0_30px_80px_-45px_rgba(28,25,23,0.45)]">
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
-          {destinationFilters.map((filter) => (
-            <Button
-              aria-label={`Filter destinations by ${filter}`}
-              aria-haspopup="listbox"
-              className="min-h-20 justify-between rounded-[1.35rem] bg-stone-50 px-5 py-4 text-sm font-bold text-stone-950 hover:bg-stone-100"
-              key={filter}
-              type="button"
-              variant="ghost"
-            >
-              <span>{filter}</span>
-              <Compass className="size-4 text-emerald-800" />
-            </Button>
+    <aside className="w-full flex-shrink-0 lg:w-72">
+      <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_30px_80px_-55px_rgba(28,25,23,0.45)] lg:sticky lg:top-28">
+        <div className="mb-6 flex items-center justify-between border-b border-stone-100 pb-5">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Filters</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-stone-950">Choose destination</h2>
+          </div>
+          <Filter aria-hidden="true" className="size-5 text-emerald-800" />
+        </div>
+
+        <div className="space-y-7">
+          {destinationFilterGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-stone-500">{group.title}</h3>
+              <div className="flex flex-wrap gap-2">
+                {group.options.map((option) => (
+                  <Button
+                    aria-label={`Filter destinations by ${option}`}
+                    className="rounded-xl border border-stone-200 bg-stone-50 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50 hover:text-stone-950"
+                    key={option}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </div>
+            </div>
           ))}
-          <Button aria-label="Apply destination filters" className="h-full min-h-20 rounded-[1.35rem] bg-stone-950 px-8 text-white hover:bg-emerald-900" type="button">
-            <Filter className="size-5" />
-            <span className="text-xs font-bold uppercase tracking-widest xl:sr-only 2xl:not-sr-only">Filter</span>
-          </Button>
         </div>
       </div>
-    </section>
+    </aside>
   );
 }
 
@@ -107,20 +121,22 @@ function DestinationCardView({ destination }: Readonly<{ destination: Destinatio
   );
 }
 
-function DestinationsGrid({ destinations }: Readonly<{ destinations: readonly DestinationCard[] }>) {
+function DestinationsListingContent({ destinations }: Readonly<{ destinations: readonly DestinationCard[] }>) {
   return (
-    <section className="mx-auto max-w-screen-2xl px-8 py-24 lg:px-24 lg:py-32">
-      <div className="mb-12 flex flex-col justify-between gap-6 border-b border-stone-200 pb-8 md:flex-row md:items-end">
+    <div className="min-w-0 flex-1">
+      <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Portfolio View</p>
           <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Places with lasting pull</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-500">Showing {destinations.length} destinations</p>
         </div>
-        <p className="max-w-md text-sm leading-relaxed text-stone-500">
-          A compact destination index balancing scenic impact, cultural depth, and premium itinerary potential.
-        </p>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">View:</span>
+          <span className="text-sm font-semibold text-stone-950">Latest collection</span>
+        </div>
       </div>
       {destinations.length > 0 ? (
-        <div className="grid grid-cols-1 gap-x-8 gap-y-20 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 gap-y-16 md:grid-cols-2 xl:grid-cols-3">
           {destinations.map((destination) => (
             <DestinationCardView destination={destination} key={destination.href} />
           ))}
@@ -142,7 +158,7 @@ function DestinationsGrid({ destinations }: Readonly<{ destinations: readonly De
           </Button>
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -214,8 +230,12 @@ export default function DestinationsListingPage({ destinations, suggestions }: R
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Destinations" />
       <DestinationsHero />
-      <DestinationsFilterBar />
-      <DestinationsGrid destinations={destinations} />
+      <section className="mx-auto max-w-screen-2xl px-8 pb-24 pt-8 lg:px-24 lg:pb-32">
+        <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
+          <DestinationsSidebarFilters />
+          <DestinationsListingContent destinations={destinations} />
+        </div>
+      </section>
       <PremiumExtensions suggestions={suggestions} />
       <TravelFooter />
     </main>

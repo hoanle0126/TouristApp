@@ -3,10 +3,12 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
-import type { TravelEventCard } from "@/src/data/mockData";
+import type { TravelEventCard } from "@/src/types/travel";
 
 export function HomeEventsSection({ events }: Readonly<{ events: readonly TravelEventCard[] }>) {
-  if (events.length === 0) {
+  const visibleEvents = events.slice(0, 5);
+
+  if (visibleEvents.length === 0) {
     return null;
   }
 
@@ -25,7 +27,7 @@ export function HomeEventsSection({ events }: Readonly<{ events: readonly Travel
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {events.map((event, index) => (
+          {visibleEvents.map((event, index) => (
             <article className={index === 0 ? "group relative min-h-[28rem] overflow-hidden rounded-4xl border border-stone-200 bg-stone-950 shadow-xl shadow-stone-950/8 lg:col-span-2 lg:min-h-[34rem]" : "group relative min-h-[28rem] overflow-hidden rounded-4xl border border-stone-200 bg-stone-950 shadow-sm"} key={event.title}>
               <Image alt={event.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes={index === 0 ? "(min-width: 1024px) 66vw, 100vw" : "(min-width: 1024px) 33vw, 100vw"} src={event.image} />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/25 to-transparent" />

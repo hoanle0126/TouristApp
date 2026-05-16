@@ -53,19 +53,16 @@ function buildHeroSlides(
   items: readonly VisualDiaryItem[],
   siteContent: Pick<
     ApiSiteContentSettings,
-    | "homeHeroAlt"
     | "homeHeroImage"
     | "heroImageTwo"
-    | "heroImageTwoAlt"
     | "heroImageThree"
-    | "heroImageThreeAlt"
   >,
 ): readonly HeroImageSlide[] {
   const seenImages = new Set<string>();
   const baseSlides = [
-    { alt: siteContent.homeHeroAlt, image: siteContent.homeHeroImage },
-    { alt: siteContent.heroImageTwoAlt, image: siteContent.heroImageTwo },
-    { alt: siteContent.heroImageThreeAlt, image: siteContent.heroImageThree },
+    { alt: "Hero Image 1", image: siteContent.homeHeroImage },
+    { alt: "Hero Image 2", image: siteContent.heroImageTwo },
+    { alt: "Hero Image 3", image: siteContent.heroImageThree },
     ...items.slice(0, 3).map((item) => ({ alt: item.alt, image: item.image })),
   ];
 
@@ -535,12 +532,9 @@ interface TravelLandingPageProps {
     | "siteDescription"
     | "contactEmail"
     | "hotline"
-    | "homeHeroAlt"
     | "homeHeroImage"
     | "heroImageTwo"
-    | "heroImageTwoAlt"
     | "heroImageThree"
-    | "heroImageThreeAlt"
   >;
   readonly tourCards: readonly TourCard[];
   readonly travelPartners: readonly TravelPartner[];

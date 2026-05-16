@@ -26,16 +26,10 @@ const DEFAULT_PROMO_LABEL =
 const DEFAULT_PROMO_CTA = 'View offers';
 const DEFAULT_PROMO_HREF = '/tours';
 const DEFAULT_HOME_HERO_IMAGE = '/thumbnail.jpg';
-const DEFAULT_HOME_HERO_ALT =
-  'Misty mountains reflected in a crystal lake at first light';
 const DEFAULT_HOME_HERO_IMAGE_TWO =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80';
-const DEFAULT_HOME_HERO_ALT_TWO =
-  'Golden evening light over a secluded tropical bay';
 const DEFAULT_HOME_HERO_IMAGE_THREE =
   'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80';
-const DEFAULT_HOME_HERO_ALT_THREE =
-  'A sweeping coastline with clear water and distant cliffs';
 
 type AiProviderSettingsRecord = {
   provider: string;
@@ -81,11 +75,8 @@ type SiteContentSettingsRecord = {
   promoCta: string;
   promoHref: string;
   homeHeroImage: string;
-  homeHeroAlt: string;
   heroImageTwo: string;
-  heroImageTwoAlt: string;
   heroImageThree: string;
-  heroImageThreeAlt: string;
 };
 
 @Injectable()
@@ -204,12 +195,8 @@ export class SettingsService {
         promoCta: dto.promoCta ?? current.promoCta,
         promoHref: dto.promoHref ?? current.promoHref,
         homeHeroImage: dto.homeHeroImage ?? current.homeHeroImage,
-        homeHeroAlt: dto.homeHeroAlt ?? current.homeHeroAlt,
         heroImageTwo: dto.heroImageTwo ?? current.heroImageTwo,
-        heroImageTwoAlt: dto.heroImageTwoAlt ?? current.heroImageTwoAlt,
         heroImageThree: dto.heroImageThree ?? current.heroImageThree,
-        heroImageThreeAlt:
-          dto.heroImageThreeAlt ?? current.heroImageThreeAlt,
       },
       update: {
         ...(dto.siteName !== undefined ? { siteName: dto.siteName } : {}),
@@ -234,20 +221,11 @@ export class SettingsService {
         ...(dto.homeHeroImage !== undefined
           ? { homeHeroImage: dto.homeHeroImage }
           : {}),
-        ...(dto.homeHeroAlt !== undefined
-          ? { homeHeroAlt: dto.homeHeroAlt }
-          : {}),
         ...(dto.heroImageTwo !== undefined
           ? { heroImageTwo: dto.heroImageTwo }
           : {}),
-        ...(dto.heroImageTwoAlt !== undefined
-          ? { heroImageTwoAlt: dto.heroImageTwoAlt }
-          : {}),
         ...(dto.heroImageThree !== undefined
           ? { heroImageThree: dto.heroImageThree }
-          : {}),
-        ...(dto.heroImageThreeAlt !== undefined
-          ? { heroImageThreeAlt: dto.heroImageThreeAlt }
           : {}),
       },
     });
@@ -362,13 +340,9 @@ export class SettingsService {
       promoCta: config?.promoCta ?? DEFAULT_PROMO_CTA,
       promoHref: config?.promoHref ?? DEFAULT_PROMO_HREF,
       homeHeroImage: config?.homeHeroImage ?? DEFAULT_HOME_HERO_IMAGE,
-      homeHeroAlt: config?.homeHeroAlt ?? DEFAULT_HOME_HERO_ALT,
       heroImageTwo: config?.heroImageTwo ?? DEFAULT_HOME_HERO_IMAGE_TWO,
-      heroImageTwoAlt: config?.heroImageTwoAlt ?? DEFAULT_HOME_HERO_ALT_TWO,
       heroImageThree:
         config?.heroImageThree ?? DEFAULT_HOME_HERO_IMAGE_THREE,
-      heroImageThreeAlt:
-        config?.heroImageThreeAlt ?? DEFAULT_HOME_HERO_ALT_THREE,
     };
   }
 

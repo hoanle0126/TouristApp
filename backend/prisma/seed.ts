@@ -2351,14 +2351,10 @@ const seedSiteContentConfig = {
   promoCta: 'View offers',
   promoHref: '/tours',
   homeHeroImage: '/thumbnail.jpg',
-  homeHeroAlt: 'Misty mountains reflected in a crystal lake at first light',
   heroImageTwo:
     'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
-  heroImageTwoAlt: 'Golden evening light over a secluded tropical bay',
   heroImageThree:
     'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80',
-  heroImageThreeAlt:
-    'A sweeping coastline with clear water and distant cliffs',
 } as const;
 
 async function main() {

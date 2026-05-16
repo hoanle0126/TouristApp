@@ -12,6 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
 import { TravelerReviewsModule } from './traveler-reviews/traveler-reviews.module';
 import { ToursModule } from './tours/tours.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ToursModule } from './tours/tours.module';
     BookingsModule,
     ChatbotModule,
     SettingsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -54,25 +54,10 @@ export class UpdateSiteContentSettingsDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  homeHeroAlt?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
   heroImageTwo?: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  heroImageTwoAlt?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
   heroImageThree?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  heroImageThreeAlt?: string;
 }

@@ -22,6 +22,7 @@ import { Card, CardContent } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
+import { ImageUploadInput } from "@/src/components/admin/ImageUploadInput";
 import {
   getAiProviderSettings,
   getShopPaymentSettings,
@@ -90,11 +91,8 @@ type SiteContentFormState = {
   promoCta: string;
   promoHref: string;
   homeHeroImage: string;
-  homeHeroAlt: string;
   heroImageTwo: string;
-  heroImageTwoAlt: string;
   heroImageThree: string;
-  heroImageThreeAlt: string;
 };
 
 type StatusState = {
@@ -128,11 +126,8 @@ const defaultSiteContentForm: SiteContentFormState = {
   promoCta: "",
   promoHref: "",
   homeHeroImage: "",
-  homeHeroAlt: "",
   heroImageTwo: "",
-  heroImageTwoAlt: "",
   heroImageThree: "",
-  heroImageThreeAlt: "",
 };
 
 function createFormFromSettings(settings: ApiAiProviderSettings): FormState {
@@ -157,11 +152,8 @@ function createSiteContentForm(settings: ApiSiteContentSettings): SiteContentFor
     promoCta: settings.promoCta,
     promoHref: settings.promoHref,
     homeHeroImage: settings.homeHeroImage,
-    homeHeroAlt: settings.homeHeroAlt,
     heroImageTwo: settings.heroImageTwo,
-    heroImageTwoAlt: settings.heroImageTwoAlt,
     heroImageThree: settings.heroImageThree,
-    heroImageThreeAlt: settings.heroImageThreeAlt,
   };
 }
 
@@ -429,11 +421,8 @@ export default function AdminSettingsPage() {
       ["Promo CTA", siteContentForm.promoCta],
       ["Promo link", siteContentForm.promoHref],
       ["Hero image 1", siteContentForm.homeHeroImage],
-      ["Hero image 1 alt", siteContentForm.homeHeroAlt],
       ["Hero image 2", siteContentForm.heroImageTwo],
-      ["Hero image 2 alt", siteContentForm.heroImageTwoAlt],
       ["Hero image 3", siteContentForm.heroImageThree],
-      ["Hero image 3 alt", siteContentForm.heroImageThreeAlt],
     ];
 
     const missingField = requiredFields.find(([, value]) => value.trim().length === 0);
@@ -458,11 +447,8 @@ export default function AdminSettingsPage() {
         promoCta: siteContentForm.promoCta.trim(),
         promoHref: siteContentForm.promoHref.trim(),
         homeHeroImage: siteContentForm.homeHeroImage.trim(),
-        homeHeroAlt: siteContentForm.homeHeroAlt.trim(),
         heroImageTwo: siteContentForm.heroImageTwo.trim(),
-        heroImageTwoAlt: siteContentForm.heroImageTwoAlt.trim(),
         heroImageThree: siteContentForm.heroImageThree.trim(),
-        heroImageThreeAlt: siteContentForm.heroImageThreeAlt.trim(),
       });
       await refreshSettings();
       setSiteContentStatus({
@@ -789,57 +775,27 @@ export default function AdminSettingsPage() {
 
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
-                        <Label htmlFor="hero-image-one">Hero image 1 URL</Label>
-                        <Input
+                        <ImageUploadInput
                           id="hero-image-one"
-                          onChange={(event) => updateSiteContentField("homeHeroImage", event.target.value)}
-                          placeholder="https://..."
+                          label="Hero image 1 URL"
                           value={siteContentForm.homeHeroImage}
+                          onChange={(value) => updateSiteContentField("homeHeroImage", value)}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="hero-image-one-alt">Hero image 1 alt text</Label>
-                        <Input
-                          id="hero-image-one-alt"
-                          onChange={(event) => updateSiteContentField("homeHeroAlt", event.target.value)}
-                          placeholder="Describe the first hero image"
-                          value={siteContentForm.homeHeroAlt}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="hero-image-two">Hero image 2 URL</Label>
-                        <Input
+                        <ImageUploadInput
                           id="hero-image-two"
-                          onChange={(event) => updateSiteContentField("heroImageTwo", event.target.value)}
-                          placeholder="https://..."
+                          label="Hero image 2 URL"
                           value={siteContentForm.heroImageTwo}
+                          onChange={(value) => updateSiteContentField("heroImageTwo", value)}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="hero-image-two-alt">Hero image 2 alt text</Label>
-                        <Input
-                          id="hero-image-two-alt"
-                          onChange={(event) => updateSiteContentField("heroImageTwoAlt", event.target.value)}
-                          placeholder="Describe the second hero image"
-                          value={siteContentForm.heroImageTwoAlt}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="hero-image-three">Hero image 3 URL</Label>
-                        <Input
+                        <ImageUploadInput
                           id="hero-image-three"
-                          onChange={(event) => updateSiteContentField("heroImageThree", event.target.value)}
-                          placeholder="https://..."
+                          label="Hero image 3 URL"
                           value={siteContentForm.heroImageThree}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="hero-image-three-alt">Hero image 3 alt text</Label>
-                        <Input
-                          id="hero-image-three-alt"
-                          onChange={(event) => updateSiteContentField("heroImageThreeAlt", event.target.value)}
-                          placeholder="Describe the third hero image"
-                          value={siteContentForm.heroImageThreeAlt}
+                          onChange={(value) => updateSiteContentField("heroImageThree", value)}
                         />
                       </div>
                     </div>

@@ -311,11 +311,8 @@ export type ApiSiteContentSettings = {
   readonly promoCta: string;
   readonly promoHref: string;
   readonly homeHeroImage: string;
-  readonly homeHeroAlt: string;
   readonly heroImageTwo: string;
-  readonly heroImageTwoAlt: string;
   readonly heroImageThree: string;
-  readonly heroImageThreeAlt: string;
 };
 
 export type UpdateSiteContentSettingsInput = {
@@ -329,11 +326,8 @@ export type UpdateSiteContentSettingsInput = {
   readonly promoCta?: string;
   readonly promoHref?: string;
   readonly homeHeroImage?: string;
-  readonly homeHeroAlt?: string;
   readonly heroImageTwo?: string;
-  readonly heroImageTwoAlt?: string;
   readonly heroImageThree?: string;
-  readonly heroImageThreeAlt?: string;
 };
 
 export type TestAiProviderSettingsInput = {

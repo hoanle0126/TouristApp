@@ -2,6 +2,10 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Prisma, PrismaClient } from '@prisma/client';
 import 'dotenv/config';
 
+function parsePrice(priceStr: string): number {
+  return parseInt(priceStr.replace(/[^0-9]/g, ''), 10) || 0;
+}
+
 type SeedDestination = {
   slug: string;
   title: string;
@@ -2397,11 +2401,13 @@ async function main() {
         where: { slug: hotel.slug },
         create: {
           ...data,
+          priceAmount: parsePrice(data.price),
           destinations: { connect: destinationSlugs.map((slug) => ({ slug })) },
           inventoryDays: { create: inventory },
         },
         update: {
           ...data,
+          priceAmount: parsePrice(data.price),
           destinations: { set: destinationSlugs.map((slug) => ({ slug })) },
           inventoryDays: {
             deleteMany: {},
@@ -2421,12 +2427,14 @@ async function main() {
         where: { slug: tour.slug },
         create: {
           ...data,
+          priceAmount: parsePrice(data.price),
           destination: { connect: { slug: destinationSlug } },
           hotels: { connect: hotelSlugs.map((slug) => ({ slug })) },
           departures: { create: departures },
         },
         update: {
           ...data,
+          priceAmount: parsePrice(data.price),
           destination: { connect: { slug: destinationSlug } },
           hotels: { set: hotelSlugs.map((slug) => ({ slug })) },
           departures: {

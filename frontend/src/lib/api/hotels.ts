@@ -36,13 +36,16 @@ export type SaveHotelInput = {
   readonly destinationSlugs?: readonly string[];
 };
 
-export async function getHotels(query: { readonly search?: string; readonly location?: string; readonly perPage?: number } = {}) {
+export async function getHotels(query: { readonly search?: string; readonly location?: string; readonly perPage?: number; readonly rating?: string; readonly priceRange?: string; readonly amenities?: string } = {}) {
   const hotels = await apiFetch<ApiHotelCard[]>("/hotels", {
     cache: "no-store",
     query: {
       location: query.location,
       search: query.search,
       per_page: query.perPage,
+      rating: query.rating,
+      priceRange: query.priceRange,
+      amenities: query.amenities,
     },
   });
 

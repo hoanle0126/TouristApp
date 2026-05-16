@@ -31,12 +31,16 @@ export type SaveTourInput = {
   readonly destinationSlug: string;
 };
 
-export async function getTours(query: { readonly search?: string; readonly perPage?: number } = {}) {
+export async function getTours(query: { readonly search?: string; readonly perPage?: number; readonly type?: string; readonly duration?: string; readonly priceRange?: string; readonly departureDate?: string } = {}) {
   const tours = await apiFetch<ApiTourCard[]>("/tours", {
     cache: "no-store",
     query: {
       per_page: query.perPage,
       search: query.search,
+      type: query.type,
+      duration: query.duration,
+      priceRange: query.priceRange,
+      departureDate: query.departureDate,
     },
   });
   return tours.map(toTourCard);

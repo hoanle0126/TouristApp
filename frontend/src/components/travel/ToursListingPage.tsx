@@ -1,62 +1,25 @@
+
 import Image from "next/image";
 import Link from "next/link";
+
 import { ArrowLeft, ArrowRight, Filter } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
 import type { TourCard } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
-const filterGroups = [
-  {
-    options: ["Tour name", "Linked destination", "Linked hotel"],
-    title: "Find your tour",
-  },
-  {
-    options: ["Travel style", "Trip length"],
-    title: "Journey details",
-  },
-  {
-    options: ["Departure date", "Availability"],
-    title: "Booking needs",
-  },
-] as const;
 
-function ToursSidebarFilters() {
-  return (
-    <aside className="w-full shrink-0 lg:w-72">
-      <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_30px_80px_-55px_rgba(28,25,23,0.45)] lg:sticky lg:top-28">
-        <div className="mb-6 flex items-center justify-between border-b border-stone-100 pb-5">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Filters</p>
-            <h2 className="mt-1 text-xl font-black tracking-tight text-stone-950">Refine journeys</h2>
-          </div>
-          <Filter aria-hidden="true" className="size-5 text-emerald-800" />
-        </div>
-        <div className="space-y-7">
-          {filterGroups.map((group) => (
-            <div key={group.title}>
-              <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-stone-500">{group.title}</h3>
-              <div className="flex flex-wrap gap-2">
-                {group.options.map((option) => (
-                  <Button
-                    aria-label={`Filter tours by ${option}`}
-                    className="rounded-xl border border-stone-200 bg-stone-50 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50 hover:text-stone-950"
-                    key={option}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </aside>
-  );
-}
+
+import { ToursSidebarFilters } from "./filters/ToursFilters";
 
 function TourCardView({ tour }: Readonly<{ tour: TourCard }>) {
   return (
@@ -99,7 +62,7 @@ function TourCardView({ tour }: Readonly<{ tour: TourCard }>) {
   );
 }
 
-function ToursHero() {
+export function ToursHero() {
   return (
     <section className="mx-auto mb-20 max-w-screen-2xl px-8 pt-32 lg:px-24">
       <div className="max-w-3xl">
@@ -117,7 +80,7 @@ function ToursHero() {
   );
 }
 
-function ToursListingContent({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
+export function ToursListingContent({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
   return (
     <div className="min-w-0 flex-1">
       <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
@@ -175,21 +138,5 @@ function ToursListingContent({ tours }: Readonly<{ tours: readonly TourCard[] }>
         </div>
       )}
     </div>
-  );
-}
-
-export default function ToursListingPage({ tours }: Readonly<{ tours: readonly TourCard[] }>) {
-  return (
-    <main className="min-h-screen bg-[#f9faf6] text-stone-950">
-      <TravelHeader activeItem="Tours" />
-      <ToursHero />
-      <section className="mx-auto mb-24 max-w-screen-2xl px-8 lg:px-24">
-        <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
-          <ToursSidebarFilters />
-          <ToursListingContent tours={tours} />
-        </div>
-      </section>
-      <TravelFooter />
-    </main>
   );
 }

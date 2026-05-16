@@ -24,6 +24,7 @@ export class ToursController {
     @Query('type') type?: string,
     @Query('duration') duration?: string,
     @Query('search') search?: string,
+    @Query('priceRange') priceRange?: string,
     @Query('per_page') perPage?: string,
   ) {
     return this.toursService.findAll({
@@ -32,6 +33,7 @@ export class ToursController {
       hotel,
       perPage: this.parsePerPage(perPage),
       search,
+      priceRange,
       type,
     });
   }

@@ -14,13 +14,15 @@ export type SaveDestinationInput = {
   readonly spotlight: readonly { readonly title: string; readonly description: string }[];
 };
 
-export async function getDestinations(query: { readonly search?: string; readonly market?: string; readonly perPage?: number } = {}) {
+export async function getDestinations(query: { readonly search?: string; readonly market?: string; readonly perPage?: number; readonly region?: string; readonly style?: string } = {}) {
   const destinations = await apiFetch<ApiDestinationDetail[]>("/destinations", {
     cache: "no-store",
     query: {
       market: query.market,
       search: query.search,
       per_page: query.perPage,
+      region: query.region,
+      style: query.style,
     },
   });
 

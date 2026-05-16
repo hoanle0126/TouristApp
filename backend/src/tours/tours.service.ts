@@ -32,6 +32,7 @@ type FindAllFilters = {
   type?: string;
   duration?: string;
   search?: string;
+  priceRange?: string;
   perPage?: number;
   sort?: string;
 };
@@ -230,6 +231,24 @@ export class ToursService {
                 },
               },
             ],
+          }
+        : {}),
+      ...(filters.priceRange
+        ? {
+            priceAmount: (() => {
+              switch (filters.priceRange) {
+                case 'under-1000':
+                  return { lt: 1000 };
+                case '1000-3000':
+                  return { gte: 1000, lte: 3000 };
+                case '3000-5000':
+                  return { gte: 3000, lte: 5000 };
+                case '5000+':
+                  return { gte: 5000 };
+                default:
+                  return undefined;
+              }
+            })(),
           }
         : {}),
     } satisfies Prisma.TourWhereInput;

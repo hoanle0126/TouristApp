@@ -23,6 +23,7 @@ export class HotelsController {
     @Query('destination') destination?: string,
     @Query('tour') tour?: string,
     @Query('search') search?: string,
+    @Query('priceRange') priceRange?: string,
     @Query('per_page') perPage?: string,
   ) {
     return this.hotelsService.findAll({
@@ -30,6 +31,7 @@ export class HotelsController {
       destination,
       tour,
       search,
+      priceRange,
       perPage: this.parsePerPage(perPage),
     });
   }

@@ -41,6 +41,7 @@ export class HotelsService {
       destination?: string;
       tour?: string;
       search?: string;
+      priceRange?: string;
       perPage?: number;
     } = {},
   ) {
@@ -191,6 +192,7 @@ export class HotelsService {
     destination?: string;
     tour?: string;
     search?: string;
+    priceRange?: string;
   }) {
     return {
       status: 'published',
@@ -228,6 +230,24 @@ export class HotelsService {
                 },
               },
             ],
+          }
+        : {}),
+      ...(filters.priceRange
+        ? {
+            priceAmount: (() => {
+              switch (filters.priceRange) {
+                case 'under-200':
+                  return { lt: 200 };
+                case '200-500':
+                  return { gte: 200, lte: 500 };
+                case '500-1000':
+                  return { gte: 500, lte: 1000 };
+                case '1000+':
+                  return { gte: 1000 };
+                default:
+                  return undefined;
+              }
+            })(),
           }
         : {}),
     } satisfies Prisma.HotelWhereInput;

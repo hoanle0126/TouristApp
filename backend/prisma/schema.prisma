@@ -15,6 +15,7 @@ model Tour {
   duration         String
   guests           String
   price            String
+  priceAmount      Int        @default(0)
   availability     String
   description      Json
   shortDescription String
@@ -121,6 +122,7 @@ model Hotel {
   location         String
   address          String
   price            String
+  priceAmount      Int                 @default(0)
   badge            String?
   status           String              @default("published")
   listingImage     String

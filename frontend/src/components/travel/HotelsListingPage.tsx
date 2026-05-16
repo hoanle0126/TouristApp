@@ -1,27 +1,25 @@
+
 import Image from "next/image";
 import Link from "next/link";
+
 import { ArrowRight, MapPin, Search } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
 import type { HotelCard } from "@/src/types/travel";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 
-const hotelFilterGroups = [
-  {
-    options: ["Hotel name", "Stay location", "Address"],
-    title: "Find your stay",
-  },
-  {
-    options: ["Linked destination", "Linked tour"],
-    title: "Related inventory",
-  },
-  {
-    options: ["Check-in date", "Guest count"],
-    title: "Booking needs",
-  },
-] as const;
 
-function HotelsHero() {
+
+export function HotelsHero() {
   return (
     <section className="mx-auto max-w-screen-2xl px-8 pb-12 pt-36 lg:px-24 lg:pb-16 lg:pt-44">
       <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
@@ -41,42 +39,7 @@ function HotelsHero() {
   );
 }
 
-function HotelsSidebarFilters() {
-  return (
-    <aside className="w-full shrink-0 lg:w-72">
-      <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_30px_80px_-55px_rgba(28,25,23,0.45)] lg:sticky lg:top-28">
-        <div className="mb-6 flex items-center justify-between border-b border-stone-100 pb-5">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Filters</p>
-            <h2 className="mt-1 text-xl font-black tracking-tight text-stone-950">Refine stays</h2>
-          </div>
-          <Search aria-hidden="true" className="size-5 text-emerald-800" />
-        </div>
-        <div className="space-y-7">
-          {hotelFilterGroups.map((group) => (
-            <div key={group.title}>
-              <h3 className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-stone-500">{group.title}</h3>
-              <div className="flex flex-wrap gap-2">
-                {group.options.map((option) => (
-                  <Button
-                    aria-label={`Filter hotels by ${option}`}
-                    className="rounded-xl border border-stone-200 bg-stone-50 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50 hover:text-stone-950"
-                    key={option}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </aside>
-  );
-}
+import { HotelsSidebarFilters } from "./filters/HotelsFilters";
 
 function HotelCardView({ hotel }: Readonly<{ hotel: HotelCard }>) {
   return (
@@ -129,7 +92,7 @@ function HotelCardView({ hotel }: Readonly<{ hotel: HotelCard }>) {
   );
 }
 
-function HotelsListingContent({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
+export function HotelsListingContent({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
   return (
     <div className="min-w-0 flex-1">
       <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
@@ -170,7 +133,7 @@ function HotelsListingContent({ hotels }: Readonly<{ hotels: readonly HotelCard[
   );
 }
 
-function PrivateCurationCta() {
+export function PrivateCurationCta() {
   return (
     <section className="mx-auto max-w-screen-2xl px-8 pb-24 lg:px-24 lg:pb-32">
       <div className="relative overflow-hidden rounded-[2.5rem] bg-stone-950 px-8 py-16 text-white md:px-14 lg:px-20">
@@ -200,19 +163,4 @@ function PrivateCurationCta() {
   );
 }
 
-export default function HotelsListingPage({ hotels }: Readonly<{ hotels: readonly HotelCard[] }>) {
-  return (
-    <main className="min-h-screen bg-[#f9faf6] text-stone-950">
-      <TravelHeader activeItem="Hotels" />
-      <HotelsHero />
-      <section className="mx-auto max-w-screen-2xl px-8 pb-24 pt-8 lg:px-24 lg:pb-32">
-        <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
-          <HotelsSidebarFilters />
-          <HotelsListingContent hotels={hotels} />
-        </div>
-      </section>
-      <PrivateCurationCta />
-      <TravelFooter />
-    </main>
-  );
-}
+

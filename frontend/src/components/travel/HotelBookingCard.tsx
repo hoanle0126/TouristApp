@@ -252,7 +252,7 @@ function statusLabel(status: AvailabilityStatus) {
 
 function statusClasses(status: AvailabilityStatus) {
   if (status === "available") {
-    return "bg-emerald-100 text-emerald-900";
+    return "bg-red-100 text-red-900";
   }
 
   if (status === "limited") {
@@ -331,7 +331,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
             <span className="ml-2 text-stone-500">/ night</span>
           </div>
           <div className="flex items-center gap-1 text-sm font-black text-stone-950">
-            <Star className="size-4 fill-emerald-800 text-emerald-800" />
+            <Star className="size-4 fill-red-800 text-red-800" />
             {hotel.booking.rating}
           </div>
         </div>
@@ -400,7 +400,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
           </div>
 
           <div className="rounded-[1.5rem] border border-stone-200 bg-stone-50 px-5 py-4 text-center">
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Live Availability</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-800">Live Availability</p>
             <p className="mt-2 text-sm font-semibold text-stone-950">
               {nights > 0 ? `${stayLabel} • ${nights} nights` : "Select check-in and check-out dates to see available rooms."}
             </p>
@@ -415,8 +415,8 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
 
           {inventoryOpen && nights === 0 ? (
             <div className="rounded-[1.5rem] border border-dashed border-stone-200 bg-white px-5 py-6 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50">
-                <CalendarSearch className="size-6 text-emerald-800" />
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-red-50">
+                <CalendarSearch className="size-6 text-red-800" />
               </div>
               <p className="mt-4 text-lg font-black tracking-tight text-stone-950">Choose your stay to reveal room options</p>
               <p className="mt-2 text-sm leading-relaxed text-stone-500">
@@ -427,8 +427,8 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
 
           {inventoryOpen && nights > 0 && availabilityOptions.length === 0 && !availabilityFeedback ? (
             <div className="rounded-[1.5rem] border border-dashed border-stone-200 bg-white px-5 py-6 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50">
-                <CalendarSearch className="size-6 text-emerald-800" />
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-red-50">
+                <CalendarSearch className="size-6 text-red-800" />
               </div>
               <p className="mt-4 text-lg font-black tracking-tight text-stone-950">No room matches this stay yet</p>
               <p className="mt-2 text-sm leading-relaxed text-stone-500">
@@ -451,7 +451,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                     {quantity === 1 ? "1 room" : `${quantity} rooms`} available for this alternative.
                   </p>
                   <Button
-                    className="mt-3 w-full rounded-xl border border-emerald-200 bg-white text-sm font-bold text-emerald-950 hover:bg-emerald-50"
+                    className="mt-3 w-full rounded-xl border border-red-200 bg-white text-sm font-bold text-red-950 hover:bg-red-50"
                     onClick={() => {
                       setCheckIn(availabilityFeedback.nextAvailableStay!.checkIn);
                       setCheckOut(availabilityFeedback.nextAvailableStay!.checkOut);
@@ -475,7 +475,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
             <div className="space-y-4 rounded-[1.5rem] border border-stone-200 bg-stone-50 p-4">
               <div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Availability Results</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-800">Availability Results</p>
                   <p className="mt-1 text-sm font-semibold text-stone-950">
                     {stayLabel} • {nights} nights
                   </p>
@@ -495,7 +495,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                       <button
                         className={
                           selected
-                            ? "w-full rounded-[1.25rem] border border-emerald-800 bg-white p-4 text-left shadow-[0_18px_40px_-30px_rgba(6,78,59,0.35)]"
+                            ? "w-full rounded-[1.25rem] border border-red-800 bg-white p-4 text-left shadow-[0_18px_40px_-30px_rgba(6,78,59,0.35)]"
                             : "w-full rounded-[1.25rem] border border-stone-200 bg-white p-4 text-left transition-colors hover:border-stone-300"
                         }
                         disabled={disabled}
@@ -524,7 +524,7 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
                               Total stay {option.total}
                             </p>
                           </div>
-                          <span className={selected ? "text-xs font-black uppercase tracking-[0.18em] text-emerald-800" : disabled ? "text-xs font-black uppercase tracking-[0.18em] text-stone-400" : "text-xs font-black uppercase tracking-[0.18em] text-stone-400"}>
+                          <span className={selected ? "text-xs font-black uppercase tracking-[0.18em] text-red-800" : disabled ? "text-xs font-black uppercase tracking-[0.18em] text-stone-400" : "text-xs font-black uppercase tracking-[0.18em] text-stone-400"}>
                             {selected ? "Selected" : disabled ? "Unavailable" : "Select room"}
                           </span>
                         </div>
@@ -539,14 +539,14 @@ export function HotelBookingCard({ hotel }: Readonly<{ hotel: HotelDetail }>) {
           {!inventoryOpen ? (
             <div className="rounded-[1.5rem] border border-dashed border-stone-200 bg-stone-50 px-5 py-6 text-center">
               <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-white shadow-sm shadow-stone-950/5">
-                <BedDouble className="size-6 text-emerald-800" />
+                <BedDouble className="size-6 text-red-800" />
               </div>
               <p className="mt-4 text-lg font-black tracking-tight text-stone-950">No stay inventory is open right now</p>
               <p className="mt-2 text-sm leading-relaxed text-stone-500">
                 This property has no bookable room dates available yet. Check back soon or contact the travel desk for upcoming openings.
               </p>
               {nextOpenDay ? (
-                <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-emerald-800">
+                <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-red-800">
                   Next open date: {formatDate(nextOpenDay)}
                 </p>
               ) : null}

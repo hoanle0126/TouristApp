@@ -50,7 +50,7 @@ export default async function AdminBlogsPage() {
             <CardContent className="p-6">
               <p className="text-sm font-medium text-stone-500">{item.label}</p>
               <p className="mt-4 text-3xl font-bold tracking-tight text-stone-950">{item.value}</p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">{item.note}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-red-800">{item.note}</p>
             </CardContent>
           </Card>
         ))}
@@ -61,7 +61,7 @@ export default async function AdminBlogsPage() {
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between border-b border-stone-200 pb-5">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Editorial pipeline</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Editorial pipeline</p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">Published stories and next briefs</h3>
               </div>
               <Button size="sm" variant="ghost">
@@ -75,7 +75,7 @@ export default async function AdminBlogsPage() {
                 <div className="rounded-2xl bg-stone-50 p-4" key={post.slug}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-800">{post.category}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-800">{post.category}</p>
                       <p className="mt-2 text-lg font-bold tracking-tight text-stone-950">{post.title}</p>
                       <p className="mt-2 text-sm leading-relaxed text-stone-600">{post.excerpt}</p>
                     </div>
@@ -101,10 +101,10 @@ export default async function AdminBlogsPage() {
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">Content watchlist</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">Content watchlist</p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight">Editorial actions</h3>
               </div>
-              <BookOpenText className="size-5 text-emerald-200" />
+              <BookOpenText className="size-5 text-red-200" />
             </div>
             <div className="mt-6 space-y-3">
               {[
@@ -115,7 +115,7 @@ export default async function AdminBlogsPage() {
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4" key={item.title}>
                   <div className="flex gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white/10">
-                      <item.icon className="size-4 text-emerald-200" />
+                      <item.icon className="size-4 text-red-200" />
                     </span>
                     <div>
                       <p className="font-semibold tracking-tight">{item.title}</p>

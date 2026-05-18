@@ -33,7 +33,7 @@ function TourCardView({ tour }: Readonly<{ tour: TourCard }>) {
           src={tour.image}
         />
         {tour.badge ? (
-          <div className="absolute left-4 top-4 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-950">
+          <div className="absolute left-4 top-4 rounded-full bg-red-100 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-red-950">
             {tour.badge}
           </div>
         ) : null}
@@ -44,7 +44,7 @@ function TourCardView({ tour }: Readonly<{ tour: TourCard }>) {
           <span className="size-1 rounded-full bg-stone-300" />
           <span>{tour.guests}</span>
         </div>
-        <h3 className="text-2xl font-extrabold tracking-tight text-stone-950 transition-colors group-hover:text-emerald-800">
+        <h3 className="text-2xl font-extrabold tracking-tight text-stone-950 transition-colors group-hover:text-red-800">
           {tour.title}
         </h3>
         <p className="line-clamp-2 text-sm leading-relaxed text-stone-600">{tour.description}</p>
@@ -66,7 +66,7 @@ export function ToursHero() {
   return (
     <section className="mx-auto mb-20 max-w-screen-2xl px-8 pt-32 lg:px-24">
       <div className="max-w-3xl">
-        <span className="mb-4 inline-block text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">
+        <span className="mb-4 inline-block text-xs font-bold uppercase tracking-[0.2em] text-red-700">
           Curated Collection
         </span>
         <h1 className="mb-8 text-5xl font-extrabold leading-[1.1] tracking-tighter text-stone-950 md:text-7xl">
@@ -85,7 +85,7 @@ export function ToursListingContent({ tours }: Readonly<{ tours: readonly TourCa
     <div className="min-w-0 flex-1">
       <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Curated Collection</p>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-red-800">Curated Collection</p>
           <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Tours &amp; Journeys</h2>
           <p className="mt-3 text-sm leading-relaxed text-stone-500">Showing {tours.length} journeys</p>
         </div>
@@ -114,7 +114,7 @@ export function ToursListingContent({ tours }: Readonly<{ tours: readonly TourCa
                 <span className="h-px w-8 bg-stone-300" />
                 <span className="text-stone-400">08</span>
               </div>
-              <button aria-label="Next page" className="text-stone-950 transition-colors hover:text-emerald-800" type="button">
+              <button aria-label="Next page" className="text-stone-950 transition-colors hover:text-red-800" type="button">
                 <ArrowRight className="size-5" />
               </button>
             </div>
@@ -122,7 +122,7 @@ export function ToursListingContent({ tours }: Readonly<{ tours: readonly TourCa
         </>
       ) : (
         <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
             <Filter className="size-7" />
           </div>
           <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No journeys are available right now</h3>

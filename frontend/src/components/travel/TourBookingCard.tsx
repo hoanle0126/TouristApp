@@ -109,7 +109,7 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
           ].map(([label, value]) => (
             <div className="flex items-center justify-between border-b border-stone-200 py-3" key={label}>
               <span className="text-stone-500">{label}</span>
-              <span className={label === "Availability" ? "font-semibold text-emerald-800" : "font-semibold text-stone-950"}>{value}</span>
+              <span className={label === "Availability" ? "font-semibold text-red-800" : "font-semibold text-stone-950"}>{value}</span>
             </div>
           ))}
         </div>
@@ -201,7 +201,7 @@ export function TourBookingCard({ tour }: Readonly<{ tour: TourDetail }>) {
             </div>
             <div>
               <p className="text-sm font-bold text-stone-950">Talk to a Curator</p>
-              <a className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-tight text-emerald-800 hover:underline" href="#">
+              <a className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-tight text-red-800 hover:underline" href="#">
                 <MessageCircle className="size-3.5" />
                 Chat with us now
               </a>

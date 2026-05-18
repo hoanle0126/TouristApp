@@ -17,7 +17,7 @@ export default function PublicBookingLookupPage() {
           <nav aria-label="Breadcrumb" className="mb-8">
             <ol className="flex flex-wrap items-center gap-2 text-sm font-semibold text-stone-500">
               <li>
-                <Link className="transition-colors hover:text-emerald-700" href="/">
+                <Link className="transition-colors hover:text-red-700" href="/">
                   Home
                 </Link>
               </li>
@@ -31,7 +31,7 @@ export default function PublicBookingLookupPage() {
           </nav>
 
           <div className="mb-8 max-w-3xl">
-            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-red-800">
               Booking lookup
             </p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-stone-950 sm:text-5xl">

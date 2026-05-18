@@ -313,6 +313,9 @@ export type ApiSiteContentSettings = {
   readonly homeHeroImage: string;
   readonly heroImageTwo: string;
   readonly heroImageThree: string;
+  readonly facebookUrl: string;
+  readonly tiktokUrl: string;
+  readonly instagramUrl: string;
 };
 
 export type UpdateSiteContentSettingsInput = {
@@ -328,6 +331,9 @@ export type UpdateSiteContentSettingsInput = {
   readonly homeHeroImage?: string;
   readonly heroImageTwo?: string;
   readonly heroImageThree?: string;
+  readonly facebookUrl?: string;
+  readonly tiktokUrl?: string;
+  readonly instagramUrl?: string;
 };
 
 export type TestAiProviderSettingsInput = {

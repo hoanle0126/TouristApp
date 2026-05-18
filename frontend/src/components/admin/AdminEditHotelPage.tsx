@@ -60,7 +60,7 @@ export default async function AdminEditHotelPage({ slug }: AdminEditHotelPagePro
             <span className="flex size-16 items-center justify-center rounded-3xl bg-stone-100 text-stone-500">
               <SearchX className="size-7" />
             </span>
-            <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
               Hotel not found
             </p>
             <h3 className="mt-3 text-3xl font-bold tracking-tight text-stone-950">

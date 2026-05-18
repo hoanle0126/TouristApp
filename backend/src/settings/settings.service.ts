@@ -77,6 +77,9 @@ type SiteContentSettingsRecord = {
   homeHeroImage: string;
   heroImageTwo: string;
   heroImageThree: string;
+  facebookUrl: string;
+  tiktokUrl: string;
+  instagramUrl: string;
 };
 
 @Injectable()
@@ -197,6 +200,9 @@ export class SettingsService {
         homeHeroImage: dto.homeHeroImage ?? current.homeHeroImage,
         heroImageTwo: dto.heroImageTwo ?? current.heroImageTwo,
         heroImageThree: dto.heroImageThree ?? current.heroImageThree,
+        facebookUrl: dto.facebookUrl ?? current.facebookUrl,
+        tiktokUrl: dto.tiktokUrl ?? current.tiktokUrl,
+        instagramUrl: dto.instagramUrl ?? current.instagramUrl,
       },
       update: {
         ...(dto.siteName !== undefined ? { siteName: dto.siteName } : {}),
@@ -226,6 +232,15 @@ export class SettingsService {
           : {}),
         ...(dto.heroImageThree !== undefined
           ? { heroImageThree: dto.heroImageThree }
+          : {}),
+        ...(dto.facebookUrl !== undefined
+          ? { facebookUrl: dto.facebookUrl }
+          : {}),
+        ...(dto.tiktokUrl !== undefined
+          ? { tiktokUrl: dto.tiktokUrl }
+          : {}),
+        ...(dto.instagramUrl !== undefined
+          ? { instagramUrl: dto.instagramUrl }
           : {}),
       },
     });
@@ -343,6 +358,9 @@ export class SettingsService {
       heroImageTwo: config?.heroImageTwo ?? DEFAULT_HOME_HERO_IMAGE_TWO,
       heroImageThree:
         config?.heroImageThree ?? DEFAULT_HOME_HERO_IMAGE_THREE,
+      facebookUrl: config?.facebookUrl ?? '',
+      tiktokUrl: config?.tiktokUrl ?? '',
+      instagramUrl: config?.instagramUrl ?? '',
     };
   }
 

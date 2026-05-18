@@ -50,7 +50,7 @@ export default async function AdminHotelsPage() {
             <CardContent className="p-6">
               <p className="text-sm font-medium text-stone-500">{item.label}</p>
               <p className="mt-4 text-3xl font-bold tracking-tight text-stone-950">{item.value}</p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">{item.note}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-red-800">{item.note}</p>
             </CardContent>
           </Card>
         ))}
@@ -61,7 +61,7 @@ export default async function AdminHotelsPage() {
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between border-b border-stone-200 pb-5">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Hotel portfolio</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Hotel portfolio</p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">Current stays and merchandising posture</h3>
               </div>
               <Button disabled size="sm" variant="ghost">
@@ -105,10 +105,10 @@ export default async function AdminHotelsPage() {
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">Property watchlist</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">Property watchlist</p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight">Partner notes</h3>
               </div>
-              <Hotel className="size-5 text-emerald-200" />
+              <Hotel className="size-5 text-red-200" />
             </div>
             <div className="mt-6 space-y-3">
               {[
@@ -119,7 +119,7 @@ export default async function AdminHotelsPage() {
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4" key={item.title}>
                   <div className="flex gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white/10">
-                      <item.icon className="size-4 text-emerald-200" />
+                      <item.icon className="size-4 text-red-200" />
                     </span>
                     <div>
                       <p className="font-semibold tracking-tight">{item.title}</p>

@@ -42,7 +42,7 @@ function SectionHeading({
 }>) {
   return (
     <div className="mb-10 flex items-center gap-4">
-      <span className="text-xs font-bold uppercase tracking-[0.32em] text-emerald-800">
+      <span className="text-xs font-bold uppercase tracking-[0.32em] text-red-800">
         {index}
       </span>
       <h2
@@ -220,13 +220,13 @@ export default function CheckoutPage() {
           <Link
             className={cn(
               headlineFont.className,
-              "text-2xl font-bold uppercase tracking-[-0.08em] text-emerald-950",
+              "text-2xl font-bold uppercase tracking-[-0.08em] text-red-950",
             )}
             href="/"
           >
             Curator
           </Link>
-          <Button asChild className="gap-2 rounded-full px-4 text-stone-500 hover:text-emerald-900" variant="ghost">
+          <Button asChild className="gap-2 rounded-full px-4 text-stone-500 hover:text-red-900" variant="ghost">
             <Link href="/">
               <X className="size-4" />
               <span className="text-xs uppercase tracking-[0.22em]">
@@ -247,7 +247,7 @@ export default function CheckoutPage() {
           >
             Checkout
           </h1>
-          <div className="mt-5 h-1 w-24 rounded-full bg-emerald-800" />
+          <div className="mt-5 h-1 w-24 rounded-full bg-red-800" />
         </section>
 
         <form className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-20 xl:gap-24" onSubmit={handleSubmit}>
@@ -261,7 +261,7 @@ export default function CheckoutPage() {
                       Full Name
                     </Label>
                     <Input
-                      className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
+                      className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-red-800/12"
                       id="full-name"
                       name="fullName"
                       placeholder="Johnathan Doe"
@@ -272,7 +272,7 @@ export default function CheckoutPage() {
                       Phone Number
                     </Label>
                     <Input
-                      className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
+                      className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-red-800/12"
                       id="phone-number"
                       name="phone"
                       placeholder="+1 (555) 000-0000"
@@ -285,7 +285,7 @@ export default function CheckoutPage() {
                     Email Address
                   </Label>
                   <Input
-                    className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
+                    className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-red-800/12"
                     id="email-address"
                     name="email"
                     placeholder="curator@travel.com"
@@ -297,13 +297,13 @@ export default function CheckoutPage() {
                     Country
                   </Label>
                   <Input
-                    className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-emerald-800/12"
+                    className="h-14 rounded-xl border-none bg-stone-100 px-6 shadow-none focus-visible:ring-4 focus-visible:ring-red-800/12"
                     id="country"
                     name="country"
                     placeholder="Vietnam"
                   />
                 </div>
-                <div className="rounded-xl border border-dashed border-emerald-800/30 bg-white px-5 py-4 text-sm leading-6 text-stone-600">
+                <div className="rounded-xl border border-dashed border-red-800/30 bg-white px-5 py-4 text-sm leading-6 text-stone-600">
                   After you submit this booking, you will be taken to a VietQR payment page with the shop account, total amount, and booking reference filled in automatically.
                 </div>
               </div>
@@ -350,7 +350,7 @@ export default function CheckoutPage() {
 
                 <CardContent className="space-y-8 p-6 md:p-8">
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-800">
+                    <span className="text-xs font-bold uppercase tracking-[0.28em] text-red-800">
                       Journey Summary
                     </span>
                     <h3
@@ -378,13 +378,13 @@ export default function CheckoutPage() {
                       icon={CreditCard}
                       label="Total Price"
                       value={journey.totalPrice}
-                      valueClassName="text-2xl text-emerald-800"
+                      valueClassName="text-2xl text-red-800"
                     />
                   </div>
 
                   <div className="rounded-xl border border-stone-200/70 bg-white p-5">
                     <div className="flex items-start gap-4">
-                      <Leaf className="mt-0.5 size-5 shrink-0 text-emerald-800" />
+                      <Leaf className="mt-0.5 size-5 shrink-0 text-red-800" />
                       <div>
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-stone-950">
                           Curator Carbon Credit
@@ -409,7 +409,7 @@ export default function CheckoutPage() {
           <Link
             className={cn(
               headlineFont.className,
-              "text-lg font-bold uppercase tracking-[-0.07em] text-emerald-950",
+              "text-lg font-bold uppercase tracking-[-0.07em] text-red-950",
             )}
             href="/"
           >

@@ -24,11 +24,11 @@ export function HotelsHero() {
     <section className="mx-auto max-w-screen-2xl px-8 pb-12 pt-36 lg:px-24 lg:pb-16 lg:pt-44">
       <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
-          <span className="mb-5 inline-flex rounded-full border border-emerald-800/20 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.28em] text-emerald-800">
+          <span className="mb-5 inline-flex rounded-full border border-red-800/20 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.28em] text-red-800">
             Private Hotel Index
           </span>
           <h1 className="text-6xl font-black leading-[0.9] tracking-tighter text-stone-950 md:text-8xl lg:text-9xl">
-            Curated <span className="font-serif italic text-emerald-800">Stays.</span>
+            Curated <span className="font-serif italic text-red-800">Stays.</span>
           </h1>
         </div>
         <p className="max-w-xl text-lg font-light leading-relaxed text-stone-600 md:text-xl">
@@ -63,11 +63,11 @@ function HotelCardView({ hotel }: Readonly<{ hotel: HotelCard }>) {
       </div>
       <div className="space-y-5 px-1">
         <div>
-          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
+          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-red-800">
             <MapPin className="size-3.5" />
             {hotel.location}
           </p>
-          <h3 className="text-3xl font-black tracking-tight text-stone-950 transition-colors group-hover:text-emerald-800">{hotel.name}</h3>
+          <h3 className="text-3xl font-black tracking-tight text-stone-950 transition-colors group-hover:text-red-800">{hotel.name}</h3>
         </div>
         <div className="flex flex-wrap gap-2">
           {hotel.amenities.map((amenity) => (
@@ -97,7 +97,7 @@ export function HotelsListingContent({ hotels }: Readonly<{ hotels: readonly Hot
     <div className="min-w-0 flex-1">
       <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Editorial Selection</p>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-red-800">Editorial Selection</p>
           <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Architectural retreats</h2>
           <p className="mt-3 text-sm leading-relaxed text-stone-500">Showing {hotels.length} stays</p>
         </div>
@@ -114,7 +114,7 @@ export function HotelsListingContent({ hotels }: Readonly<{ hotels: readonly Hot
         </div>
       ) : (
         <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
             <Search className="size-7" />
           </div>
           <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No curated stays are live right now</h3>
@@ -148,12 +148,12 @@ export function PrivateCurationCta() {
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/95 to-stone-950/55" />
         <div className="relative max-w-2xl">
-          <p className="mb-5 text-xs font-black uppercase tracking-[0.3em] text-emerald-200">Bespoke Concierge</p>
+          <p className="mb-5 text-xs font-black uppercase tracking-[0.3em] text-red-200">Bespoke Concierge</p>
           <h2 className="mb-6 text-4xl font-black tracking-tight md:text-6xl">Can&apos;t find your ideal retreat?</h2>
           <p className="mb-10 text-lg font-light leading-relaxed text-white/75">
             Let our bespoke travel concierges curate a private itinerary tailored specifically to your aesthetic and lifestyle requirements.
           </p>
-          <Button className="rounded-full bg-white px-8 py-6 text-xs font-black uppercase tracking-widest text-stone-950 hover:bg-emerald-100">
+          <Button className="rounded-full bg-white px-8 py-6 text-xs font-black uppercase tracking-widest text-stone-950 hover:bg-red-100">
             Request Private Curation
             <ArrowRight className="size-4" />
           </Button>

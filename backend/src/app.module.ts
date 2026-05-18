@@ -3,10 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BlogsModule } from './blogs/blogs.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { ContactModule } from './contact/contact.module';
 import { DestinationsModule } from './destinations/destinations.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { HotelsModule } from './hotels/hotels.module';
 import { EventsModule } from './events/events.module';
+import { NewsletterModule } from './newsletter/newsletter.module';
 import { PartnersModule } from './partners/partners.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
@@ -26,6 +28,8 @@ import { UploadsModule } from './uploads/uploads.module';
     BlogsModule,
     BookingsModule,
     ChatbotModule,
+    ContactModule,
+    NewsletterModule,
     SettingsModule,
     UploadsModule,
   ],

@@ -18,6 +18,8 @@ import { CircularImageRailSection } from "@/src/components/travel/CircularImageR
 import { FeedbackPartnersSection } from "@/src/components/travel/FeedbackPartnersSection";
 import { HeroImageCarousel } from "@/src/components/travel/HeroImageCarousel";
 import { HomeEventsSection } from "@/src/components/travel/HomeEventsSection";
+import { LandingContactForm } from "@/src/components/travel/LandingContactForm";
+import { PromoPopup } from "@/src/components/travel/PromoPopup";
 import { RegionalHighlightsSection } from "@/src/components/travel/RegionalHighlightsSection";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
 import { Button } from "@/src/components/ui/button";
@@ -93,12 +95,12 @@ interface HeroSectionProps {
   >;
 }
 
-interface HotelShowcaseSectionProps {
-  readonly hotels: readonly HotelCard[];
+interface DestinationShowcaseSectionProps {
+  readonly destinations: readonly DestinationCard[];
 }
 
-interface HotelShowcaseCardProps {
-  readonly hotel: HotelCard;
+interface DestinationShowcaseCardProps {
+  readonly destination: DestinationCard;
 }
 
 interface BlogSectionProps {
@@ -148,7 +150,7 @@ function SectionHeading({
 }: Readonly<SectionHeadingProps>) {
   return (
     <div className={align === "center" ? "text-center" : ""}>
-      <span className="mb-4 block text-sm font-bold uppercase tracking-[0.2em] text-emerald-700">
+      <span className="mb-4 block text-sm font-bold uppercase tracking-[0.2em] text-red-700">
         {eyebrow}
       </span>
       <h2 className="text-4xl font-extrabold tracking-tighter text-stone-950 md:text-5xl">
@@ -176,7 +178,7 @@ function LandingEmptyState({
 }>) {
   return (
     <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
         {icon}
       </div>
       <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">
@@ -235,7 +237,7 @@ function HeroSection({ slides, siteContent }: Readonly<HeroSectionProps>) {
           {siteContent.siteTagline}
         </p>
         <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tighter text-white md:text-7xl">
-          Discover <span className="text-emerald-100">{siteContent.siteName}</span>
+          Discover <span className="text-red-100">{siteContent.siteName}</span>
         </h1>
         <p className="mx-auto mb-12 max-w-2xl text-xl font-light tracking-wide text-white/90 md:text-2xl">
           {siteContent.siteDescription}
@@ -245,7 +247,7 @@ function HeroSection({ slides, siteContent }: Readonly<HeroSectionProps>) {
             <div className="grid flex-1 grid-cols-1 gap-2 md:grid-cols-4">
               <div className="rounded-2xl bg-stone-50/80 p-4 text-left">
                 <Label className="inline-flex items-center gap-1.5" htmlFor="destination">
-                  <MapPin className="size-3.5 text-emerald-700" />
+                  <MapPin className="size-3.5 text-red-700" />
                   Destination
                 </Label>
                 <Input
@@ -257,7 +259,7 @@ function HeroSection({ slides, siteContent }: Readonly<HeroSectionProps>) {
               </div>
               <div className="rounded-2xl bg-stone-50/80 p-4 text-left">
                 <Label className="inline-flex items-center gap-1.5" htmlFor="check-in">
-                  <CalendarDays className="size-3.5 text-emerald-700" />
+                  <CalendarDays className="size-3.5 text-red-700" />
                   Check-in
                 </Label>
                 <Input
@@ -268,7 +270,7 @@ function HeroSection({ slides, siteContent }: Readonly<HeroSectionProps>) {
               </div>
               <div className="rounded-2xl bg-stone-50/80 p-4 text-left">
                 <Label className="inline-flex items-center gap-1.5" htmlFor="check-out">
-                  <CalendarDays className="size-3.5 text-emerald-700" />
+                  <CalendarDays className="size-3.5 text-red-700" />
                   Check-out
                 </Label>
                 <Input
@@ -279,7 +281,7 @@ function HeroSection({ slides, siteContent }: Readonly<HeroSectionProps>) {
               </div>
               <div className="rounded-2xl bg-stone-50/80 p-4 text-left">
                 <Label className="inline-flex items-center gap-1.5">
-                  <Users className="size-3.5 text-emerald-700" />
+                  <Users className="size-3.5 text-red-700" />
                   Guests
                 </Label>
                 <Select defaultValue="2-adults">
@@ -305,35 +307,29 @@ function HeroSection({ slides, siteContent }: Readonly<HeroSectionProps>) {
   );
 }
 
-function HotelShowcaseCard({ hotel }: Readonly<HotelShowcaseCardProps>) {
+function DestinationShowcaseCard({ destination }: Readonly<DestinationShowcaseCardProps>) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-stone-200/70 bg-white shadow-sm transition-all duration-500 hover:shadow-xl">
       <div className="relative h-80 overflow-hidden">
         <Image
-          alt={hotel.alt}
+          alt={destination.alt}
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           fill
           sizes="(min-width: 1024px) 33vw, 100vw"
-          src={hotel.image}
+          src={destination.image}
         />
       </div>
       <div className="p-8">
-        <div className="mb-3 flex items-center justify-between gap-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
-            {hotel.location}
-          </p>
-          <p className="text-sm font-bold text-emerald-800">{hotel.price}</p>
-        </div>
-        <h3 className="mb-3 text-2xl font-bold text-stone-950">{hotel.name}</h3>
+        <h3 className="mb-3 text-2xl font-bold text-stone-950">{destination.title}</h3>
         <p className="mb-6 text-sm leading-relaxed text-stone-600">
-          {hotel.amenities.slice(0, 3).join(" • ")}
+          {destination.description}
         </p>
         <div className="flex items-center justify-between border-t border-stone-200 pt-6">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
-            Hotel
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-red-800">
+            Destination
           </span>
           <Button asChild className="rounded-full px-4" variant="ghost">
-            <Link href={hotel.slug ? `/hotels/${hotel.slug}` : "/hotels"}>
+            <Link href={destination.slug ? `/destinations/${destination.slug}` : destination.href}>
               Explore More
               <ArrowRight className="size-4" />
             </Link>
@@ -344,27 +340,27 @@ function HotelShowcaseCard({ hotel }: Readonly<HotelShowcaseCardProps>) {
   );
 }
 
-function HotelShowcaseSection({ hotels }: Readonly<HotelShowcaseSectionProps>) {
+function DestinationShowcaseSection({ destinations }: Readonly<DestinationShowcaseSectionProps>) {
   return (
-    <section className="bg-stone-100 py-24" id="hotels">
+    <section className="bg-stone-100 py-24" id="destinations">
       <div className="mx-auto max-w-screen-2xl px-8">
         <div className="mb-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <SectionHeading
-            eyebrow="Featured Stays"
+            eyebrow="Featured Destinations"
             subtitle="Architectural retreats and private sanctuaries selected for atmosphere, service, and sense of place."
-            title="Curated Hotels"
+            title="Curated Destinations"
           />
           <Button asChild className="w-fit" size="pill" variant="outline">
-            <Link href="/hotels">
+            <Link href="/destinations">
               View all
               <ArrowRight className="size-4" />
             </Link>
           </Button>
         </div>
-        {hotels.length > 0 ? (
+        {destinations.length > 0 ? (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {hotels.slice(0, 3).map((hotel) => (
-              <HotelShowcaseCard hotel={hotel} key={hotel.slug ?? hotel.name} />
+            {destinations.slice(0, 3).map((destination) => (
+              <DestinationShowcaseCard destination={destination} key={destination.slug ?? destination.title} />
             ))}
           </div>
         ) : (
@@ -387,7 +383,7 @@ function BlogCard({ post }: Readonly<BlogCardProps>) {
           src={post.image}
         />
       </div>
-      <span className="mb-3 text-xs font-bold uppercase tracking-widest text-emerald-700">
+      <span className="mb-3 text-xs font-bold uppercase tracking-widest text-red-700">
         {post.category}
       </span>
       <h3 className="mb-4 text-2xl font-bold leading-snug text-stone-950">
@@ -397,7 +393,7 @@ function BlogCard({ post }: Readonly<BlogCardProps>) {
         {post.excerpt}
       </p>
       <Link
-        className="group inline-flex items-center gap-2 text-sm font-bold text-emerald-800"
+        className="group inline-flex items-center gap-2 text-sm font-bold text-red-800"
         href={post.slug ? `/blog/${post.slug}` : "/blog"}
       >
         Read More <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -449,7 +445,7 @@ function ContactSection({
               ["General Inquiries", siteContent.contactEmail],
             ].map(([label, value]) => (
               <div className="flex items-start gap-6" key={label}>
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-800">
                   {label === "Global Headquarters" ? <MapPin className="size-5" /> : null}
                   {label === "Direct Line" ? <Phone className="size-5" /> : null}
                   {label === "General Inquiries" ? <Mail className="size-5" /> : null}
@@ -464,55 +460,7 @@ function ContactSection({
         </div>
         <Card className="bg-stone-100/90 shadow-xl shadow-stone-950/5">
           <CardContent className="p-8 md:p-12">
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <Label htmlFor="first-name">First Name</Label>
-                  <Input id="first-name" placeholder="First Name" type="text" />
-                </div>
-                <div>
-                  <Label htmlFor="last-name">Last Name</Label>
-                  <Input id="last-name" placeholder="Last Name" type="text" />
-                </div>
-              </div>
-              <div>
-                <Label className="inline-flex items-center gap-1.5" htmlFor="email">
-                  <Mail className="size-3.5 text-emerald-700" />
-                  Email Address
-                </Label>
-                <Input id="email" placeholder="Email Address" type="email" />
-              </div>
-              <div>
-                <Label className="inline-flex items-center gap-1.5">
-                  <MapPin className="size-3.5 text-emerald-700" />
-                  Desired Destination
-                </Label>
-                <Select defaultValue="europe">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="europe">Europe</SelectItem>
-                    <SelectItem value="asia">Asia</SelectItem>
-                    <SelectItem value="americas">The Americas</SelectItem>
-                    <SelectItem value="oceania">Oceania</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="inline-flex items-center gap-1.5" htmlFor="message">
-                  <Send className="size-3.5 text-emerald-700" />
-                  Message
-                </Label>
-                <Textarea id="message" placeholder="Message" rows={4} />
-              </div>
-              <Button asChild className="w-full py-6 text-base font-bold">
-                <Link href="/contact">
-                  <Send className="size-4" />
-                  Send Inquiry
-                </Link>
-              </Button>
-            </form>
+            <LandingContactForm />
           </CardContent>
         </Card>
       </div>
@@ -556,23 +504,29 @@ export default function TravelLandingPage({
   const heroSlides = buildHeroSlides(visualDiaryItems, siteContent);
   const featuredTourItems = buildTourHighlightItems(tourCards);
   const featuredHotelItems = buildHotelHighlightItems(hotelCards);
+  const promoEvent = eventCards[0];
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
+      {promoEvent ? <PromoPopup event={promoEvent} /> : null}
       <TravelHeader activeItem="Home" />
       <HeroSection siteContent={siteContent} slides={heroSlides} />
       <HomeEventsSection events={eventCards} />
       <CircularImageRailSection items={destinationCards} />
-      <HotelShowcaseSection hotels={hotelCards} />
-      <RegionalHighlightsSection items={featuredTourItems} />
+      <RegionalHighlightsSection
+        description=""
+        items={featuredTourItems}
+        title="Discover the North-Central-South tour of Vietnam"
+      />
       <RegionalHighlightsSection
         ctaHref="/hotels"
         ctaLabel="Browse stays"
         description="Private villas, design-led resorts, and high-touch stays arranged in a mirrored carousel for faster browsing."
         items={featuredHotelItems}
         reverse
-        title="Featured Stays"
+        title="Top-tier resort"
       />
+      <DestinationShowcaseSection destinations={destinationCards} />
       <BlogSection posts={blogPosts} />
       <FeedbackPartnersSection
         feedback={travelerFeedback}

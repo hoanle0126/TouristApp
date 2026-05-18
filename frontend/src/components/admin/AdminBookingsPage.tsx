@@ -66,7 +66,7 @@ function BookingStatGrid({ bookings }: { readonly bookings: readonly ApiBooking[
             <p className="mt-4 text-3xl font-bold tracking-tight text-stone-950">
               {item.value}
             </p>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-red-800">
               {item.note}
             </p>
           </CardContent>
@@ -82,14 +82,14 @@ function UpcomingCheckinsPanel({ bookings }: { readonly bookings: readonly ApiBo
       <CardContent className="p-6 sm:p-7">
         <div className="flex items-center justify-between border-b border-stone-200 pb-5">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
               Upcoming arrivals
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
               Next itineraries on the calendar
             </h3>
           </div>
-          <CalendarCheck2 className="size-5 text-emerald-800" />
+          <CalendarCheck2 className="size-5 text-red-800" />
         </div>
 
         <div className="mt-6 space-y-4">
@@ -113,7 +113,7 @@ function UpcomingCheckinsPanel({ bookings }: { readonly bookings: readonly ApiBo
                   </span>
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-900">
+                  <span className="rounded-full bg-red-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-red-900">
                     {booking.bookingCode}
                   </span>
                   <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
@@ -135,14 +135,14 @@ function PaymentsPanel() {
       <CardContent className="p-6 sm:p-7">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">
               Payment watchlist
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight">
               Cases finance should clear next
             </h3>
           </div>
-          <ReceiptText className="size-5 text-emerald-200" />
+          <ReceiptText className="size-5 text-red-200" />
         </div>
 
         <div className="mt-6 space-y-3">
@@ -150,7 +150,7 @@ function PaymentsPanel() {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4" key={title}>
               <div className="flex gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white/10">
-                  <Icon className="size-4 text-emerald-200" />
+                  <Icon className="size-4 text-red-200" />
                 </span>
                 <div>
                   <p className="font-semibold tracking-tight">{title}</p>
@@ -177,14 +177,14 @@ function BookingSummaryPanel() {
       <CardContent className="p-6 sm:p-7">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
               Booking ops pulse
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
               Today&apos;s throughput
             </h3>
           </div>
-          <Users className="size-5 text-emerald-800" />
+          <Users className="size-5 text-red-800" />
         </div>
 
         <div className="mt-6 space-y-3">

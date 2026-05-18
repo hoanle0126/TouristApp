@@ -33,11 +33,11 @@ export function DestinationsHero() {
     <section className="mx-auto max-w-screen-2xl px-8 pb-12 pt-36 lg:px-24 lg:pb-16 lg:pt-44">
       <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
-          <span className="mb-5 inline-flex rounded-full border border-emerald-800/20 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.28em] text-emerald-800">
+          <span className="mb-5 inline-flex rounded-full border border-red-800/20 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.28em] text-red-800">
             Curated Destination Index
           </span>
           <h1 className="text-6xl font-black leading-[0.9] tracking-tighter text-stone-950 md:text-8xl lg:text-9xl">
-            Global <span className="font-serif italic text-emerald-800">Destinations.</span>
+            Global <span className="font-serif italic text-red-800">Destinations.</span>
           </h1>
         </div>
         <p className="max-w-xl text-lg font-light leading-relaxed text-stone-600 md:text-xl">
@@ -65,11 +65,11 @@ function DestinationCardView({ destination }: Readonly<{ destination: Destinatio
       </div>
       <div className="space-y-5 px-1">
         <div>
-          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
+          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-red-800">
             <MapPin className="size-3.5" />
             Editorial Pick
           </p>
-          <h3 className="text-3xl font-black tracking-tight text-stone-950 transition-colors group-hover:text-emerald-800">
+          <h3 className="text-3xl font-black tracking-tight text-stone-950 transition-colors group-hover:text-red-800">
             {destination.title}
           </h3>
         </div>
@@ -92,7 +92,7 @@ export function DestinationsListingContent({ destinations }: Readonly<{ destinat
     <div className="min-w-0 flex-1">
       <div className="mb-8 flex flex-col gap-5 border-b border-stone-200 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Portfolio View</p>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-red-800">Portfolio View</p>
           <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Places with lasting pull</h2>
           <p className="mt-3 text-sm leading-relaxed text-stone-500">Showing {destinations.length} destinations</p>
         </div>
@@ -109,7 +109,7 @@ export function DestinationsListingContent({ destinations }: Readonly<{ destinat
         </div>
       ) : (
         <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
             <Compass className="size-7" />
           </div>
           <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No featured destinations are live yet</h3>
@@ -145,7 +145,7 @@ function SuggestionCardView({ suggestion }: Readonly<{ suggestion: TourCard }>) 
           <h3 className="text-xl font-bold tracking-tight text-stone-950">{suggestion.title}</h3>
           <p className="mt-1 text-sm text-stone-600">{suggestion.duration} · {suggestion.guests}</p>
         </div>
-        <p className="whitespace-nowrap text-sm font-bold text-emerald-800">{suggestion.price}</p>
+        <p className="whitespace-nowrap text-sm font-bold text-red-800">{suggestion.price}</p>
       </div>
     </article>
   );
@@ -156,10 +156,10 @@ export function PremiumExtensions({ suggestions }: Readonly<{ suggestions: reado
     <section className="mx-auto max-w-screen-2xl px-8 pb-24 lg:px-24 lg:pb-32">
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Beyond The Core</p>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-red-800">Beyond The Core</p>
           <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Add-on escapes and private extensions</h2>
         </div>
-        <Button className="rounded-full bg-stone-950 px-6 text-xs uppercase tracking-widest text-white hover:bg-emerald-900">
+        <Button className="rounded-full bg-stone-950 px-6 text-xs uppercase tracking-widest text-white hover:bg-red-900">
           <Sparkles className="size-4" />
           Request Bespoke Plan
         </Button>
@@ -172,7 +172,7 @@ export function PremiumExtensions({ suggestions }: Readonly<{ suggestions: reado
         </div>
       ) : (
         <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
             <Sparkles className="size-7" />
           </div>
           <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No private extensions to show yet</h3>

@@ -11,6 +11,7 @@ import {
   CreditCard,
   Hotel,
   LayoutDashboard,
+  Mail,
   MapPinned,
   Menu,
   Quote,
@@ -55,6 +56,7 @@ const adminNavItems: readonly AdminNavItem[] = [
   { href: "/admin/blogs", icon: SquarePen, label: "Blogs" },
   { href: "/admin/events", icon: CalendarDays, label: "Events" },
   { href: "/admin/feedback", icon: Quote, label: "Feedback" },
+  { href: "/admin/newsletter", icon: Mail, label: "Newsletter" },
   { href: "/admin/settings", icon: Settings2, label: "Settings" },
 ] as const;
 
@@ -124,7 +126,7 @@ function AdminTopBar({
         <div className="flex items-start gap-3">
           <AdminMobileNav activePath={activePath} />
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-emerald-800">
+            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-red-800">
               {dateLabel}
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-stone-950 sm:text-4xl">
@@ -226,7 +228,7 @@ function AdminSidebarContent({
             : "border-b border-stone-200/80 px-8 py-7"
         }
       >
-        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-emerald-800">
+        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-red-800">
           CURATOR Admin
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-stone-950">
@@ -246,7 +248,7 @@ function AdminSidebarContent({
               <Link
                 className={
                   active
-                    ? "flex w-full items-center justify-between rounded-2xl bg-emerald-900 px-4 py-3 text-left text-white shadow-lg shadow-emerald-950/10"
+                    ? "flex w-full items-center justify-between rounded-2xl bg-red-900 px-4 py-3 text-left text-white shadow-lg shadow-red-950/10"
                     : "flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-stone-600 transition-colors hover:bg-white hover:text-stone-950"
                 }
                 href={href}
@@ -277,7 +279,7 @@ function AdminSidebarContent({
         <Card className="overflow-hidden border-none bg-stone-950 text-white shadow-[0_30px_80px_-40px_rgba(28,25,23,0.85)]">
           <CardContent className="space-y-5 p-6">
             <div className="flex items-center justify-between">
-              <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-emerald-200">
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-red-200">
                 Live brief
               </span>
               <Clock3 className="size-4 text-white/60" />
@@ -292,7 +294,7 @@ function AdminSidebarContent({
               </p>
             </div>
             <Button
-              className="w-full bg-white text-stone-950 hover:bg-emerald-100"
+              className="w-full bg-white text-stone-950 hover:bg-red-100"
               variant="secondary"
             >
               View arrival plan

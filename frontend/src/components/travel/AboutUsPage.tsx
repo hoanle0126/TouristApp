@@ -32,17 +32,17 @@ function StorySection() {
         <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-stone-200 shadow-[0_30px_80px_-55px_rgba(28,25,23,0.65)]">
           <Image alt={aboutPageData.story.alt} className="object-cover transition-transform duration-700 hover:scale-105" fill sizes="(min-width: 768px) 50vw, 100vw" src={aboutPageData.story.image} />
         </div>
-        <div className="absolute -bottom-8 -right-8 -z-10 size-48 rounded-2xl bg-emerald-100/60 backdrop-blur-xl" />
+        <div className="absolute -bottom-8 -right-8 -z-10 size-48 rounded-2xl bg-red-100/60 backdrop-blur-xl" />
       </div>
       <div className="space-y-8">
-        <span className="text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Our Narrative</span>
+        <span className="text-xs font-black uppercase tracking-[0.3em] text-red-800">Our Narrative</span>
         <h2 className="text-5xl font-black leading-tight tracking-tighter text-stone-950 md:text-6xl">{aboutPageData.story.heading}</h2>
         <div className="space-y-6 text-lg leading-relaxed text-stone-600">
           {aboutPageData.story.body.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-        <Button className="text-sm font-black text-emerald-800 hover:bg-transparent" variant="ghost">
+        <Button className="text-sm font-black text-red-800 hover:bg-transparent" variant="ghost">
           Learn about our philosophy
           <ArrowRight className="size-4" />
         </Button>
@@ -55,7 +55,7 @@ function MissionVisionSection() {
   return (
     <section className="bg-stone-100 py-32">
       <div className="mx-auto max-w-5xl px-8 text-center">
-        <ShieldCheck className="mx-auto mb-8 size-12 text-emerald-800" strokeWidth={1.6} />
+        <ShieldCheck className="mx-auto mb-8 size-12 text-red-800" strokeWidth={1.6} />
         <h2 className="mb-14 text-5xl font-black tracking-tighter text-stone-950 md:text-6xl">Curating with Intent</h2>
         <div className="grid grid-cols-1 gap-8 text-left md:grid-cols-2">
           {[
@@ -63,7 +63,7 @@ function MissionVisionSection() {
             ["Our Vision", aboutPageData.vision],
           ].map(([title, body]) => (
             <article className="rounded-2xl border border-stone-200/70 bg-white p-8 shadow-[0_25px_70px_-55px_rgba(28,25,23,0.55)]" key={title}>
-              <h3 className="mb-4 text-xl font-black text-emerald-800">{title}</h3>
+              <h3 className="mb-4 text-xl font-black text-red-800">{title}</h3>
               <p className="leading-relaxed text-stone-600">{body}</p>
             </article>
           ))}
@@ -78,10 +78,10 @@ function CuratorCard({ curator }: Readonly<{ curator: AboutCurator }>) {
     <article className="group">
       <div className="relative mb-6 aspect-square overflow-hidden rounded-2xl bg-stone-200 shadow-[0_25px_70px_-55px_rgba(28,25,23,0.55)]">
         <Image alt={curator.alt} className="object-cover transition-transform duration-700 group-hover:scale-110" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" src={curator.image} />
-        <div className="absolute inset-0 bg-emerald-800/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="absolute inset-0 bg-red-800/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       </div>
       <h3 className="text-2xl font-black tracking-tight text-stone-950">{curator.name}</h3>
-      <p className="mt-2 text-sm font-bold tracking-wide text-emerald-800">{curator.role}</p>
+      <p className="mt-2 text-sm font-bold tracking-wide text-red-800">{curator.role}</p>
       <p className="mt-4 text-sm leading-relaxed text-stone-600">{curator.bio}</p>
     </article>
   );
@@ -92,13 +92,13 @@ function CuratorsSection() {
     <section className="mx-auto max-w-screen-2xl px-8 py-32 lg:px-24">
       <div className="mb-20 flex flex-col justify-between gap-8 md:flex-row md:items-end">
         <div className="max-w-xl">
-          <span className="text-xs font-black uppercase tracking-[0.3em] text-emerald-800">The Visionaries</span>
+          <span className="text-xs font-black uppercase tracking-[0.3em] text-red-800">The Visionaries</span>
           <h2 className="mt-4 text-5xl font-black tracking-tighter text-stone-950">Meet the Curators</h2>
           <p className="mt-6 text-lg leading-relaxed text-stone-600">
             Our team is composed of former editors, architects, and anthropologists who view the world through a different lens.
           </p>
         </div>
-        <Button className="hidden rounded-none border-b-2 border-emerald-800 text-emerald-800 hover:bg-transparent md:inline-flex" variant="ghost">
+        <Button className="hidden rounded-none border-b-2 border-red-800 text-red-800 hover:bg-transparent md:inline-flex" variant="ghost">
           View all team members
         </Button>
       </div>
@@ -134,7 +134,7 @@ function PhilosophySection() {
         <div className="grid grid-cols-1 gap-16 md:grid-cols-3">
           {aboutPageData.philosophy.map((pillar) => (
             <article className="group text-center" key={pillar.title}>
-              <div className="mb-8 flex justify-center text-emerald-800 transition-transform duration-300 group-hover:scale-110">
+              <div className="mb-8 flex justify-center text-red-800 transition-transform duration-300 group-hover:scale-110">
                 <PhilosophyIcon icon={pillar.icon} />
               </div>
               <h3 className="mb-4 text-2xl font-black text-stone-950">{pillar.title}</h3>
@@ -150,11 +150,11 @@ function PhilosophySection() {
 function CtaSection() {
   return (
     <section className="relative overflow-hidden px-8 py-40 text-center">
-      <div className="absolute left-0 top-0 -z-10 size-96 rounded-full bg-emerald-800/10 blur-[120px]" />
+      <div className="absolute left-0 top-0 -z-10 size-96 rounded-full bg-red-800/10 blur-[120px]" />
       <div className="absolute bottom-0 right-0 -z-10 size-96 rounded-full bg-stone-500/10 blur-[120px]" />
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-10 text-5xl font-black leading-tight tracking-tighter text-stone-950 md:text-7xl">{aboutPageData.cta}</h2>
-        <Button className="min-h-16 px-10 text-lg font-bold shadow-xl shadow-emerald-950/10 active:scale-95">
+        <Button className="min-h-16 px-10 text-lg font-bold shadow-xl shadow-red-950/10 active:scale-95">
           Start Your Journey
         </Button>
       </div>

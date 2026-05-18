@@ -27,7 +27,7 @@ const statCards = [
     helper: "vs last month",
     icon: CreditCard,
     label: "Gross booking value",
-    tone: "bg-emerald-950 text-white",
+    tone: "bg-red-950 text-white",
     value: "$128,400",
   },
   {
@@ -120,7 +120,7 @@ const operations = [
 ] as const;
 
 const statusClasses: Record<(typeof recentBookings)[number]["status"], string> = {
-  Confirmed: "bg-emerald-100 text-emerald-900",
+  Confirmed: "bg-red-100 text-red-900",
   Pending: "bg-amber-100 text-amber-900",
   Review: "bg-stone-200 text-stone-700",
 };
@@ -159,14 +159,14 @@ function RevenuePanel() {
       <CardContent className="p-6 sm:p-7">
         <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
               Revenue cadence
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
               Booking momentum is ahead of target
             </h3>
           </div>
-          <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">
+          <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-900">
             +18.4% MoM
           </div>
         </div>
@@ -176,7 +176,7 @@ function RevenuePanel() {
             {monthlyRevenue.map((value, index) => (
               <div className="flex flex-1 flex-col justify-end gap-3" key={`${value}-${index}`}>
                 <div
-                  className="rounded-t-[1.25rem] bg-gradient-to-t from-emerald-900 via-emerald-800 to-emerald-500"
+                  className="rounded-t-[1.25rem] bg-gradient-to-t from-red-900 via-red-800 to-red-500"
                   style={{ height: `${value * 2}px` }}
                 />
                 <span className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-stone-400">
@@ -222,7 +222,7 @@ function BookingsPanel() {
       <CardContent className="p-6 sm:p-7">
         <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
               Latest bookings
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
@@ -314,14 +314,14 @@ function PortfolioPanel({ counts }: Readonly<{ counts: PortfolioCounts }>) {
       <CardContent className="p-6 sm:p-7">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
               Portfolio health
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
               Supply and content snapshot
             </h3>
           </div>
-          <TrendingUp className="size-5 text-emerald-800" />
+          <TrendingUp className="size-5 text-red-800" />
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -331,7 +331,7 @@ function PortfolioPanel({ counts }: Readonly<{ counts: PortfolioCounts }>) {
               <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-stone-400">
                 {item.count}
               </p>
-              <p className="mt-4 text-lg font-bold tracking-tight text-emerald-900">
+              <p className="mt-4 text-lg font-bold tracking-tight text-red-900">
                 {item.value}
               </p>
             </div>
@@ -348,7 +348,7 @@ function OperationsPanel() {
       <CardContent className="p-6 sm:p-7">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">
               Action list
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight">
@@ -368,14 +368,14 @@ function OperationsPanel() {
             >
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 flex size-10 items-center justify-center rounded-2xl bg-white/10">
-                  <Icon className="size-4 text-emerald-200" />
+                  <Icon className="size-4 text-red-200" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold tracking-tight">{title}</p>
                   <p className="mt-1 text-sm leading-relaxed text-white/65">
                     {detail}
                   </p>
-                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-emerald-200">
+                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-red-200">
                     {due}
                   </p>
                 </div>

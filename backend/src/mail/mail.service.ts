@@ -35,6 +35,16 @@ export type BookingEmail = {
   createdAt: string;
 };
 
+export type ContactEmail = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  message: string;
+  desiredDestination?: string;
+  primaryInterest?: string;
+  source: 'landing' | 'contact-page';
+};
+
 @Injectable()
 export class MailService {
   private readonly transporter: Transporter | null;
@@ -65,6 +75,74 @@ export class MailService {
       subject: `New TouristWeb booking ${booking.bookingCode}`,
       text: this.renderAdminNotification(booking),
     });
+  }
+
+  async sendContactInquiryToAdmin(input: ContactEmail, recipient: string) {
+    await this.sendMail({
+      to: recipient,
+      subject: `New website inquiry from ${input.firstName} ${input.lastName}`,
+      text: this.renderContactInquiry(input),
+    });
+  }
+
+  async sendEventAnnouncement(
+    recipient: string,
+    event: {
+      title: string;
+      badge: string;
+      date: string;
+      location: string;
+      description: string;
+      href: string;
+    },
+    siteUrl?: string,
+  ) {
+    const link = siteUrl
+      ? `${siteUrl.replace(/\/$/, '')}${event.href.startsWith('/') ? event.href : `/${event.href}`}`
+      : event.href;
+
+    await this.sendMail({
+      to: recipient,
+      subject: `New journey: ${event.title}`,
+      text: [
+        `Hello,`,
+        '',
+        `We just released a new ${event.badge.toLowerCase()} you might love.`,
+        '',
+        `${event.title}`,
+        `${event.date} · ${event.location}`,
+        '',
+        event.description,
+        '',
+        `Explore now: ${link}`,
+        '',
+        'You are receiving this because you subscribed to our newsletter.',
+      ].join('\n'),
+    });
+  }
+
+  private renderContactInquiry(input: ContactEmail) {
+    const sourceLabel =
+      input.source === 'landing' ? 'Homepage form' : 'Contact page form';
+
+    return [
+      `New inquiry received from the website.`,
+      `Source: ${sourceLabel}`,
+      '',
+      `Name: ${input.firstName} ${input.lastName}`,
+      `Email: ${input.email}`,
+      input.desiredDestination
+        ? `Desired destination: ${input.desiredDestination}`
+        : undefined,
+      input.primaryInterest
+        ? `Primary interest: ${input.primaryInterest}`
+        : undefined,
+      '',
+      'Message:',
+      input.message,
+    ]
+      .filter((line): line is string => typeof line === 'string')
+      .join('\n');
   }
 
   private createTransporter() {

@@ -21,7 +21,7 @@ const amenityIcons = {
 function AmenityIcon({ icon }: Readonly<{ icon: HotelDetailAmenity["icon"] }>) {
   const Icon = amenityIcons[icon];
 
-  return <Icon className="size-8 text-emerald-800" />;
+  return <Icon className="size-8 text-red-800" />;
 }
 
 function HotelBreadcrumb({ title }: Readonly<{ title: string }>) {
@@ -44,7 +44,7 @@ function HotelBreadcrumb({ title }: Readonly<{ title: string }>) {
         <li aria-hidden="true">
           <ChevronRight className="size-4 text-white/40" />
         </li>
-        <li aria-current="page" className="max-w-full truncate text-emerald-100">
+        <li aria-current="page" className="max-w-full truncate text-red-100">
           {title}
         </li>
       </ol>
@@ -90,7 +90,7 @@ function OverviewSection({ hotel }: Readonly<{ hotel: HotelDetail }>) {
   return (
     <section>
       <div className="mb-6 flex items-center gap-3 text-stone-500">
-        <MapPin className="size-5 text-emerald-800" />
+        <MapPin className="size-5 text-red-800" />
         <span className="font-medium">{hotel.address}</span>
       </div>
       <h2 className="mb-8 text-4xl font-black tracking-tight text-stone-950">An Editorial Sanctuary on the Thu Bon</h2>
@@ -131,14 +131,14 @@ function SuitesSection({ hotel }: Readonly<{ hotel: HotelDetail }>) {
             </div>
             <div className={index % 2 === 1 ? "space-y-6 md:order-1" : "space-y-6"}>
               {suite.badge ? (
-                <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-950">
+                <span className="inline-flex rounded-full bg-red-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-red-950">
                   {suite.badge}
                 </span>
               ) : null}
               <h3 className="text-2xl font-black tracking-tight text-stone-950">{suite.name}</h3>
               <p className="leading-relaxed text-stone-600">{suite.description}</p>
               <div className="flex items-center justify-between border-t border-stone-200 pt-5">
-                <span className="text-3xl font-black text-emerald-800">
+                <span className="text-3xl font-black text-red-800">
                   {suite.price}
                   <span className="ml-1 text-sm font-normal text-stone-500">/ night</span>
                 </span>

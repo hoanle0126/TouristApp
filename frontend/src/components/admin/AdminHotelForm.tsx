@@ -52,6 +52,8 @@ interface AdminHotelFormProps {
 
 interface FormErrors {
   name?: string;
+  location?: string;
+  address?: string;
   price?: string;
   listingImage?: string;
   heroImage?: string;
@@ -343,6 +345,12 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
     if (!form.name.trim()) {
       nextErrors.name = "Hotel name is required.";
     }
+    if (!form.location.trim()) {
+      nextErrors.location = "Location is required.";
+    }
+    if (!form.address.trim()) {
+      nextErrors.address = "Address is required.";
+    }
     if (!form.price.trim()) {
       nextErrors.price = "Price is required.";
     }
@@ -469,14 +477,14 @@ function HotelDraftSidebar({
         <CardContent className="p-6 sm:p-7">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">
                 {copy.readinessEyebrow}
               </p>
               <h3 className="mt-2 text-2xl font-bold tracking-tight">
                 {completed} of {readiness.length} sections ready
               </h3>
             </div>
-            <BadgeCheck className="size-6 text-emerald-200" />
+            <BadgeCheck className="size-6 text-red-200" />
           </div>
 
           <div className="mt-6 space-y-3">
@@ -487,7 +495,7 @@ function HotelDraftSidebar({
                   <span className="sr-only">: {item.ready ? "ready" : "incomplete"}</span>
                 </span>
                 {item.ready ? (
-                  <CheckCircle2 className="size-4 text-emerald-200" />
+                  <CheckCircle2 className="size-4 text-red-200" />
                 ) : (
                   <CircleAlert className="size-4 text-white/45" />
                 )}
@@ -499,7 +507,7 @@ function HotelDraftSidebar({
 
       <Card>
         <CardContent className="p-6 sm:p-7">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
             Live summary
           </p>
           <h3 className="mt-3 text-2xl font-bold tracking-tight text-stone-950">
@@ -517,12 +525,12 @@ function HotelDraftSidebar({
       </Card>
 
       {saved ? (
-        <Card aria-live="polite" className="border-none bg-emerald-100 text-emerald-950" role="status">
+        <Card aria-live="polite" className="border-none bg-red-100 text-red-950" role="status">
           <CardContent className="flex gap-3 p-5">
             <CheckCircle2 className="mt-0.5 size-5 shrink-0" />
             <div>
               <p className="font-bold">{copy.successTitle}</p>
-              <p className="mt-1 text-sm text-emerald-900/75">{copy.successDescription}</p>
+              <p className="mt-1 text-sm text-red-900/75">{copy.successDescription}</p>
             </div>
           </CardContent>
         </Card>
@@ -554,7 +562,7 @@ function SummaryPill({ label, value }: Readonly<{ label: string; value: string }
 function SectionHeader({ eyebrow, title, description }: Readonly<{ eyebrow: string; title: string; description: string }>) {
   return (
     <div className="border-b border-stone-200 pb-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">{eyebrow}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">{eyebrow}</p>
       <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-stone-500">{description}</p>
     </div>
@@ -757,8 +765,19 @@ function HotelMediaSection({
           />
         </div>
         <div>
+          <Label htmlFor="hotel-location">Location</Label>
+          <Input
+            id="hotel-location"
+            onChange={(event) => updateField("location", event.target.value)}
+            placeholder="e.g. Hoi An, Vietnam"
+            value={form.location}
+          />
+          {errors.location ? <p className="mt-1 text-sm text-red-600">{errors.location}</p> : null}
+        </div>
+        <div>
           <Label htmlFor="hotel-address">Address</Label>
           <Textarea id="hotel-address" onChange={(event) => updateField("address", event.target.value)} value={form.address} />
+          {errors.address ? <p className="mt-1 text-sm text-red-600">{errors.address}</p> : null}
         </div>
       </CardContent>
     </Card>
@@ -968,7 +987,7 @@ function AmenitiesEditor({
                   <Select value={amenity.icon} onValueChange={(value: HotelAmenityIcon) => onUpdate(amenity.id, "icon", value)}>
                     <SelectTrigger id={`${amenity.id}-icon`}>
                       <div className="flex items-center gap-2">
-                        <SelectedIcon className="size-4 text-emerald-800" />
+                        <SelectedIcon className="size-4 text-red-800" />
                         <span>{selectedOption.label}</span>
                       </div>
                     </SelectTrigger>
@@ -979,7 +998,7 @@ function AmenitiesEditor({
                         return (
                           <SelectItem key={option.value} value={option.value}>
                             <span className="flex items-center gap-2">
-                              <Icon className="size-4 text-emerald-800" />
+                              <Icon className="size-4 text-red-800" />
                               <span>{option.label}</span>
                             </span>
                           </SelectItem>
@@ -1188,7 +1207,7 @@ function CollectionHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
-        <span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900">
+        <span className="flex size-9 items-center justify-center rounded-2xl bg-red-100 text-red-900">
           {icon}
         </span>
         {label}

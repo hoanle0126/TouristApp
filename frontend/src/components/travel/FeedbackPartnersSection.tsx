@@ -19,7 +19,7 @@ export function FeedbackPartnersSection({
         {feedback.length > 0 ? (
           <div>
             <div className="mb-10 text-center">
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.3em] text-red-800">
                 Feedback
               </p>
               <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">
@@ -32,14 +32,14 @@ export function FeedbackPartnersSection({
                   className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm shadow-stone-950/5"
                   key={item.name}
                 >
-                  <Quote className="mb-6 size-8 text-violet-700" />
+                  <Quote className="mb-6 size-8 text-red-700" />
                   <p className="text-lg font-medium leading-8 tracking-tight text-stone-800">
                     “{item.quote}”
                   </p>
                   <div className="mt-8 border-t border-stone-200 pt-5">
                     <h3 className="font-black text-stone-950">{item.name}</h3>
                     <p className="mt-1 text-sm text-stone-500">{item.role}</p>
-                    <p className="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-800">
+                    <p className="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-800">
                       {item.trip}
                     </p>
                   </div>
@@ -53,7 +53,7 @@ export function FeedbackPartnersSection({
           <div className="mt-16 rounded-[2rem] border border-stone-200 bg-stone-100/80 p-6 md:p-8">
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.28em] text-violet-700">
+                <p className="text-xs font-black uppercase tracking-[0.28em] text-red-700">
                   Partners
                 </p>
                 <h3 className="mt-2 text-2xl font-black tracking-tight text-stone-950">
@@ -68,7 +68,7 @@ export function FeedbackPartnersSection({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
               {partners.map((partner) => (
                 <div
-                  className="rounded-2xl border border-stone-200 bg-white px-5 py-4 transition-colors hover:border-emerald-200 hover:bg-emerald-50/50"
+                  className="rounded-2xl border border-stone-200 bg-white px-5 py-4 transition-colors hover:border-red-200 hover:bg-red-50/50"
                   key={partner.name}
                 >
                   <p className="text-sm font-black uppercase tracking-tight text-stone-950">

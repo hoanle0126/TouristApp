@@ -108,7 +108,7 @@ function AdminTourPreviewModal({ onClose, tour }: { readonly onClose: () => void
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/75 to-transparent p-6 text-white">
             <div className="flex flex-wrap gap-2">
               {tour.badge ? (
-                <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-950">
+                <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-red-950">
                   {tour.badge}
                 </span>
               ) : null}
@@ -125,7 +125,7 @@ function AdminTourPreviewModal({ onClose, tour }: { readonly onClose: () => void
         <div className="flex max-h-[92vh] flex-col overflow-y-auto p-6 sm:p-7">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Tour preview</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Tour preview</p>
               <p className="mt-2 text-3xl font-bold tracking-tight text-stone-950">{tour.price}</p>
             </div>
             <button
@@ -188,7 +188,7 @@ export function AdminTourCatalogPreview({ tours }: AdminTourCatalogPreviewProps)
         <CardContent className="p-6 sm:p-7">
           <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Tour catalog</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Tour catalog</p>
               <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
                 Signature products and occupancy posture
               </h3>
@@ -206,7 +206,7 @@ export function AdminTourCatalogPreview({ tours }: AdminTourCatalogPreviewProps)
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       {tour.badge ? (
-                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-900">
+                        <span className="rounded-full bg-red-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-red-900">
                           {tour.badge}
                         </span>
                       ) : null}

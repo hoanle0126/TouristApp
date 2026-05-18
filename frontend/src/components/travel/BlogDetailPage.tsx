@@ -15,7 +15,7 @@ function ArticleHero({ article }: Readonly<{ article: JournalDetail }>) {
       </section>
       <header className="relative z-10 mx-auto -mt-52 mb-20 max-w-4xl rounded-[2rem] bg-white p-8 text-center shadow-[0_25px_70px_-45px_rgba(28,25,23,0.55)] md:p-16">
         <div className="mb-6 flex justify-center">
-          <span className="rounded-full bg-emerald-100 px-4 py-2 text-xs font-black uppercase tracking-widest text-emerald-950">
+          <span className="rounded-full bg-red-100 px-4 py-2 text-xs font-black uppercase tracking-widest text-red-950">
             {article.category}
           </span>
         </div>
@@ -52,7 +52,7 @@ function ArticleBody({ article }: Readonly<{ article: JournalDetail }>) {
       <section>
         <h2 className="mb-6 mt-16 text-3xl font-black tracking-tight text-stone-950">{machiyaSection.heading}</h2>
         <p>{machiyaSection.body[0]}</p>
-        <blockquote className="my-12 border-l-2 border-emerald-700 pl-6 font-serif text-2xl italic leading-relaxed text-emerald-800">
+        <blockquote className="my-12 border-l-2 border-red-700 pl-6 font-serif text-2xl italic leading-relaxed text-red-800">
           “{article.quote}”
         </blockquote>
         <p>{machiyaSection.body[1]}</p>
@@ -96,7 +96,7 @@ function RelatedPostCard({ post }: Readonly<{ post: JournalDetailRelatedPost }>)
         <Image alt={post.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill sizes="(min-width: 768px) 33vw, 100vw" src={post.image} />
       </div>
       <div className="p-8">
-        <span className="mb-3 block text-[10px] font-black uppercase tracking-widest text-emerald-800">{post.category}</span>
+        <span className="mb-3 block text-[10px] font-black uppercase tracking-widest text-red-800">{post.category}</span>
         <h3 className="mb-2 text-lg font-black tracking-tight text-stone-950">{post.title}</h3>
         <p className="line-clamp-2 text-sm leading-relaxed text-stone-600">{post.excerpt}</p>
       </div>
@@ -108,7 +108,7 @@ function RelatedStories({ article }: Readonly<{ article: JournalDetail }>) {
   return (
     <section className="mx-auto max-w-screen-2xl rounded-t-[2.5rem] bg-stone-100 px-8 py-20 lg:px-24">
       <div className="mb-12 flex flex-col items-center gap-4 text-center">
-        <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Continue Reading</p>
+        <p className="text-xs font-black uppercase tracking-[0.3em] text-red-800">Continue Reading</p>
         <h2 className="text-3xl font-black tracking-tight text-stone-950">Related Stories</h2>
       </div>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">

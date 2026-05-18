@@ -53,7 +53,7 @@ export function VisualDiaryCarousel({ items }: Readonly<VisualDiaryCarouselProps
     <div className="mx-auto max-w-screen-2xl px-6 md:px-10 lg:px-16">
       <div className="mb-12 flex items-end justify-between">
         <div>
-          <span className="mb-4 block text-sm font-bold uppercase tracking-[0.2em] text-emerald-700">
+          <span className="mb-4 block text-sm font-bold uppercase tracking-[0.2em] text-red-700">
             Visual Diary
           </span>
           <h2 className="text-4xl font-extrabold tracking-tighter text-stone-950 md:text-5xl">

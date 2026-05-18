@@ -40,7 +40,7 @@ const highlightIcons = {
 function HighlightIcon({ icon }: Readonly<{ icon: TourDetailHighlight["icon"] }>) {
   const Icon = highlightIcons[icon];
 
-  return <Icon className="size-6 text-emerald-800" />;
+  return <Icon className="size-6 text-red-800" />;
 }
 
 function TourBreadcrumb({ title }: Readonly<{ title: string }>) {
@@ -63,7 +63,7 @@ function TourBreadcrumb({ title }: Readonly<{ title: string }>) {
         <li aria-hidden="true">
           <ChevronRight className="size-4 text-white/40" />
         </li>
-        <li aria-current="page" className="max-w-full truncate text-emerald-100">
+        <li aria-current="page" className="max-w-full truncate text-red-100">
           {title}
         </li>
       </ol>
@@ -79,7 +79,7 @@ function DetailHero({ tour }: Readonly<{ tour: TourDetail }>) {
       <div className="relative mx-auto w-full max-w-screen-2xl px-8 pb-20 lg:px-24">
         <div className="max-w-5xl">
           <TourBreadcrumb title={tour.title} />
-          <div className="mb-6 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-emerald-100 backdrop-blur">
+          <div className="mb-6 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-red-100 backdrop-blur">
             Private Travel Desk
           </div>
           <h1 className="max-w-5xl text-5xl font-black leading-[0.94] tracking-tighter text-white md:text-7xl lg:text-8xl">
@@ -133,24 +133,24 @@ function ExperienceSection({ tour }: Readonly<{ tour: TourDetail }>) {
   return (
     <section className="grid grid-cols-1 gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-12">
       <div className="rounded-[2rem] bg-white p-8 shadow-sm shadow-stone-950/5 md:p-10">
-        <p className="mb-4 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Journey overview</p>
+        <p className="mb-4 text-xs font-black uppercase tracking-[0.3em] text-red-800">Journey overview</p>
         <h2 className="mb-7 text-3xl font-black tracking-tight text-stone-950 md:text-4xl">An itinerary shaped like a private escape</h2>
         <div className="space-y-5 text-base leading-8 text-stone-600 md:text-lg">
           {tour.description.length > 0 ? tour.description.map((paragraph) => <p key={paragraph}>{paragraph}</p>) : <p>Detailed introduction content is being updated.</p>}
         </div>
       </div>
       <div className="rounded-[2rem] border border-stone-200 bg-stone-100 p-8 md:p-10">
-        <p className="mb-5 text-xs font-black uppercase tracking-[0.3em] text-violet-700">Highlights</p>
+        <p className="mb-5 text-xs font-black uppercase tracking-[0.3em] text-red-700">Highlights</p>
         {tour.highlights.length > 0 ? (
           <ul className="space-y-5">
             {tour.highlights.map((highlight) => (
               <li className="flex items-start gap-4 rounded-2xl bg-white p-4 shadow-sm" key={highlight.title}>
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-red-50">
                   <HighlightIcon icon={highlight.icon} />
                 </div>
                 <div>
                   <h3 className="font-black text-stone-950">{highlight.title}</h3>
-                  <p className="mt-1 text-sm leading-6 text-stone-600">{highlight.description}</p>
+                  <p className="mt-1 whitespace-pre-line text-sm leading-6 text-stone-600">{highlight.description}</p>
                 </div>
               </li>
             ))}
@@ -168,7 +168,7 @@ function ItinerarySection({ tour }: Readonly<{ tour: TourDetail }>) {
     <section>
       <div className="mb-10 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Itinerary</p>
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.3em] text-red-800">Itinerary</p>
           <h2 className="text-3xl font-black tracking-tight text-stone-950 md:text-4xl">Key stages of the experience</h2>
         </div>
         <p className="max-w-md text-sm leading-6 text-stone-500">Each stage is presented clearly so travelers can quickly understand the pace and focus of the journey.</p>
@@ -182,7 +182,7 @@ function ItinerarySection({ tour }: Readonly<{ tour: TourDetail }>) {
               </div>
               <div>
                 <h3 className="text-xl font-black tracking-tight text-stone-950">{step.title}</h3>
-                <p className="mt-2 leading-7 text-stone-600">{step.description}</p>
+                <p className="mt-2 whitespace-pre-line leading-7 text-stone-600">{step.description}</p>
               </div>
             </article>
           ))}
@@ -201,7 +201,7 @@ function GallerySection({ tour }: Readonly<{ tour: TourDetail }>) {
   return (
     <section>
       <div className="mb-10">
-        <p className="mb-3 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Visual Journal</p>
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.3em] text-red-800">Visual Journal</p>
         <h2 className="text-3xl font-black tracking-tight text-stone-950 md:text-4xl">A look before you go</h2>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -222,8 +222,8 @@ function GallerySection({ tour }: Readonly<{ tour: TourDetail }>) {
 
 function InclusionList({ items, title, variant }: Readonly<{ items: readonly string[]; title: string; variant: "included" | "excluded" }>) {
   const Icon = variant === "included" ? CheckCircle2 : CircleX;
-  const color = variant === "included" ? "text-emerald-800" : "text-rose-700";
-  const dot = variant === "included" ? "bg-emerald-700/50" : "bg-rose-700/50";
+  const color = variant === "included" ? "text-red-800" : "text-rose-700";
+  const dot = variant === "included" ? "bg-red-700/50" : "bg-rose-700/50";
 
   return (
     <div className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm">
@@ -252,11 +252,11 @@ function ServicePromiseStrip() {
 
   return (
     <section className="rounded-[2rem] bg-stone-950 p-8 text-white md:p-10">
-      <p className="mb-6 text-xs font-black uppercase tracking-[0.3em] text-emerald-300">Why book this journey</p>
+      <p className="mb-6 text-xs font-black uppercase tracking-[0.3em] text-red-300">Why book this journey</p>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {promises.map((promise) => (
           <div className="rounded-2xl border border-white/10 bg-white/8 p-5" key={promise}>
-            <Sparkles className="mb-4 size-5 text-violet-300" />
+            <Sparkles className="mb-4 size-5 text-red-300" />
             <p className="font-black tracking-tight">{promise}</p>
           </div>
         ))}

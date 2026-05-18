@@ -225,16 +225,16 @@ function BlogDraftSidebar({ copy, form, isSubmitting, readiness, saved, submitEr
         <CardContent className="p-6 sm:p-7">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">{copy.readinessEyebrow}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">{copy.readinessEyebrow}</p>
               <h3 className="mt-2 text-2xl font-bold tracking-tight">{completed} of {readiness.length} sections ready</h3>
             </div>
-            <BadgeCheck className="size-6 text-emerald-200" />
+            <BadgeCheck className="size-6 text-red-200" />
           </div>
           <div className="mt-6 space-y-3">
             {readiness.map((item) => (
               <div className="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3" key={item.label}>
                 <span className="text-sm font-semibold">{item.label}<span className="sr-only">: {item.ready ? "ready" : "incomplete"}</span></span>
-                {item.ready ? <CheckCircle2 className="size-4 text-emerald-200" /> : <CircleAlert className="size-4 text-white/45" />}
+                {item.ready ? <CheckCircle2 className="size-4 text-red-200" /> : <CircleAlert className="size-4 text-white/45" />}
               </div>
             ))}
           </div>
@@ -242,7 +242,7 @@ function BlogDraftSidebar({ copy, form, isSubmitting, readiness, saved, submitEr
       </Card>
       <Card>
         <CardContent className="p-6 sm:p-7">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Live summary</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Live summary</p>
           <h3 className="mt-3 text-2xl font-bold tracking-tight text-stone-950">{form.title || "Untitled blog"}</h3>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">{form.excerpt || "Add an excerpt to preview blog listing copy."}</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 2xl:grid-cols-1">
@@ -264,12 +264,12 @@ function BlogDraftSidebar({ copy, form, isSubmitting, readiness, saved, submitEr
 
 function StatusCard({ title, description }: Readonly<{ title: string; description: string }>) {
   return (
-    <Card aria-live="polite" className="border-none bg-emerald-100 text-emerald-950" role="status">
+    <Card aria-live="polite" className="border-none bg-red-100 text-red-950" role="status">
       <CardContent className="flex gap-3 p-5">
         <CheckCircle2 className="mt-0.5 size-5 shrink-0" />
         <div>
           <p className="font-bold">{title}</p>
-          <p className="mt-1 text-sm text-emerald-900/75">{description}</p>
+          <p className="mt-1 text-sm text-red-900/75">{description}</p>
         </div>
       </CardContent>
     </Card>
@@ -288,7 +288,7 @@ function SummaryPill({ label, value }: Readonly<{ label: string; value: string }
 function SectionHeader({ eyebrow, title, description }: Readonly<{ eyebrow: string; title: string; description: string }>) {
   return (
     <div className="border-b border-stone-200 pb-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">{eyebrow}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">{eyebrow}</p>
       <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-stone-500">{description}</p>
     </div>
@@ -441,7 +441,7 @@ function TextAreaField({ error, id, label, onChange, value }: Readonly<{ error?:
 function CollectionHeader({ addLabel, icon, label, onAdd }: Readonly<{ addLabel: string; icon: ReactNode; label: string; onAdd: () => void }>) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex items-center gap-2 text-sm font-bold text-stone-950"><span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900">{icon}</span>{label}</div>
+      <div className="flex items-center gap-2 text-sm font-bold text-stone-950"><span className="flex size-9 items-center justify-center rounded-2xl bg-red-100 text-red-900">{icon}</span>{label}</div>
       <Button aria-label={addLabel} onClick={onAdd} size="sm" type="button" variant="outline"><Plus className="size-4" />{addLabel}</Button>
     </div>
   );

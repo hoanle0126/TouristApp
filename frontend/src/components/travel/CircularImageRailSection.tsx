@@ -15,7 +15,7 @@ export function CircularImageRailSection({ items }: Readonly<{ items: readonly D
       <div className="mx-auto max-w-screen-2xl px-8">
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-emerald-800">Destination list</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-red-800">Destination list</p>
             <h2 className="mt-2 text-3xl font-black tracking-tight text-stone-950 md:text-4xl">Browse featured destinations at a glance</h2>
           </div>
           <p className="max-w-md text-sm leading-6 text-stone-500">
@@ -27,7 +27,7 @@ export function CircularImageRailSection({ items }: Readonly<{ items: readonly D
             {visibleItems.map((item) => (
               <li className="w-32 shrink-0 snap-start text-center" key={item.title}>
                 <Link className="group block" href={item.href}>
-                  <div className="relative mx-auto size-28 overflow-hidden rounded-full bg-stone-200 ring-4 ring-stone-100 transition-transform duration-300 group-hover:-translate-y-1 group-hover:ring-emerald-100 md:size-32">
+                  <div className="relative mx-auto size-28 overflow-hidden rounded-full bg-stone-200 ring-4 ring-stone-100 transition-transform duration-300 group-hover:-translate-y-1 group-hover:ring-red-100 md:size-32">
                     <Image alt={item.alt} className="object-cover" fill sizes="128px" src={item.image} />
                   </div>
                   <h3 className="mt-3 text-sm font-black tracking-tight text-stone-950">{item.title}</h3>

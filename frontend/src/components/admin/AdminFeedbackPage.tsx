@@ -384,7 +384,7 @@ export default function AdminFeedbackPage({
               <p className="mt-4 text-3xl font-bold tracking-tight text-stone-950">
                 {item.value}
               </p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-red-800">
                 {item.note}
               </p>
             </CardContent>
@@ -397,7 +397,7 @@ export default function AdminFeedbackPage({
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between gap-3 border-b border-stone-200 pb-5">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   Traveler reviews
                 </p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
@@ -409,7 +409,7 @@ export default function AdminFeedbackPage({
                   <Plus className="size-4" />
                   Add review
                 </Button>
-                <Quote className="size-5 text-emerald-800" />
+                <Quote className="size-5 text-red-800" />
               </div>
             </div>
 
@@ -421,7 +421,7 @@ export default function AdminFeedbackPage({
                   <button
                     className={
                       active
-                        ? "w-full rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-left"
+                        ? "w-full rounded-2xl border border-red-300 bg-red-50 p-4 text-left"
                         : "w-full rounded-2xl border border-stone-200 bg-stone-50 p-4 text-left transition-colors hover:border-stone-300 hover:bg-white"
                     }
                     key={review.id}
@@ -430,7 +430,7 @@ export default function AdminFeedbackPage({
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-800">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-800">
                           {review.trip}
                         </p>
                         <p className="mt-2 text-lg font-bold tracking-tight text-stone-950">
@@ -458,7 +458,7 @@ export default function AdminFeedbackPage({
           <CardContent className="p-6 sm:p-7">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   {reviewForm.id ? "Edit review" : "New review"}
                 </p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
@@ -488,7 +488,7 @@ export default function AdminFeedbackPage({
                   <Trash2 className="size-4" />
                   {reviewForm.id ? "Delete review" : "Reset form"}
                 </Button>
-                <MessageSquareQuote className="size-5 text-emerald-800" />
+                <MessageSquareQuote className="size-5 text-red-800" />
               </div>
             </div>
 
@@ -553,7 +553,7 @@ export default function AdminFeedbackPage({
               </div>
 
               <div className="rounded-3xl border border-stone-200 bg-stone-50 p-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   Live preview
                 </p>
                 <p className="mt-4 text-lg font-medium leading-8 tracking-tight text-stone-800">
@@ -568,14 +568,14 @@ export default function AdminFeedbackPage({
                   <p className="mt-1 text-sm text-stone-500">
                     {reviewForm.role || "Role or location"}
                   </p>
-                  <p className="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-800">
+                  <p className="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-800">
                     {reviewForm.trip || "Trip label"}
                   </p>
                 </div>
               </div>
 
               {reviewSaved ? (
-                <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+                <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
                   Traveler review saved.
                 </p>
               ) : null}
@@ -605,7 +605,7 @@ export default function AdminFeedbackPage({
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between gap-3 border-b border-stone-200 pb-5">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   Partner network
                 </p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
@@ -617,7 +617,7 @@ export default function AdminFeedbackPage({
                   <Plus className="size-4" />
                   Add partner
                 </Button>
-                <Handshake className="size-5 text-emerald-800" />
+                <Handshake className="size-5 text-red-800" />
               </div>
             </div>
 
@@ -629,7 +629,7 @@ export default function AdminFeedbackPage({
                   <button
                     className={
                       active
-                        ? "w-full rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-left"
+                        ? "w-full rounded-2xl border border-red-300 bg-red-50 p-4 text-left"
                         : "w-full rounded-2xl border border-stone-200 bg-stone-50 p-4 text-left transition-colors hover:border-stone-300 hover:bg-white"
                     }
                     key={partner.id}
@@ -660,7 +660,7 @@ export default function AdminFeedbackPage({
           <CardContent className="p-6 sm:p-7">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   {partnerForm.id ? "Edit partner" : "New partner"}
                 </p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
@@ -690,7 +690,7 @@ export default function AdminFeedbackPage({
                   <Trash2 className="size-4" />
                   {partnerForm.id ? "Delete partner" : "Reset form"}
                 </Button>
-                <Handshake className="size-5 text-emerald-800" />
+                <Handshake className="size-5 text-red-800" />
               </div>
             </div>
 
@@ -730,7 +730,7 @@ export default function AdminFeedbackPage({
               </div>
 
               <div className="rounded-3xl border border-stone-200 bg-stone-50 p-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   Homepage pill preview
                 </p>
                 <p className="mt-4 text-sm font-black uppercase tracking-tight text-stone-950">
@@ -743,7 +743,7 @@ export default function AdminFeedbackPage({
               </div>
 
               {partnerSaved ? (
-                <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+                <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
                   Partner saved.
                 </p>
               ) : null}

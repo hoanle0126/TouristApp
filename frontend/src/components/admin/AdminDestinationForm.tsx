@@ -236,14 +236,14 @@ function DestinationDraftSidebar({
         <CardContent className="p-6 sm:p-7">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">
                 {copy.readinessEyebrow}
               </p>
               <h3 className="mt-2 text-2xl font-bold tracking-tight">
                 {completed} of {readiness.length} sections ready
               </h3>
             </div>
-            <BadgeCheck className="size-6 text-emerald-200" />
+            <BadgeCheck className="size-6 text-red-200" />
           </div>
 
           <div className="mt-6 space-y-3">
@@ -254,7 +254,7 @@ function DestinationDraftSidebar({
                   <span className="sr-only">: {item.ready ? "ready" : "incomplete"}</span>
                 </span>
                 {item.ready ? (
-                  <CheckCircle2 className="size-4 text-emerald-200" />
+                  <CheckCircle2 className="size-4 text-red-200" />
                 ) : (
                   <CircleAlert className="size-4 text-white/45" />
                 )}
@@ -266,7 +266,7 @@ function DestinationDraftSidebar({
 
       <Card>
         <CardContent className="p-6 sm:p-7">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
             Live summary
           </p>
           <h3 className="mt-3 text-2xl font-bold tracking-tight text-stone-950">
@@ -279,12 +279,12 @@ function DestinationDraftSidebar({
       </Card>
 
       {saved ? (
-        <Card aria-live="polite" className="border-none bg-emerald-100 text-emerald-950" role="status">
+        <Card aria-live="polite" className="border-none bg-red-100 text-red-950" role="status">
           <CardContent className="flex gap-3 p-5">
             <CheckCircle2 className="mt-0.5 size-5 shrink-0" />
             <div>
               <p className="font-bold">{copy.successTitle}</p>
-              <p className="mt-1 text-sm text-emerald-900/75">{copy.successDescription}</p>
+              <p className="mt-1 text-sm text-red-900/75">{copy.successDescription}</p>
             </div>
           </CardContent>
         </Card>
@@ -307,7 +307,7 @@ function DestinationDraftSidebar({
 function SectionHeader({ eyebrow, title, description }: Readonly<{ eyebrow: string; title: string; description: string }>) {
   return (
     <div className="border-b border-stone-200 pb-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">{eyebrow}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">{eyebrow}</p>
       <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-stone-500">{description}</p>
     </div>
@@ -503,7 +503,7 @@ function FactsEditor({
     <div className="space-y-4 border-t border-stone-200 pt-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
-          <span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900">
+          <span className="flex size-9 items-center justify-center rounded-2xl bg-red-100 text-red-900">
             <BadgeCheck className="size-4" />
           </span>
           Facts
@@ -558,7 +558,7 @@ function TextRowsEditor({
     <div className="space-y-4 border-t border-stone-200 pt-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
-          <span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-900">
+          <span className="flex size-9 items-center justify-center rounded-2xl bg-red-100 text-red-900">
             {icon}
           </span>
           {label}

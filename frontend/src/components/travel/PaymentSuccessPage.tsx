@@ -112,7 +112,7 @@ export default function PaymentSuccessPage({
   return (
     <div className={cn(bodyFont.className, "min-h-screen overflow-x-hidden bg-[#f9faf6] text-stone-950")}>
       <section
-        className="relative h-[320px] overflow-hidden bg-emerald-900 md:h-[409px]"
+        className="relative h-[320px] overflow-hidden bg-red-900 md:h-[409px]"
         style={{ clipPath: "polygon(0 0, 100% 0, 100% 85%, 0% 100%)" }}
       >
         <Image
@@ -123,15 +123,15 @@ export default function PaymentSuccessPage({
           sizes="100vw"
           src={successPageData.heroImage}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-emerald-900/40" />
-        <div className="absolute inset-0 bg-emerald-900/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-red-900/40" />
+        <div className="absolute inset-0 bg-red-900/40" />
       </section>
 
       <main className="relative mx-auto -mt-32 max-w-4xl px-6 pb-24 md:-mt-48 md:px-12">
         <Card className="rounded-xl border-none bg-white shadow-[0_40px_80px_rgba(26,28,26,0.06)]">
           <CardContent className="p-8 text-center md:p-16">
-            <div className="mb-8 inline-flex size-24 items-center justify-center rounded-full bg-emerald-100">
-              <CheckCheck className="size-12 text-emerald-800" strokeWidth={2.2} />
+            <div className="mb-8 inline-flex size-24 items-center justify-center rounded-full bg-red-100">
+              <CheckCheck className="size-12 text-red-800" strokeWidth={2.2} />
             </div>
 
             <h1
@@ -145,7 +145,7 @@ export default function PaymentSuccessPage({
             <h2
               className={cn(
                 headlineFont.className,
-                "mb-6 text-xl font-semibold text-emerald-800 md:text-2xl",
+                "mb-6 text-xl font-semibold text-red-800 md:text-2xl",
               )}
             >
               {hasQrPayment ? "Booking Received" : "Booking Confirmed"}
@@ -182,7 +182,7 @@ export default function PaymentSuccessPage({
 
                   <SummaryItem label="Payment Status">
                     <div className="flex items-center gap-2">
-                      <Circle className="size-2 fill-emerald-800 text-emerald-800" />
+                      <Circle className="size-2 fill-red-800 text-red-800" />
                       <span
                         className={cn(
                           headlineFont.className,
@@ -211,7 +211,7 @@ export default function PaymentSuccessPage({
             </Card>
 
             {hasQrPayment && bankTransfer ? (
-              <Card className="mb-12 rounded-xl border border-emerald-200 bg-emerald-50/60 text-left shadow-none">
+              <Card className="mb-12 rounded-xl border border-red-200 bg-red-50/60 text-left shadow-none">
                 <CardContent className="grid gap-8 p-8 md:grid-cols-[280px_minmax(0,1fr)] md:items-center">
                   <div className="mx-auto w-full max-w-[280px] rounded-xl bg-white p-4 shadow-[0_20px_50px_-35px_rgba(6,78,59,0.5)]">
                     <img
@@ -221,7 +221,7 @@ export default function PaymentSuccessPage({
                     />
                   </div>
                   <div>
-                    <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">
+                    <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-red-800">
                       <QrCode className="size-4" />
                       VietQR ready
                     </div>
@@ -231,12 +231,12 @@ export default function PaymentSuccessPage({
                     <p className="mt-3 max-w-xl text-sm leading-7 text-stone-600">
                       The QR includes the receiving account, booking reference, and preset amount so the transfer form opens ready to review in the customer&apos;s banking app.
                     </p>
-                    <div className="mt-4 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/70 px-4 py-3 text-sm leading-6 text-emerald-950">
+                    <div className="mt-4 rounded-xl border border-dashed border-red-300 bg-red-50/70 px-4 py-3 text-sm leading-6 text-red-950">
                       After payment is confirmed, our team will follow up with your itinerary and next steps.
                     </div>
                     <div className="mt-6 space-y-4 rounded-xl bg-white/80 p-5">
                       <div className="flex items-center gap-3">
-                        <Landmark className="size-4 text-emerald-800" />
+                        <Landmark className="size-4 text-red-800" />
                         <span className="text-sm text-stone-600">Receiving bank</span>
                         <span className="ml-auto text-right text-sm font-bold text-stone-950">{bankTransfer.bankName}</span>
                       </div>
@@ -304,7 +304,7 @@ export default function PaymentSuccessPage({
           <Link
             className={cn(
               headlineFont.className,
-              "text-lg font-bold uppercase tracking-[-0.07em] text-emerald-950",
+              "text-lg font-bold uppercase tracking-[-0.07em] text-red-950",
             )}
             href="/"
           >

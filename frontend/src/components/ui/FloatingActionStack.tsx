@@ -178,11 +178,11 @@ export function FloatingActionStack() {
         <div className="border-b border-stone-200/80 px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.28em] text-emerald-800">
+              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.28em] text-red-800">
                 Curator Assistant
               </p>
               <div className="flex items-center gap-2 text-2xl font-black tracking-tight text-stone-950">
-                <Sparkles className="size-5 text-emerald-800" />
+                <Sparkles className="size-5 text-red-800" />
                 Plan with chat
               </div>
             </div>
@@ -203,7 +203,7 @@ export function FloatingActionStack() {
           <div className="mb-6 flex flex-wrap gap-2">
             {quickPrompts.map((prompt) => (
               <Button
-                className="h-auto rounded-full border border-stone-200 bg-white px-4 py-2 text-left text-xs font-medium text-stone-600 hover:border-emerald-800/30 hover:bg-emerald-50 hover:text-emerald-900"
+                className="h-auto rounded-full border border-stone-200 bg-white px-4 py-2 text-left text-xs font-medium text-stone-600 hover:border-red-800/30 hover:bg-red-50 hover:text-red-900"
                 disabled={isSending}
                 key={prompt}
                 onClick={() => sendMessage(prompt)}
@@ -223,7 +223,7 @@ export function FloatingActionStack() {
                   "max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
                   message.role === "assistant"
                     ? "bg-stone-100 text-stone-700"
-                    : "ml-auto bg-emerald-800 text-white",
+                    : "ml-auto bg-red-800 text-white",
                 )}
                 key={`${message.role}-${index}`}
               >
@@ -264,10 +264,10 @@ export function FloatingActionStack() {
         aria-expanded={isChatOpen}
         aria-label="Open chatbot panel"
         className={cn(
-          "fixed right-6 z-[60] rounded-full shadow-[0_20px_50px_-20px_rgba(6,78,59,0.65)] transition-all duration-300",
+          "fixed right-6 z-[60] rounded-full bg-red-900 text-white shadow-[0_20px_50px_-20px_rgba(127,29,29,0.65)] transition-all duration-300 hover:bg-red-950",
           "md:right-8",
           chatButtonOffsetClass,
-          isChatOpen && "bg-emerald-900 hover:bg-emerald-950",
+          isChatOpen && "bg-red-950 hover:bg-red-900",
         )}
         onClick={() => setIsChatOpen((current) => !current)}
         ref={triggerRef}
@@ -280,7 +280,7 @@ export function FloatingActionStack() {
       <Button
         aria-label="Scroll to top"
         className={cn(
-          "fixed bottom-6 right-6 z-[60] rounded-full shadow-[0_20px_50px_-20px_rgba(6,78,59,0.65)] transition-all duration-300",
+          "fixed bottom-6 right-6 z-[60] rounded-full bg-red-900 text-white shadow-[0_20px_50px_-20px_rgba(127,29,29,0.65)] transition-all duration-300 hover:bg-red-950",
           "md:bottom-8 md:right-8",
           isScrollVisible
             ? "translate-y-0 opacity-100"

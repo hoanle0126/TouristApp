@@ -41,8 +41,8 @@ export function RegionalHighlightsSection({
 }: Readonly<RegionalHighlightsSectionProps>) {
   const visibleItems = items.slice(0, 8);
   const sectionBackgroundClass = reverse
-    ? "bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_24%),linear-gradient(135deg,#101820_0%,#17352f_46%,#1a6072_100%)]"
-    : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.12),transparent_24%),linear-gradient(135deg,#111827_0%,#16372f_48%,#14637a_100%)]";
+    ? "bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_26%),linear-gradient(135deg,#0c4a6e_0%,#1d4ed8_55%,#38bdf8_100%)]"
+    : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_26%),linear-gradient(135deg,#0c4a6e_0%,#1d4ed8_50%,#38bdf8_100%)]";
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start", containScroll: "trimSnaps" });
   const [canScrollNext, setCanScrollNext] = useState(false);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -105,12 +105,14 @@ export function RegionalHighlightsSection({
       <div className={`mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 sm:px-6 lg:items-stretch lg:gap-6 lg:px-8 ${reverse ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
         <div className="flex w-full flex-col justify-center lg:min-h-145 lg:w-[320px] lg:flex-none">
           <p className="text-sm font-semibold text-white/75">{eyebrow}</p>
-          <h2 className="mt-4 max-w-56 text-4xl font-black leading-none tracking-tight text-white sm:text-5xl">
+          <h2 className="mt-4 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl">
             {title}
           </h2>
-          <p className="mt-5 max-w-xs text-sm leading-6 text-white/78 sm:text-base">
-            {description}
-          </p>
+          {description ? (
+            <p className="mt-5 max-w-xs text-sm leading-6 text-white/78 sm:text-base">
+              {description}
+            </p>
+          ) : null}
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Button asChild className="rounded-full bg-pink-500 px-6 text-sm font-bold text-white hover:bg-pink-400" size="lg">
               <Link href={ctaHref}>
@@ -147,7 +149,7 @@ export function RegionalHighlightsSection({
                   </div>
                 </div>
                 <div className="flex flex-1 flex-col p-5">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-700">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-700">
                     {item.category}
                   </p>
                   <h3 className="mt-3 text-2xl font-black leading-tight tracking-tight text-stone-950">
@@ -168,7 +170,7 @@ export function RegionalHighlightsSection({
                   </div>
                   <div className="mt-auto flex items-center justify-between gap-3 pt-5">
                     <p className="text-sm font-black text-pink-600">{item.price}</p>
-                    <Button asChild className="rounded-full bg-violet-800 px-4 text-white hover:bg-violet-700" size="sm">
+                    <Button asChild className="rounded-full bg-red-900 px-4 text-white hover:bg-red-950" size="sm">
                       <Link href={item.href}>
                         View details
                         <ArrowRight className="size-4" />

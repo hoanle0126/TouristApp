@@ -186,7 +186,7 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
             <CardContent className="p-6">
               <p className="text-sm font-medium text-stone-500">{item.label}</p>
               <p className="mt-4 text-3xl font-bold tracking-tight text-stone-950">{item.value}</p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">{item.note}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-red-800">{item.note}</p>
             </CardContent>
           </Card>
         ))}
@@ -197,10 +197,10 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between border-b border-stone-200 pb-5">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Homepage events</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Homepage events</p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">Landing page display order</h3>
               </div>
-              <CalendarDays className="size-5 text-emerald-800" />
+              <CalendarDays className="size-5 text-red-800" />
             </div>
 
             <div className="mt-6 space-y-3">
@@ -211,7 +211,7 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
                   <button
                     className={
                       active
-                        ? "w-full rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-left"
+                        ? "w-full rounded-2xl border border-red-300 bg-red-50 p-4 text-left"
                         : "w-full rounded-2xl border border-stone-200 bg-stone-50 p-4 text-left transition-colors hover:border-stone-300 hover:bg-white"
                     }
                     key={event.id}
@@ -220,7 +220,7 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-800">{event.badge}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-800">{event.badge}</p>
                         <p className="mt-2 text-lg font-bold tracking-tight text-stone-950">{event.title}</p>
                         <p className="mt-2 text-sm leading-relaxed text-stone-600">
                           Order {event.sortOrder} · {event.date} · {event.location}
@@ -241,14 +241,14 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
           <CardContent className="p-6 sm:p-7">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   {form.id ? "Edit event" : "New event"}
                 </p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
                   {form.id ? "Update homepage card" : "Create homepage card"}
                 </h3>
               </div>
-              <ImagePlus className="size-5 text-emerald-800" />
+              <ImagePlus className="size-5 text-red-800" />
             </div>
 
             <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
@@ -301,7 +301,7 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
               </div>
 
               {submitError ? <p className="text-sm font-semibold text-rose-700">{submitError}</p> : null}
-              {saved ? <p className="text-sm font-semibold text-emerald-800">Event saved successfully.</p> : null}
+              {saved ? <p className="text-sm font-semibold text-red-800">Event saved successfully.</p> : null}
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button disabled={isSubmitting} type="submit">

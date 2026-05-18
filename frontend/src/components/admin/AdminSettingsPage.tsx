@@ -93,6 +93,9 @@ type SiteContentFormState = {
   homeHeroImage: string;
   heroImageTwo: string;
   heroImageThree: string;
+  facebookUrl: string;
+  tiktokUrl: string;
+  instagramUrl: string;
 };
 
 type StatusState = {
@@ -128,6 +131,9 @@ const defaultSiteContentForm: SiteContentFormState = {
   homeHeroImage: "",
   heroImageTwo: "",
   heroImageThree: "",
+  facebookUrl: "",
+  tiktokUrl: "",
+  instagramUrl: "",
 };
 
 function createFormFromSettings(settings: ApiAiProviderSettings): FormState {
@@ -154,6 +160,9 @@ function createSiteContentForm(settings: ApiSiteContentSettings): SiteContentFor
     homeHeroImage: settings.homeHeroImage,
     heroImageTwo: settings.heroImageTwo,
     heroImageThree: settings.heroImageThree,
+    facebookUrl: settings.facebookUrl,
+    tiktokUrl: settings.tiktokUrl,
+    instagramUrl: settings.instagramUrl,
   };
 }
 
@@ -449,6 +458,9 @@ export default function AdminSettingsPage() {
         homeHeroImage: siteContentForm.homeHeroImage.trim(),
         heroImageTwo: siteContentForm.heroImageTwo.trim(),
         heroImageThree: siteContentForm.heroImageThree.trim(),
+        facebookUrl: siteContentForm.facebookUrl.trim(),
+        tiktokUrl: siteContentForm.tiktokUrl.trim(),
+        instagramUrl: siteContentForm.instagramUrl.trim(),
       });
       await refreshSettings();
       setSiteContentStatus({
@@ -478,7 +490,7 @@ export default function AdminSettingsPage() {
         {settingSections.map(({ description, icon: Icon, title, value }) => (
           <Card className="border-none bg-white" key={title}>
             <CardContent className="p-6">
-              <span className="flex size-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-900">
+              <span className="flex size-12 items-center justify-center rounded-2xl bg-red-50 text-red-900">
                 <Icon className="size-5" />
               </span>
               <p className="mt-5 text-sm font-medium text-stone-500">{title}</p>
@@ -515,7 +527,7 @@ export default function AdminSettingsPage() {
                         aria-pressed={form.enabled}
                         className={
                           form.enabled
-                            ? "flex h-10 w-full items-center justify-between rounded-md border border-emerald-300 bg-emerald-50 px-3 text-sm font-semibold text-emerald-950"
+                            ? "flex h-10 w-full items-center justify-between rounded-md border border-red-300 bg-red-50 px-3 text-sm font-semibold text-red-950"
                             : "flex h-10 w-full items-center justify-between rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-700"
                         }
                         id="ai-enabled"
@@ -523,7 +535,7 @@ export default function AdminSettingsPage() {
                         type="button"
                       >
                         <span>{form.enabled ? "Enabled" : "Disabled"}</span>
-                        <span className={form.enabled ? "text-emerald-700" : "text-stone-400"}>
+                        <span className={form.enabled ? "text-red-700" : "text-stone-400"}>
                           {form.enabled ? "AI booking summaries are active" : "Booking flow stays fail-open"}
                         </span>
                       </button>
@@ -646,7 +658,7 @@ export default function AdminSettingsPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-relaxed text-emerald-950">
+                  <div className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-relaxed text-red-950">
                     The booking code is added automatically to the transfer note. Customers only see the QR code after they complete traveler details and submit checkout.
                   </div>
 
@@ -801,6 +813,42 @@ export default function AdminSettingsPage() {
                     </div>
                   </div>
 
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-stone-500">Social media links</h3>
+                      <p className="mt-1 text-xs text-stone-500">Optional. Leave blank to hide the icon from the side rail.</p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div>
+                        <Label htmlFor="facebook-url">Facebook URL</Label>
+                        <Input
+                          id="facebook-url"
+                          onChange={(event) => updateSiteContentField("facebookUrl", event.target.value)}
+                          placeholder="https://www.facebook.com/your-page"
+                          value={siteContentForm.facebookUrl}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="tiktok-url">TikTok URL</Label>
+                        <Input
+                          id="tiktok-url"
+                          onChange={(event) => updateSiteContentField("tiktokUrl", event.target.value)}
+                          placeholder="https://www.tiktok.com/@your-handle"
+                          value={siteContentForm.tiktokUrl}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="instagram-url">Instagram URL</Label>
+                        <Input
+                          id="instagram-url"
+                          onChange={(event) => updateSiteContentField("instagramUrl", event.target.value)}
+                          placeholder="https://www.instagram.com/your-handle"
+                          value={siteContentForm.instagramUrl}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {siteContentStatus ? <StatusCard status={siteContentStatus} /> : null}
 
                   <div className="flex justify-end">
@@ -820,14 +868,14 @@ export default function AdminSettingsPage() {
             <CardContent className="p-6 sm:p-7">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">
                     AI readiness
                   </p>
                   <h3 className="mt-2 text-2xl font-bold tracking-tight">
                     {readiness.filter((item) => item.ready).length} of {readiness.length} checks ready
                   </h3>
                 </div>
-                <Sparkles className="size-6 text-emerald-200" />
+                <Sparkles className="size-6 text-red-200" />
               </div>
 
               <div className="mt-6 space-y-3">
@@ -835,7 +883,7 @@ export default function AdminSettingsPage() {
                   <div className="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3" key={item.label}>
                     <span className="text-sm font-semibold">{item.label}</span>
                     {item.ready ? (
-                      <CheckCircle2 className="size-4 text-emerald-200" />
+                      <CheckCircle2 className="size-4 text-red-200" />
                     ) : (
                       <CircleAlert className="size-4 text-white/45" />
                     )}
@@ -848,7 +896,7 @@ export default function AdminSettingsPage() {
           <Card>
             <CardContent className="space-y-5 p-6 sm:p-7">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                   Current state
                 </p>
                 <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
@@ -890,14 +938,14 @@ export default function AdminSettingsPage() {
             <CardContent className="space-y-5 p-6 sm:p-7">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                     Customer payment
                   </p>
                   <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
                     VietQR checkout
                   </h3>
                 </div>
-                <Landmark className="size-5 text-emerald-800" />
+                <Landmark className="size-5 text-red-800" />
               </div>
 
               <SummaryPill label="Bank BIN" value={shopPaymentSettings?.bankBin ?? "Not set"} />
@@ -911,14 +959,14 @@ export default function AdminSettingsPage() {
             <CardContent className="space-y-5 p-6 sm:p-7">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
                     Public website
                   </p>
                   <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
                     Editable site content
                   </h3>
                 </div>
-                <Globe2 className="size-5 text-emerald-800" />
+                <Globe2 className="size-5 text-red-800" />
               </div>
 
               <SummaryPill label="Site name" value={siteContentSettings?.siteName ?? "Not set"} />
@@ -948,7 +996,7 @@ function LoadingState() {
 function StatusCard({ status }: Readonly<{ status: StatusState }>) {
   const tone =
     status.type === "success"
-      ? "border-none bg-emerald-100 text-emerald-950"
+      ? "border-none bg-red-100 text-red-950"
       : "border-none bg-rose-100 text-rose-950";
 
   return (
@@ -973,7 +1021,7 @@ function SummaryPill({ label, value }: Readonly<{ label: string; value: string }
 function SectionHeader({ eyebrow, title, description }: Readonly<{ eyebrow: string; title: string; description: string }>) {
   return (
     <div className="border-b border-stone-200 pb-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">{eyebrow}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">{eyebrow}</p>
       <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-stone-500">{description}</p>
     </div>

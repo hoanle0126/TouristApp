@@ -48,7 +48,7 @@ function DestinationStatGrid({ destinations }: { readonly destinations: readonly
             <p className="mt-4 text-3xl font-bold tracking-tight text-stone-950">
               {item.value}
             </p>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-red-800">
               {item.note}
             </p>
           </CardContent>
@@ -64,14 +64,14 @@ function WatchlistPanel() {
       <CardContent className="p-6 sm:p-7">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-200">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-200">
               Destination watchlist
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight">
               What merchandising should do next
             </h3>
           </div>
-          <MapPinned className="size-5 text-emerald-200" />
+          <MapPinned className="size-5 text-red-200" />
         </div>
 
         <div className="mt-6 space-y-3">
@@ -79,7 +79,7 @@ function WatchlistPanel() {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4" key={title}>
               <div className="flex gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white/10">
-                  <Icon className="size-4 text-emerald-200" />
+                  <Icon className="size-4 text-red-200" />
                 </span>
                 <div>
                   <p className="font-semibold tracking-tight">{title}</p>

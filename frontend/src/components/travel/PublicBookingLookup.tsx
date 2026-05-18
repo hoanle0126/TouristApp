@@ -52,11 +52,11 @@ function DetailRow({ label, value }: { readonly label: string; readonly value?: 
 
 function BookingResult({ booking }: { readonly booking: ApiBooking }) {
   return (
-    <Card className="overflow-hidden border-emerald-100">
+    <Card className="overflow-hidden border-red-100">
       <CardContent className="p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-stone-200 pb-6">
           <div>
-            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-red-800">
               Booking found
             </p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight text-stone-950 sm:text-3xl">
@@ -65,7 +65,7 @@ function BookingResult({ booking }: { readonly booking: ApiBooking }) {
             <p className="mt-2 text-sm text-stone-500">Created {formatDate(booking.createdAt)}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-emerald-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-900">
+            <span className="rounded-full bg-red-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-red-900">
               {booking.status}
             </span>
             <span className="rounded-full bg-stone-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-stone-700">
@@ -112,11 +112,11 @@ function BookingResult({ booking }: { readonly booking: ApiBooking }) {
           </div>
         </section>
 
-        <section className="mt-8 rounded-2xl bg-emerald-50 p-5">
-          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-emerald-900">
+        <section className="mt-8 rounded-2xl bg-red-50 p-5">
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-red-900">
             Special requests
           </p>
-          <p className="mt-2 text-sm leading-6 text-emerald-950">
+          <p className="mt-2 text-sm leading-6 text-red-950">
             {booking.trip?.specialRequests || "No special requests were added to this booking."}
           </p>
         </section>
@@ -211,7 +211,7 @@ export function PublicBookingLookup() {
       ) : (
         <Card className="border-dashed bg-stone-50/70">
           <CardContent className="flex min-h-[360px] flex-col items-center justify-center p-8 text-center">
-            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-red-800">
               Booking details
             </p>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-stone-950">

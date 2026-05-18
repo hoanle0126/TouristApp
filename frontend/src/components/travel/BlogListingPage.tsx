@@ -12,7 +12,7 @@ const categories = ["All Stories", "Destinations", "Lifestyle", "Guides", "Inter
 function BlogHero() {
   return (
     <section className="mx-auto max-w-5xl px-8 pb-20 pt-36 text-center lg:pt-44">
-      <span className="mb-6 inline-flex rounded-full border border-emerald-800/20 px-4 py-2 text-[11px] font-black uppercase tracking-[0.3em] text-emerald-800">
+      <span className="mb-6 inline-flex rounded-full border border-red-800/20 px-4 py-2 text-[11px] font-black uppercase tracking-[0.3em] text-red-800">
         Curator Journal
       </span>
       <h1 className="mb-8 text-6xl font-black leading-none tracking-tighter text-stone-950 md:text-8xl">
@@ -30,7 +30,7 @@ function FeaturedPost({ post }: Readonly<{ post: FeaturedJournalPost | null }>) 
     return (
       <section className="mx-auto mb-28 max-w-screen-2xl px-8 lg:px-24">
         <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
             <Sparkles className="size-7" />
           </div>
           <h2 className="mt-5 text-3xl font-black tracking-tight text-stone-950 md:text-4xl">No featured story is live yet</h2>
@@ -54,7 +54,7 @@ function FeaturedPost({ post }: Readonly<{ post: FeaturedJournalPost | null }>) 
         <Image alt={post.alt} className="object-cover transition-transform duration-700 group-hover:scale-105" fill priority sizes="100vw" src={post.image} />
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-stone-950/10 to-transparent" />
         <div className="absolute bottom-0 left-0 max-w-4xl p-8 text-white md:p-12">
-          <span className="mb-5 inline-flex rounded-full bg-emerald-100/95 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-950 backdrop-blur-md">
+          <span className="mb-5 inline-flex rounded-full bg-red-100/95 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-red-950 backdrop-blur-md">
             {post.badge}
           </span>
           <h2 className="mb-5 text-4xl font-black leading-tight tracking-tight md:text-6xl">{post.title}</h2>
@@ -69,7 +69,7 @@ function JournalEmptyState() {
   return (
     <section className="mx-auto mb-32 max-w-screen-2xl px-8 lg:px-24">
       <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
           <Search className="size-7" />
         </div>
         <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No additional journal entries yet</h3>
@@ -103,8 +103,8 @@ function CategoryBar() {
           <Button
             className={
               category === "All Stories"
-                ? "h-auto rounded-none border-b-2 border-emerald-800 bg-transparent py-1 text-sm font-black uppercase tracking-widest text-emerald-800 hover:bg-transparent"
-                : "h-auto bg-transparent py-1 text-sm font-bold uppercase tracking-widest text-stone-500 hover:bg-transparent hover:text-emerald-800"
+                ? "h-auto rounded-none border-b-2 border-red-800 bg-transparent py-1 text-sm font-black uppercase tracking-widest text-red-800 hover:bg-transparent"
+                : "h-auto bg-transparent py-1 text-sm font-bold uppercase tracking-widest text-stone-500 hover:bg-transparent hover:text-red-800"
             }
             key={category}
             type="button"
@@ -113,7 +113,7 @@ function CategoryBar() {
             {category}
           </Button>
         ))}
-        <Button className="ml-0 h-auto gap-2 bg-transparent py-1 text-sm font-bold text-stone-500 hover:bg-transparent hover:text-emerald-800 md:ml-auto" type="button" variant="ghost">
+        <Button className="ml-0 h-auto gap-2 bg-transparent py-1 text-sm font-bold text-stone-500 hover:bg-transparent hover:text-red-800 md:ml-auto" type="button" variant="ghost">
           <Search className="size-4" />
           Search
         </Button>
@@ -135,10 +135,10 @@ function JournalCard({ post }: Readonly<{ post: JournalPost }>) {
         />
       </div>
       <div className="space-y-4">
-        <span className="text-xs font-black uppercase tracking-widest text-emerald-800">{post.category}</span>
-        <h3 className="text-2xl font-black leading-tight text-stone-950 transition-colors group-hover:text-emerald-800">{post.title}</h3>
+        <span className="text-xs font-black uppercase tracking-widest text-red-800">{post.category}</span>
+        <h3 className="text-2xl font-black leading-tight text-stone-950 transition-colors group-hover:text-red-800">{post.title}</h3>
         <p className="leading-relaxed text-stone-600">{post.excerpt}</p>
-        <Button asChild className="text-sm font-black text-stone-950 hover:bg-transparent hover:text-emerald-800" variant="ghost">
+        <Button asChild className="text-sm font-black text-stone-950 hover:bg-transparent hover:text-red-800" variant="ghost">
           <Link href={`/blog/${post.slug}`}>
             Read Story
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -153,7 +153,7 @@ function JournalNewsletter() {
   return (
     <section className="mx-auto max-w-screen-2xl px-8 pb-24 lg:px-24">
       <div className="flex flex-col items-center rounded-[2.5rem] bg-stone-100 p-10 text-center md:p-20">
-        <Sparkles className="mb-8 size-10 text-emerald-800" />
+        <Sparkles className="mb-8 size-10 text-red-800" />
         <h2 className="mb-6 max-w-2xl text-4xl font-black tracking-tight text-stone-950 md:text-5xl">
           Curated inspiration, delivered to your inbox.
         </h2>
@@ -162,7 +162,7 @@ function JournalNewsletter() {
         </p>
         <form className="flex w-full max-w-lg flex-col gap-4 md:flex-row">
           <label className="sr-only" htmlFor="journal-newsletter-email">Email address</label>
-          <Input className="min-h-14 flex-1 border-none bg-white px-6 shadow-sm ring-1 ring-stone-200 focus-visible:ring-emerald-800" id="journal-newsletter-email" placeholder="Email address" type="email" />
+          <Input className="min-h-14 flex-1 border-none bg-white px-6 shadow-sm ring-1 ring-stone-200 focus-visible:ring-red-800" id="journal-newsletter-email" placeholder="Email address" type="email" />
           <Button className="min-h-14 px-8 font-black">Subscribe Now</Button>
         </form>
         <p className="mt-6 text-xs text-stone-500">By subscribing, you agree to our privacy policy. No spam, ever.</p>

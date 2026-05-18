@@ -44,25 +44,25 @@ function SuggestionCardView({ suggestion }: { readonly suggestion: SuggestionCar
           <ul className="mb-4 space-y-2 text-xs font-semibold text-white/90">
             {categoryHoverItems[suggestion.category].map((item) => (
               <li className="flex items-center gap-2" key={item}>
-                <span className="size-1.5 rounded-full bg-emerald-300" />
+                <span className="size-1.5 rounded-full bg-red-300" />
                 {item}
               </li>
             ))}
           </ul>
-          <Link className="inline-flex w-fit items-center rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-stone-950 transition-colors hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href={categoryListingHref[suggestion.category]}>
+          <Link className="inline-flex w-fit items-center rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-stone-950 transition-colors hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href={categoryListingHref[suggestion.category]}>
             View listing
           </Link>
         </div>
       </div>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">{suggestion.category}</p>
-          <Link className="mt-2 block text-xl font-bold tracking-tight text-stone-950 transition-colors hover:text-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700" href={suggestion.href}>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-700">{suggestion.category}</p>
+          <Link className="mt-2 block text-xl font-bold tracking-tight text-stone-950 transition-colors hover:text-red-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-700" href={suggestion.href}>
             {suggestion.title}
           </Link>
           <p className="mt-1 text-sm text-stone-600">{suggestion.location}</p>
         </div>
-        <p className="whitespace-nowrap text-sm font-bold text-emerald-800">{suggestion.price}</p>
+        <p className="whitespace-nowrap text-sm font-bold text-red-800">{suggestion.price}</p>
       </div>
     </article>
   );
@@ -84,7 +84,7 @@ export function SuggestionTabs({ suggestions }: { readonly suggestions: readonly
     <section>
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-emerald-800">Curated Next</p>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-red-800">Curated Next</p>
           <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Suggestions tailored to your travel mood</h2>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -111,7 +111,7 @@ export function SuggestionTabs({ suggestions }: { readonly suggestions: readonly
         </div>
       ) : (
         <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white px-8 py-14 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-50 text-red-800">
             <Sparkles className="size-7" />
           </div>
           <h3 className="mt-5 text-2xl font-black tracking-tight text-stone-950">No matches in this tab yet</h3>

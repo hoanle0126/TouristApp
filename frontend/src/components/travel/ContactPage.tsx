@@ -2,10 +2,7 @@ import Image from "next/image";
 import { ArrowRight, ExternalLink, Mail, MapPin, Phone } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
-import { Textarea } from "@/src/components/ui/textarea";
+import { ContactPageForm } from "@/src/components/travel/ContactPageForm";
 import { contactPageData, type ContactOffice } from "@/src/data/mockData";
 import type { ApiSiteContentSettings } from "@/src/lib/api/types";
 import { TravelFooter, TravelHeader } from "@/src/components/travel/TravelShell";
@@ -24,7 +21,7 @@ function ContactHero() {
 function OfficeItem({ office }: Readonly<{ office: ContactOffice }>) {
   return (
     <article className="flex items-start gap-6">
-      <MapPin className="mt-1 size-7 shrink-0 text-emerald-800" strokeWidth={1.6} />
+      <MapPin className="mt-1 size-7 shrink-0 text-red-800" strokeWidth={1.6} />
       <div>
         <h3 className="mb-2 text-lg font-black text-stone-950">{office.name}</h3>
         <p className="mb-3 text-sm leading-relaxed text-stone-600">
@@ -32,7 +29,7 @@ function OfficeItem({ office }: Readonly<{ office: ContactOffice }>) {
             <span className="block" key={line}>{line}</span>
           ))}
         </p>
-        <Button className="h-auto text-sm font-bold text-emerald-800 hover:bg-transparent" variant="ghost">
+        <Button className="h-auto text-sm font-bold text-red-800 hover:bg-transparent" variant="ghost">
           View on map
           <ArrowRight className="size-4" />
         </Button>
@@ -64,14 +61,14 @@ function ContactSidebar({
           <h2 className="mb-4 text-sm font-black uppercase tracking-widest text-stone-500">Direct Lines</h2>
           <ul className="space-y-4">
             <li>
-              <a className="group flex items-center gap-3 font-bold text-stone-950 transition-colors hover:text-emerald-800" href="tel:+442071234567">
-                <Phone className="size-5 text-stone-400 transition-colors group-hover:text-emerald-800" />
+              <a className="group flex items-center gap-3 font-bold text-stone-950 transition-colors hover:text-red-800" href="tel:+442071234567">
+                <Phone className="size-5 text-stone-400 transition-colors group-hover:text-red-800" />
                 {siteContent.hotline}
               </a>
             </li>
             <li>
-              <a className="group flex items-center gap-3 font-bold text-stone-950 transition-colors hover:text-emerald-800" href={`mailto:${siteContent.contactEmail}`}>
-                <Mail className="size-5 text-stone-400 transition-colors group-hover:text-emerald-800" />
+              <a className="group flex items-center gap-3 font-bold text-stone-950 transition-colors hover:text-red-800" href={`mailto:${siteContent.contactEmail}`}>
+                <Mail className="size-5 text-stone-400 transition-colors group-hover:text-red-800" />
                 {siteContent.contactEmail}
               </a>
             </li>
@@ -82,7 +79,7 @@ function ContactSidebar({
           <ul className="space-y-4">
             {contactPageData.departments.map((department) => (
               <li key={department.email}>
-                <a className="block font-bold text-stone-950 transition-colors hover:text-emerald-800" href={`mailto:${department.email}`}>
+                <a className="block font-bold text-stone-950 transition-colors hover:text-red-800" href={`mailto:${department.email}`}>
                   {department.name}
                 </a>
                 <span className="text-sm text-stone-500">{department.email}</span>
@@ -96,60 +93,14 @@ function ContactSidebar({
 }
 
 function ContactForm() {
-  const fieldClassName = "min-h-14 rounded-xl border-stone-200/70 bg-stone-50/90 px-4 font-medium shadow-none transition-all hover:bg-white focus-visible:border-emerald-800 focus-visible:ring-4 focus-visible:ring-emerald-800/10";
-  const labelClassName = "text-[0.7rem] font-black text-stone-950";
-
   return (
     <section className="lg:col-span-7">
       <div className="relative overflow-hidden rounded-[2rem] border border-stone-200/70 bg-white p-8 shadow-[0_25px_80px_-60px_rgba(28,25,23,0.65)] md:p-14">
-        <div className="pointer-events-none absolute right-0 top-0 size-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-100/70 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-0 size-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-red-100/70 blur-3xl" />
         <div className="relative z-10">
           <h2 className="mb-3 text-3xl font-black tracking-tight text-stone-950">Send an Inquiry</h2>
           <p className="mb-10 text-stone-600">Share details about your desired journey, and a dedicated curator will be in touch within 24 hours.</p>
-          <form className="space-y-8">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div>
-                <Label className={labelClassName} htmlFor="contact-first-name">First Name</Label>
-                <Input className={fieldClassName} id="contact-first-name" placeholder="Jane" type="text" />
-              </div>
-              <div>
-                <Label className={labelClassName} htmlFor="contact-last-name">Last Name</Label>
-                <Input className={fieldClassName} id="contact-last-name" placeholder="Doe" type="text" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div>
-                <Label className={labelClassName} htmlFor="contact-email">Email Address</Label>
-                <Input className={fieldClassName} id="contact-email" placeholder="jane@example.com" type="email" />
-              </div>
-              <div>
-                <Label className={labelClassName} htmlFor="contact-interest">Primary Interest</Label>
-                <Select>
-                  <SelectTrigger className={`${fieldClassName} h-14`} id="contact-interest">
-                    <SelectValue placeholder="Select an option..." />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-[1.4rem] border-emerald-900/10 bg-[#fbfcf7]/95 p-2 shadow-[0_25px_80px_-45px_rgba(28,25,23,0.65)] backdrop-blur-xl">
-                    <SelectItem className="rounded-2xl px-4 py-3 font-semibold text-stone-700 focus:bg-emerald-100/80 focus:text-emerald-950" value="bespoke">Bespoke Itinerary Planning</SelectItem>
-                    <SelectItem className="rounded-2xl px-4 py-3 font-semibold text-stone-700 focus:bg-emerald-100/80 focus:text-emerald-950" value="collection">The Collection Property Booking</SelectItem>
-                    <SelectItem className="rounded-2xl px-4 py-3 font-semibold text-stone-700 focus:bg-emerald-100/80 focus:text-emerald-950" value="corporate">Corporate Retreats</SelectItem>
-                    <SelectItem className="rounded-2xl px-4 py-3 font-semibold text-stone-700 focus:bg-emerald-100/80 focus:text-emerald-950" value="other">General Inquiry</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label className={labelClassName} htmlFor="contact-message">Message</Label>
-              <Textarea
-                className="min-h-36 resize-none rounded-xl border-stone-200/70 bg-stone-50/90 px-4 py-4 font-medium shadow-none transition-all hover:bg-white focus-visible:border-emerald-800 focus-visible:ring-4 focus-visible:ring-emerald-800/10"
-                id="contact-message"
-                placeholder="Tell us about your desired destinations, travel dates, or special occasions..."
-              />
-            </div>
-            <Button className="min-h-14 px-10 text-sm font-black tracking-wide shadow-lg shadow-emerald-950/10" type="button">
-              Send Message
-              <ArrowRight className="size-4" />
-            </Button>
-          </form>
+          <ContactPageForm />
         </div>
       </div>
     </section>
@@ -165,7 +116,7 @@ function MapSection() {
         <div className="absolute bottom-8 left-8 max-w-xs rounded-2xl border border-stone-200/70 bg-white/90 p-6 shadow-xl backdrop-blur-md">
           <h2 className="mb-2 text-lg font-black text-stone-950">{contactPageData.map.title}</h2>
           <p className="mb-4 text-sm leading-relaxed text-stone-600">{contactPageData.map.note}</p>
-          <Button className="h-auto text-sm font-bold text-emerald-800 hover:bg-transparent" variant="ghost">
+          <Button className="h-auto text-sm font-bold text-red-800 hover:bg-transparent" variant="ghost">
             Get Directions
             <ExternalLink className="size-4" />
           </Button>

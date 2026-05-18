@@ -26,7 +26,7 @@ function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "flex h-12 w-full items-center justify-between gap-2 rounded-xl border border-stone-200 bg-white/90 px-4 py-3 text-left text-sm font-medium text-stone-950 shadow-sm transition-all outline-none hover:bg-white focus-visible:border-emerald-700 focus-visible:ring-4 focus-visible:ring-emerald-700/10 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-stone-400 [&>span]:line-clamp-1",
+        "flex h-12 w-full items-center justify-between gap-2 rounded-xl border border-stone-200 bg-white/90 px-4 py-3 text-left text-sm font-medium text-stone-950 shadow-sm transition-all outline-none hover:bg-white focus-visible:border-red-700 focus-visible:ring-4 focus-visible:ring-red-700/10 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-stone-400 [&>span]:line-clamp-1",
         className,
       )}
       data-slot="select-trigger"
@@ -83,7 +83,7 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        "relative flex w-full cursor-default select-none items-center gap-2 rounded-xl py-2.5 pr-8 pl-3 text-sm outline-none transition-colors focus:bg-emerald-50 focus:text-emerald-950 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex w-full cursor-default select-none items-center gap-2 rounded-xl py-2.5 pr-8 pl-3 text-sm outline-none transition-colors focus:bg-red-50 focus:text-red-950 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className,
       )}
       data-slot="select-item"
@@ -91,7 +91,7 @@ function SelectItem({
     >
       <span className="absolute right-3 flex size-4 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4 text-emerald-800" />
+          <CheckIcon className="size-4 text-red-800" />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

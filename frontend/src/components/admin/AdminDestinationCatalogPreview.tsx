@@ -118,7 +118,7 @@ function AdminDestinationPreviewModal({
           <Image alt={destination.alt} className="object-cover" fill sizes="(min-width: 1024px) 58vw, 100vw" src={detail?.heroImage ?? destination.image} />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-stone-950/80 to-transparent p-6 text-white">
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-950">
+              <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-red-950">
                 Destination
               </span>
             </div>
@@ -131,7 +131,7 @@ function AdminDestinationPreviewModal({
         <div className="flex max-h-[92vh] flex-col overflow-y-auto p-6 sm:p-7">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Destination preview</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Destination preview</p>
               <p className="mt-2 text-3xl font-bold tracking-tight text-stone-950">{destination.title}</p>
             </div>
             <button
@@ -152,7 +152,7 @@ function AdminDestinationPreviewModal({
           {detail ? (
             <div className="mt-6 space-y-4">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Spotlight</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Spotlight</p>
                 <div className="mt-3 space-y-3">
                   {detail.spotlight.map((item) => (
                     <div className="rounded-2xl bg-stone-100 p-4" key={item.title}>
@@ -216,7 +216,7 @@ export function AdminDestinationCatalogPreview({ destinationDetails, destination
         <CardContent className="p-6 sm:p-7">
           <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Destination catalog</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Destination catalog</p>
               <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">
                 Editorial destinations and commercial signal
               </h3>

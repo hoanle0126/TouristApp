@@ -60,4 +60,16 @@ export class UpdateSiteContentSettingsDto {
   @IsString()
   @IsNotEmpty()
   heroImageThree?: string;
+
+  @IsOptional()
+  @IsString()
+  facebookUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  tiktokUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  instagramUrl?: string;
 }

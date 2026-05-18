@@ -38,10 +38,10 @@ export function ToursSidebarFilters() {
       <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-[0_30px_80px_-55px_rgba(28,25,23,0.45)] lg:sticky lg:top-28">
         <div className="mb-6 flex items-center justify-between border-b border-stone-100 pb-5">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-800">Filters</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-800">Filters</p>
             <h2 className="mt-1 text-xl font-black tracking-tight text-stone-950">Refine journeys</h2>
           </div>
-          <Filter aria-hidden="true" className="size-5 text-emerald-800" />
+          <Filter aria-hidden="true" className="size-5 text-red-800" />
         </div>
         
         <div className="space-y-7">

@@ -65,14 +65,14 @@ function SearchResultCard({
         </span>
         <Button
           aria-label={`Save ${result.title}`}
-          className="absolute right-4 top-4 size-10 rounded-full bg-white/90 text-stone-700 backdrop-blur-md hover:bg-white hover:text-emerald-800"
+          className="absolute right-4 top-4 size-10 rounded-full bg-white/90 text-stone-700 backdrop-blur-md hover:bg-white hover:text-red-800"
           size="icon"
           variant="ghost"
         >
           <Heart className="size-4" />
         </Button>
       </div>
-      <h2 className="mb-2 text-2xl font-semibold tracking-tight text-stone-950 transition-colors group-hover:text-emerald-800">
+      <h2 className="mb-2 text-2xl font-semibold tracking-tight text-stone-950 transition-colors group-hover:text-red-800">
         {result.title}
       </h2>
       <p className="mb-4 text-sm leading-relaxed text-stone-600">
@@ -85,7 +85,7 @@ function SearchResultCard({
           </p>
           <p className="text-lg font-medium text-stone-950">{result.price}</p>
         </div>
-        <Button asChild className="text-xs font-semibold tracking-[0.08em] text-emerald-800 hover:text-emerald-900" size="sm" variant="ghost">
+        <Button asChild className="text-xs font-semibold tracking-[0.08em] text-red-800 hover:text-red-900" size="sm" variant="ghost">
           <Link href={result.href}>{result.cta}</Link>
         </Button>
       </div>
@@ -235,13 +235,13 @@ export default function SearchResultsPage({
         <header className="mb-16">
           <h1 className="mb-4 text-5xl font-bold leading-tight tracking-tight text-stone-950 md:text-[3.5rem]">
             {results.length} Journeys Found for{" "}
-            <span className="font-normal italic text-emerald-800">
+            <span className="font-normal italic text-red-800">
               &quot;{query || "all trips"}&quot;
             </span>
           </h1>
           <div className="mt-8 max-w-2xl">
             <form
-              className="flex items-center rounded-xl bg-stone-100 px-4 py-3 ring-1 ring-transparent transition-colors focus-within:ring-emerald-800"
+              className="flex items-center rounded-xl bg-stone-100 px-4 py-3 ring-1 ring-transparent transition-colors focus-within:ring-red-800"
               onSubmit={(event) => event.preventDefault()}
             >
               <Search className="mr-3 size-5 text-stone-400" />
@@ -253,7 +253,7 @@ export default function SearchResultsPage({
                 value={query}
               />
               {isSearching ? (
-                <span className="ml-3 text-sm font-medium text-emerald-800">
+                <span className="ml-3 text-sm font-medium text-red-800">
                   Searching...
                 </span>
               ) : null}
@@ -298,7 +298,7 @@ export default function SearchResultsPage({
                   <label className="group flex cursor-pointer items-center gap-3" key={filter}>
                     <input
                       checked={selectedCategories.includes(filter)}
-                      className="size-4 rounded border-stone-400 accent-emerald-800"
+                      className="size-4 rounded border-stone-400 accent-red-800"
                       onChange={() => toggleCategory(filter)}
                       type="checkbox"
                     />
@@ -318,7 +318,7 @@ export default function SearchResultsPage({
                 <div className="relative h-6">
                   <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-stone-200" />
                   <div
-                    className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-emerald-800"
+                    className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-red-800"
                     style={{
                       left: `${minPrice / 100}%`,
                       right: `${100 - maxPrice / 100}%`,
@@ -326,7 +326,7 @@ export default function SearchResultsPage({
                   />
                   <input
                     aria-label="Minimum price"
-                    className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent accent-emerald-800 [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto"
+                    className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent accent-red-800 [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto"
                     max="10000"
                     min="0"
                     onChange={(event) => updateMinPrice(Number(event.target.value))}
@@ -336,7 +336,7 @@ export default function SearchResultsPage({
                   />
                   <input
                     aria-label="Maximum price"
-                    className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent accent-emerald-800 [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto"
+                    className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent accent-red-800 [&::-moz-range-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:pointer-events-auto"
                     max="10000"
                     min="0"
                     onChange={(event) => updateMaxPrice(Number(event.target.value))}
@@ -366,8 +366,8 @@ export default function SearchResultsPage({
                     <Button
                       className={
                         active
-                          ? "rounded-xl bg-emerald-100 text-stone-950 hover:bg-emerald-200"
-                          : "rounded-xl border border-stone-200 bg-stone-100 text-stone-600 hover:border-emerald-800/40 hover:bg-stone-50"
+                          ? "rounded-xl bg-red-100 text-stone-950 hover:bg-red-200"
+                          : "rounded-xl border border-stone-200 bg-stone-100 text-stone-600 hover:border-red-800/40 hover:bg-stone-50"
                       }
                       key={filter.value}
                       onClick={() => setSelectedDuration(active ? null : filter.value)}

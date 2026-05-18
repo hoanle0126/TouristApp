@@ -14,19 +14,19 @@ export function CartSidebar() {
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
-        <Button aria-label="Open cart" className="relative hidden text-stone-600 hover:text-emerald-800 md:inline-flex" size="icon" variant="ghost">
+        <Button aria-label="Open cart" className="relative hidden text-stone-600 hover:text-red-800 md:inline-flex" size="icon" variant="ghost">
           <ShoppingBag className="size-5" />
-          <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-emerald-800 text-[10px] font-black text-white">
+          <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-red-800 text-[10px] font-black text-white">
             {totalItems}
           </span>
         </Button>
       </DrawerTrigger>
       <DrawerContent aria-label="Travel cart">
         <DrawerHeader className="relative border-b border-stone-200/70 px-8 py-7 text-left">
-          <div className="absolute right-0 top-0 size-40 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-100 blur-3xl" />
+          <div className="absolute right-0 top-0 size-40 translate-x-1/3 -translate-y-1/3 rounded-full bg-red-100 blur-3xl" />
           <div className="relative flex items-start justify-between gap-6">
             <div>
-              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-800">Booking Cart</p>
+              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-red-800">Booking Cart</p>
               <DrawerTitle className="text-3xl font-black tracking-tighter text-stone-950">Your trip cart</DrawerTitle>
             </div>
             <DrawerClose asChild>
@@ -50,7 +50,7 @@ export function CartSidebar() {
                       <div className="mb-3 flex items-start justify-between gap-4">
                         <div>
                           <h3 className="line-clamp-2 text-base font-black leading-tight text-stone-950">{item.title}</h3>
-                          <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-emerald-800">{item.date}</p>
+                          <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-red-800">{item.date}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           <span className="rounded-full bg-stone-100 px-3 py-1 text-sm font-black text-stone-950">{item.price}</span>
@@ -104,14 +104,14 @@ export function CartSidebar() {
             </div>
           </div>
           {items.length > 0 ? (
-            <Button asChild className="min-h-14 w-full rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-emerald-950/10">
+            <Button asChild className="min-h-14 w-full rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-red-950/10">
               <Link href="/checkout">
                 Review Booking
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
           ) : (
-            <Button className="min-h-14 w-full rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-emerald-950/10" disabled>
+            <Button className="min-h-14 w-full rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-red-950/10" disabled>
               Review Booking
               <ArrowRight className="size-4" />
             </Button>

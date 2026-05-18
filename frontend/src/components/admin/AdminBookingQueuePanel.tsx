@@ -11,7 +11,7 @@ import type { ApiBooking } from "@/src/lib/api/types";
 const statusStyles: Record<string, string> = {
   cancelled: "bg-stone-200 text-stone-700",
   completed: "bg-stone-900 text-white",
-  confirmed: "bg-emerald-100 text-emerald-900",
+  confirmed: "bg-red-100 text-red-900",
   pending: "bg-amber-100 text-amber-900",
   review: "bg-stone-200 text-stone-700",
 };
@@ -113,7 +113,7 @@ function AdminBookingDetailModal({ booking, onClose }: { readonly booking: ApiBo
       >
         <div className="flex items-start justify-between gap-4 border-b border-stone-200 p-6 sm:p-7">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">Booking detail</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">Booking detail</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-stone-950" id={titleId}>
               {booking.bookingCode}
             </h2>
@@ -132,8 +132,8 @@ function AdminBookingDetailModal({ booking, onClose }: { readonly booking: ApiBo
         </div>
 
         <div className="space-y-6 overflow-y-auto p-6 text-sm text-stone-600 sm:p-7">
-          <section className="rounded-2xl bg-emerald-50 p-4">
-            <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-800">AI booking summary</h4>
+          <section className="rounded-2xl bg-red-50 p-4">
+            <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-red-800">AI booking summary</h4>
             <p className="mt-3 text-sm leading-7 text-stone-700">
               {booking.aiSummary ?? "No AI summary has been generated yet."}
             </p>
@@ -158,7 +158,7 @@ function AdminBookingDetailModal({ booking, onClose }: { readonly booking: ApiBo
                     <div>
                       <p className="font-semibold text-stone-950">{item.title}</p>
                       {item.meta ? <p className="mt-1 text-xs text-stone-500">{item.meta}</p> : null}
-                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-800">
                         {item.itemType} · Qty {item.quantity}
                       </p>
                     </div>
@@ -241,7 +241,7 @@ export function AdminBookingQueuePanel({ bookings }: { readonly bookings: readon
         <CardContent className="p-6 sm:p-7">
           <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-emerald-800">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-red-800">
               Booking queue
             </p>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-stone-950">

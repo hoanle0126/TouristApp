@@ -222,7 +222,7 @@ function toHotelPayload(
   gallery: readonly HotelGalleryRow[],
 ): SaveHotelInput {
   return {
-    slug: form.slug,
+    slug: slugifyHotelName(form.name),
     name: form.name,
     location: form.location,
     address: form.address,
@@ -328,7 +328,7 @@ export function AdminHotelForm({ copy, initialValues, mode = "create", originalS
   function updateField<K extends keyof HotelFormState>(field: K, value: HotelFormState[K]) {
     setForm((current) => {
       if (field === "name") {
-        return { ...current, name: value, slug: current.slug || slugifyHotelName(String(value)) };
+        return { ...current, name: value, slug: slugifyHotelName(String(value)) };
       }
 
       return { ...current, [field]: value };
@@ -584,6 +584,8 @@ function TextField({
   onChange,
   placeholder,
   value,
+  disabled,
+  hint,
 }: Readonly<{
   error?: string;
   id: string;
@@ -591,6 +593,8 @@ function TextField({
   onChange: (value: string) => void;
   placeholder?: string;
   value: string;
+  disabled?: boolean;
+  hint?: string;
 }>) {
   const errorId = error ? `${id}-error` : undefined;
 
@@ -600,11 +604,13 @@ function TextField({
       <Input
         aria-describedby={errorId}
         aria-invalid={Boolean(error)}
+        disabled={disabled}
         id={id}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         value={value}
       />
+      {hint ? <p className="mt-1 text-xs text-stone-500">{hint}</p> : null}
       <FieldError id={errorId} message={error} />
     </div>
   );
@@ -635,7 +641,7 @@ function HotelEssentialsSection({
         />
         <div className="grid gap-4 md:grid-cols-2">
           <TextField error={errors.name} id="hotel-name" label="Hotel name" onChange={(value) => updateField("name", value)} value={form.name} />
-          <TextField id="hotel-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
+          <TextField id="hotel-slug" label="Slug" disabled hint="Auto-generated from the hotel name." onChange={() => undefined} value={slugifyHotelName(form.name)} />
           <div>
             <Label htmlFor="hotel-destination">Destination</Label>
             <Select disabled={isLoadingDestinations} value={form.destinationSlug} onValueChange={(value) => updateField("destinationSlug", value)}>

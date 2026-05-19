@@ -9,7 +9,9 @@ import {
   Clock3,
   Compass,
   CreditCard,
+  FileText,
   Hotel,
+  Info,
   LayoutDashboard,
   Mail,
   MapPinned,
@@ -56,6 +58,8 @@ const adminNavItems: readonly AdminNavItem[] = [
   { href: "/admin/blogs", icon: SquarePen, label: "Blogs" },
   { href: "/admin/events", icon: CalendarDays, label: "Events" },
   { href: "/admin/feedback", icon: Quote, label: "Feedback" },
+  { href: "/admin/about", icon: Info, label: "About page" },
+  { href: "/admin/contact", icon: FileText, label: "Contact page" },
   { href: "/admin/newsletter", icon: Mail, label: "Newsletter" },
   { href: "/admin/settings", icon: Settings2, label: "Settings" },
 ] as const;

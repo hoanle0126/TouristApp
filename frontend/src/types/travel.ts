@@ -72,6 +72,14 @@ export interface VisualDiaryItem {
   readonly wide?: boolean;
 }
 
+export interface TravelMoment {
+  readonly id?: string;
+  readonly image: string;
+  readonly alt: string;
+  readonly caption?: string | null;
+  readonly sortOrder?: number;
+}
+
 export interface TravelerFeedback {
   readonly id?: string;
   readonly name: string;

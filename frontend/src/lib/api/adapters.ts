@@ -10,6 +10,7 @@ import type {
   TourDetail,
   TourDetailHighlight,
   TravelEventCard,
+  TravelMoment,
   TravelPartner,
   TravelerFeedback,
   VisualDiaryItem,
@@ -25,6 +26,7 @@ import type {
   ApiPartner,
   ApiTourCard,
   ApiTourDetail,
+  ApiTravelMoment,
   ApiTravelerReview,
 } from "@/src/lib/api/types";
 
@@ -280,6 +282,16 @@ export function toTravelerFeedback(
     role: review.role,
     sortOrder: review.sortOrder,
     trip: review.trip,
+  };
+}
+
+export function toTravelMoment(moment: ApiTravelMoment): TravelMoment {
+  return {
+    alt: moment.alt,
+    caption: moment.caption,
+    id: moment.id,
+    image: moment.image,
+    sortOrder: moment.sortOrder,
   };
 }
 

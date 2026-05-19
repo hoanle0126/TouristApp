@@ -89,7 +89,7 @@ function toPublishedAt(value: string) {
 
 function toBlogPayload(form: BlogFormState, sections: readonly BlogSectionRow[], relatedPosts: readonly BlogRelatedPostRow[]): SaveBlogInput {
   return {
-    slug: form.slug,
+    slug: slugifyBlogTitle(form.title),
     title: form.title,
     excerpt: form.excerpt,
     category: form.category,
@@ -147,7 +147,7 @@ export function AdminBlogForm({ copy, initialValues, mode = "create", originalSl
   function updateField<K extends keyof BlogFormState>(field: K, value: BlogFormState[K]) {
     setForm((current) => {
       if (field === "title") {
-        return { ...current, title: value, slug: current.slug || slugifyBlogTitle(String(value)) };
+        return { ...current, title: value, slug: slugifyBlogTitle(String(value)) };
       }
 
       return { ...current, [field]: value };
@@ -299,13 +299,14 @@ function FieldError({ id, message }: Readonly<{ id?: string; message?: string }>
   return message ? <p className="mt-2 text-xs font-semibold text-rose-700" id={id}>{message}</p> : null;
 }
 
-function TextField({ error, id, label, onChange, value }: Readonly<{ error?: string; id: string; label: string; onChange: (value: string) => void; value: string }>) {
+function TextField({ error, id, label, onChange, value, disabled, hint }: Readonly<{ error?: string; id: string; label: string; onChange: (value: string) => void; value: string; disabled?: boolean; hint?: string }>) {
   const errorId = error ? `${id}-error` : undefined;
 
   return (
     <div>
       <Label htmlFor={id}>{label}</Label>
-      <Input aria-describedby={errorId} aria-invalid={Boolean(error)} id={id} onChange={(event) => onChange(event.target.value)} value={value} />
+      <Input aria-describedby={errorId} aria-invalid={Boolean(error)} disabled={disabled} id={id} onChange={(event) => onChange(event.target.value)} value={value} />
+      {hint ? <p className="mt-1 text-xs text-stone-500">{hint}</p> : null}
       <FieldError id={errorId} message={error} />
     </div>
   );
@@ -367,7 +368,7 @@ function BlogEssentialsSection({ errors, form, updateField }: Readonly<{ errors:
         <SectionHeader description="Core metadata that powers the blog listing and editorial workflow." eyebrow="Essentials" title="Blog information" />
         <div className="grid gap-4 md:grid-cols-2">
           <TextField error={errors.title} id="blog-title" label="Title" onChange={(value) => updateField("title", value)} value={form.title} />
-          <TextField id="blog-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
+          <TextField id="blog-slug" label="Slug" disabled hint="Auto-generated from the title." onChange={() => undefined} value={slugifyBlogTitle(form.title)} />
           <TextField error={errors.excerpt} id="blog-excerpt" label="Excerpt" onChange={(value) => updateField("excerpt", value)} value={form.excerpt} />
           <TextField id="blog-category" label="Category" onChange={(value) => updateField("category", value)} value={form.category} />
           <TextField id="blog-author" label="Author" onChange={(value) => updateField("author", value)} value={form.author} />

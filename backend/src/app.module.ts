@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
+import { AboutPageModule } from './about-page/about-page.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BlogsModule } from './blogs/blogs.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { ContactModule } from './contact/contact.module';
+import { ContactPageModule } from './contact-page/contact-page.module';
 import { DestinationsModule } from './destinations/destinations.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { HotelsModule } from './hotels/hotels.module';
@@ -13,18 +15,22 @@ import { PartnersModule } from './partners/partners.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
 import { TravelerReviewsModule } from './traveler-reviews/traveler-reviews.module';
+import { TravelMomentsModule } from './travel-moments/travel-moments.module';
 import { ToursModule } from './tours/tours.module';
 import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
     PrismaModule,
+    AboutPageModule,
+    ContactPageModule,
     ToursModule,
     DestinationsModule,
     HotelsModule,
     EventsModule,
     PartnersModule,
     TravelerReviewsModule,
+    TravelMomentsModule,
     BlogsModule,
     BookingsModule,
     ChatbotModule,

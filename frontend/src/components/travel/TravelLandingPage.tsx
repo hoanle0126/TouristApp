@@ -41,6 +41,7 @@ import type {
   HotelCard,
   TourCard,
   TravelEventCard,
+  TravelMoment,
   TravelPartner,
   TravelerFeedback,
   VisualDiaryItem,
@@ -485,6 +486,7 @@ interface TravelLandingPageProps {
     | "heroImageThree"
   >;
   readonly tourCards: readonly TourCard[];
+  readonly travelMoments: readonly TravelMoment[];
   readonly travelPartners: readonly TravelPartner[];
   readonly travelerFeedback: readonly TravelerFeedback[];
   readonly visualDiaryItems: readonly VisualDiaryItem[];
@@ -497,6 +499,7 @@ export default function TravelLandingPage({
   hotelCards,
   siteContent,
   tourCards,
+  travelMoments,
   travelPartners,
   travelerFeedback,
   visualDiaryItems,
@@ -530,6 +533,7 @@ export default function TravelLandingPage({
       <BlogSection posts={blogPosts} />
       <FeedbackPartnersSection
         feedback={travelerFeedback}
+        moments={travelMoments}
         partners={travelPartners}
       />
       <ContactSection siteContent={siteContent} />

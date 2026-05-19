@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { AdminShell } from "@/src/components/admin/AdminShell";
+import { AdminTravelMomentsManager } from "@/src/components/admin/AdminTravelMomentsManager";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
@@ -28,9 +29,14 @@ import {
   updateTravelerReview,
   type SaveTravelerReviewInput,
 } from "@/src/lib/api/traveler-reviews";
-import type { ApiPartner, ApiTravelerReview } from "@/src/lib/api/types";
+import type {
+  ApiPartner,
+  ApiTravelMoment,
+  ApiTravelerReview,
+} from "@/src/lib/api/types";
 
 interface AdminFeedbackPageProps {
+  readonly initialMoments: readonly ApiTravelMoment[];
   readonly initialPartners: readonly ApiPartner[];
   readonly initialReviews: readonly ApiTravelerReview[];
 }
@@ -122,6 +128,7 @@ function toPartnerPayload(form: PartnerFormState): SavePartnerInput {
 }
 
 export default function AdminFeedbackPage({
+  initialMoments,
   initialPartners,
   initialReviews,
 }: Readonly<AdminFeedbackPageProps>) {
@@ -599,6 +606,8 @@ export default function AdminFeedbackPage({
           </CardContent>
         </Card>
       </section>
+
+      <AdminTravelMomentsManager initialMoments={initialMoments} />
 
       <section className="grid gap-6 2xl:grid-cols-[minmax(0,1.2fr)_480px]">
         <Card>

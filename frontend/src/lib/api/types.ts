@@ -21,6 +21,14 @@ export type ApiTravelerReview = {
   readonly trip: string;
 };
 
+export type ApiTravelMoment = {
+  readonly id: string;
+  readonly image: string;
+  readonly alt: string;
+  readonly caption: string | null;
+  readonly sortOrder: number;
+};
+
 export type ApiEvent = {
   readonly alt: string;
   readonly badge: string;

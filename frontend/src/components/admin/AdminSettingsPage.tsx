@@ -17,12 +17,13 @@ import {
 } from "lucide-react";
 
 import { AdminShell } from "@/src/components/admin/AdminShell";
+import { ImageUploadInput } from "@/src/components/admin/ImageUploadInput";
+import { VietQrPreview } from "@/src/components/admin/VietQrPreview";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
-import { ImageUploadInput } from "@/src/components/admin/ImageUploadInput";
 import {
   getAiProviderSettings,
   getShopPaymentSettings,
@@ -657,6 +658,13 @@ export default function AdminSettingsPage() {
                       />
                     </div>
                   </div>
+
+                  <VietQrPreview
+                    accountName={shopPaymentForm.accountName}
+                    accountNumber={shopPaymentForm.accountNumber}
+                    bankBin={shopPaymentForm.bankBin}
+                    bankName={shopPaymentForm.bankName}
+                  />
 
                   <div className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-relaxed text-red-950">
                     The booking code is added automatically to the transfer note. Customers only see the QR code after they complete traveler details and submit checkout.

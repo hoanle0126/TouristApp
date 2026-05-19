@@ -1,15 +1,26 @@
 import { Quote } from "lucide-react";
 
-import type { TravelerFeedback, TravelPartner } from "@/src/types/travel";
+import { TravelMomentsCarousel } from "@/src/components/travel/TravelMomentsCarousel";
+import type {
+  TravelMoment,
+  TravelPartner,
+  TravelerFeedback,
+} from "@/src/types/travel";
 
 export function FeedbackPartnersSection({
   feedback,
+  moments,
   partners,
 }: Readonly<{
   feedback: readonly TravelerFeedback[];
+  moments: readonly TravelMoment[];
   partners: readonly TravelPartner[];
 }>) {
-  if (feedback.length === 0 && partners.length === 0) {
+  if (
+    feedback.length === 0 &&
+    partners.length === 0 &&
+    moments.length === 0
+  ) {
     return null;
   }
 
@@ -46,11 +57,14 @@ export function FeedbackPartnersSection({
                 </article>
               ))}
             </div>
+            <TravelMomentsCarousel moments={moments} />
           </div>
+        ) : moments.length > 0 ? (
+          <TravelMomentsCarousel moments={moments} />
         ) : null}
 
         {partners.length > 0 ? (
-          <div className="mt-16 rounded-[2rem] border border-stone-200 bg-stone-100/80 p-6 md:p-8">
+          <div className="mt-16 rounded-[2rem] border border-amber-200/70 bg-amber-50 p-6 shadow-sm shadow-amber-900/5 md:p-8">
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.28em] text-red-700">
@@ -60,15 +74,15 @@ export function FeedbackPartnersSection({
                   Trusted travel partners
                 </h3>
               </div>
-              <p className="max-w-lg text-sm leading-6 text-stone-500">
+              <p className="max-w-lg text-sm leading-6 text-stone-600">
                 A network of stays, guides, and local operators that helps each
                 journey run smoothly from start to finish.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {partners.map((partner) => (
+            <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:thin] md:overflow-visible">
+              {partners.slice(0, 5).map((partner) => (
                 <div
-                  className="rounded-2xl border border-stone-200 bg-white px-5 py-4 transition-colors hover:border-red-200 hover:bg-red-50/50"
+                  className="min-w-50 flex-1 rounded-2xl border border-amber-200/70 bg-white px-5 py-4 transition-colors hover:border-amber-300 hover:bg-amber-50/60 md:min-w-0"
                   key={partner.name}
                 >
                   <p className="text-sm font-black uppercase tracking-tight text-stone-950">

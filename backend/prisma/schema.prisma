@@ -115,6 +115,18 @@ model TravelerReview {
   @@index([sortOrder])
 }
 
+model TravelMoment {
+  id        String   @id @default(cuid())
+  image     String
+  alt       String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
+}
+
 model Hotel {
   id               String              @id @default(cuid())
   slug             String              @unique
@@ -309,6 +321,43 @@ model SiteContentConfig {
   instagramUrl    String   @default("")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model AboutPageContent {
+  id             String   @id
+  heroImage      String
+  heroAlt        String
+  heroTitle      String
+  heroSubtitle   String
+  storyImage     String
+  storyAlt       String
+  storyHeading   String
+  storyBody      Json
+  storyCtaLabel  String
+  mission        String
+  vision         String
+  curators       Json
+  philosophy     Json
+  cta            String
+  ctaButtonLabel String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ContactPageContent {
+  id             String   @id
+  heroTitle      String
+  heroSubtitle   String
+  formTitle      String
+  formSubtitle   String
+  offices        Json
+  departments    Json
+  mapImage       String
+  mapAlt         String
+  mapTitle       String
+  mapNote        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model NewsletterSubscriber {

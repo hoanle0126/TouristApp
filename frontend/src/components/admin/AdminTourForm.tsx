@@ -47,6 +47,7 @@ import {
   type OperationalStatus,
   type TourBadge,
   type TourFormState,
+  slugifyTourTitle,
 } from "@/src/components/admin/adminTourFormData";
 import { getDestinationDetails } from "@/src/lib/api/destinations";
 import { createTour, updateTour, updateTourDepartures, type SaveTourInput, type UpdateTourDeparturesInput } from "@/src/lib/api/tours";
@@ -214,7 +215,7 @@ function toTourPayload(
   gallery: readonly GalleryItem[],
 ): SaveTourInput {
   return {
-    slug: form.slug,
+    slug: slugifyTourTitle(form.title),
     title: form.title,
     ...(form.badge === "none" ? {} : { badge: form.badge }),
     type: form.type,
@@ -312,7 +313,16 @@ export function AdminTourForm({ copy, initialValues, mode = "create", originalSl
   );
 
   function updateField<K extends keyof TourFormState>(field: K, value: TourFormState[K]) {
-    setForm((current) => ({ ...current, [field]: value }));
+    setForm((current) => {
+      if (field === "title") {
+        return {
+          ...current,
+          title: value as TourFormState["title"],
+          slug: slugifyTourTitle(String(value)),
+        };
+      }
+      return { ...current, [field]: value };
+    });
     setSaved(false);
     if (field in errors) {
       setErrors((current) => ({ ...current, [field]: undefined }));
@@ -580,6 +590,8 @@ function TextField({
   onChange,
   placeholder,
   value,
+  disabled,
+  hint,
 }: Readonly<{
   error?: string;
   id: string;
@@ -587,6 +599,8 @@ function TextField({
   onChange: (value: string) => void;
   placeholder?: string;
   value: string;
+  disabled?: boolean;
+  hint?: string;
 }>) {
   const errorId = error ? `${id}-error` : undefined;
 
@@ -596,11 +610,13 @@ function TextField({
       <Input
         aria-describedby={errorId}
         aria-invalid={Boolean(error)}
+        disabled={disabled}
         id={id}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         value={value}
       />
+      {hint ? <p className="mt-1 text-xs text-stone-500">{hint}</p> : null}
       <FieldError id={errorId} message={error} />
     </div>
   );
@@ -728,7 +744,7 @@ function EssentialsSection({
         />
         <div className="grid gap-4 md:grid-cols-2">
           <TextField error={errors.title} id="tour-title" label="Title" onChange={(value) => updateField("title", value)} value={form.title} />
-          <TextField id="tour-slug" label="Slug" onChange={(value) => updateField("slug", value)} value={form.slug} />
+          <TextField id="tour-slug" label="Slug" disabled hint="Auto-generated from the title." onChange={() => undefined} value={slugifyTourTitle(form.title)} />
           <div>
             <Label htmlFor="tour-badge">Badge</Label>
             <Select value={form.badge} onValueChange={(value: TourBadge) => updateField("badge", value)}>

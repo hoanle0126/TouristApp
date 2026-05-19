@@ -164,7 +164,7 @@ export default function DestinationDetailPage({ detail }: Readonly<{ detail: Des
         <Spotlight detail={detail} />
         <RelatedCollection links={detail.relatedTours} title="Journeys" />
         <RelatedCollection links={detail.relatedHotels} title="Stays" />
-        <CtaBand href="/search" title={detail.card.title} />
+        <CtaBand href="/contact" title={detail.card.title} />
       </div>
       <TravelFooter />
     </main>

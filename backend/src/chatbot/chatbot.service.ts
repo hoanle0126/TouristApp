@@ -147,8 +147,9 @@ export class ChatbotService {
     sources: ChatbotResponse['sources'],
   ) {
     const config = await this.settingsService.getAiProviderRuntimeConfig();
+    const isGreeting = ['chào', 'hello', 'hi', 'xin chào', 'hey'].some(word => question.toLowerCase().includes(word));
     const fallbackAnswer =
-      groundedAnswer ?? 'I do not know based on the current website data.';
+      groundedAnswer ?? (isGreeting ? 'Xin chào! Mình có thể giúp gì cho bạn hôm nay?' : 'I do not know based on the current website data.');
     const hasGroundedContext = Boolean(groundedAnswer || sources.length > 0);
 
     if (!config.enabled || !config.apiKey) {
@@ -171,16 +172,18 @@ export class ChatbotService {
               {
                 role: 'system',
                 content: hasGroundedContext
-                  ? 'You are a multilingual travel support chatbot for a travel booking website. Answer in the same language as the user. Use the supplied website context when answering this request. Answer the website question directly from the supplied website context when that context contains the answer. Do not say you do not know when the supplied website context already answers the question. If the supplied website context is insufficient for the requested website information, say you do not know. Do not invent policies, prices, availability, or business facts.'
+                  ? 'You are a multilingual travel support chatbot for a travel booking website. Answer in the same language as the user. Use the supplied website context when answering this request. If the supplied website context does not perfectly answer the user\'s specific question, use the context to provide a helpful overview or suggestions instead of saying you do not know. Do not invent policies, prices, availability, or business facts.'
                   : 'You are a multilingual travel support chatbot for a travel booking website. Answer in the same language as the user. Respond naturally to greetings and general small talk. Do not invent specific website facts, prices, availability, policies, or business details unless website context is supplied.',
               },
               {
                 role: 'user',
-                content: JSON.stringify({
-                  question,
-                  groundedAnswer,
-                  sources,
-                }),
+                content: hasGroundedContext
+                  ? JSON.stringify({
+                      question,
+                      groundedAnswer,
+                      sources,
+                    })
+                  : question,
               },
             ],
           }),
@@ -428,27 +431,27 @@ export class ChatbotService {
       };
     }
 
+    const overviewParts: string[] = [];
+    if (destinations.length > 0) {
+      overviewParts.push(`We offer travel experiences to destinations like ${destinations.slice(0, 5).map(d => d.title).join(', ')}.`);
+    }
+    if (tours.length > 0) {
+      overviewParts.push(`Some of our popular tours include ${tours.slice(0, 3).map(t => t.title).join(', ')}.`);
+    }
+    if (hotels.length > 0) {
+      overviewParts.push(`We also feature stays at places like ${hotels.slice(0, 3).map(h => h.name).join(', ')}.`);
+    }
+
     return {
-      groundedAnswer: 'I do not know based on the current website data.',
+      groundedAnswer: overviewParts.length > 0 
+        ? `I could not find an exact match for the specific request, but here is an overview of our offerings: ${overviewParts.join(' ')}` 
+        : 'I do not know based on the current website data.',
       sources: [],
     };
   }
 
   private matches(message: string, candidates: string[]) {
-    const normalizedMessage = this.normalizeForMatch(message);
-    const messageTokens = new Set(normalizedMessage.split(' ').filter(Boolean));
-
-    return candidates.some((candidate) => {
-      const normalizedCandidate = this.normalizeForMatch(candidate);
-      const candidateTokens = normalizedCandidate
-        .split(' ')
-        .filter((token) => token.length >= 3);
-
-      return (
-        this.hasExactMatch(message, [candidate]) ||
-        candidateTokens.some((token) => messageTokens.has(token))
-      );
-    });
+    return this.hasExactMatch(message, candidates);
   }
 
   private hasExactMatch(message: string, candidates: string[]) {

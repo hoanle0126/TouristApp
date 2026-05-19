@@ -96,35 +96,36 @@ function Spotlight({ detail }: Readonly<{ detail: DestinationDetail }>) {
   );
 }
 
-function RelatedCollection({
-  links,
-  title,
-}: Readonly<{
-  links: DestinationDetail["relatedHotels"];
-  title: string;
-}>) {
+function DestinationMarquee({ heroImage }: { heroImage: string }) {
+  const images = [
+    heroImage,
+    "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=80",
+  ];
+
   return (
-    <section>
-      <div className="mb-8 flex items-end justify-between gap-4 border-b border-stone-200 pb-6">
-        <div>
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-red-800">{title}</p>
-          <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Related picks</h2>
+    <section className="overflow-hidden">
+      <h2 className="mb-10 text-sm font-bold uppercase tracking-[0.3em] text-red-800">Visuals</h2>
+      <div className="relative flex w-full overflow-hidden">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-50% - 1rem)); }
+          }
+          .animate-marquee {
+            animation: marquee 40s linear infinite;
+          }
+        `}} />
+        <div className="flex w-max min-w-full shrink-0 animate-marquee gap-6">
+          {[...images, ...images].map((img, i) => (
+            <div key={i} className="relative h-72 w-96 shrink-0 overflow-hidden rounded-[1.75rem] shadow-sm">
+              <Image src={img} alt="Destination visuals" fill className="object-cover" />
+            </div>
+          ))}
         </div>
-      </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {links.map((link) => (
-          <article className="rounded-[1.75rem] border border-stone-200 bg-white p-6 shadow-sm" key={link.title}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-800">{link.label}</p>
-            <h3 className="mt-3 text-2xl font-black tracking-tight text-stone-950">{link.title}</h3>
-            <p className="mt-3 text-sm leading-relaxed text-stone-600">{link.meta}</p>
-            <Button asChild className="mt-6 text-xs uppercase tracking-widest text-red-800" size="sm" variant="ghost">
-              <Link href={link.href}>
-                Explore
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-          </article>
-        ))}
       </div>
     </section>
   );
@@ -162,8 +163,7 @@ export default function DestinationDetailPage({ detail }: Readonly<{ detail: Des
       <div className="mx-auto max-w-screen-2xl space-y-24 px-8 py-24 md:space-y-32 md:py-32 lg:px-24">
         <Overview detail={detail} />
         <Spotlight detail={detail} />
-        <RelatedCollection links={detail.relatedTours} title="Journeys" />
-        <RelatedCollection links={detail.relatedHotels} title="Stays" />
+        <DestinationMarquee heroImage={detail.heroImage} />
         <CtaBand href="/contact" title={detail.card.title} />
       </div>
       <TravelFooter />

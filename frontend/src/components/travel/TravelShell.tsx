@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Phone, Search, Sparkles } from "lucide-react";
 
 import { CartSidebar } from "@/src/components/travel/CartSidebar";
+import { MobileNavigation } from "@/src/components/travel/MobileNavigation";
 import { NewsletterForm } from "@/src/components/travel/NewsletterForm";
 import { Button } from "@/src/components/ui/button";
 import { getDestinations } from "@/src/lib/api/destinations";
@@ -222,12 +223,19 @@ export async function TravelHeader({ activeItem = "Home" }: Readonly<TravelHeade
                 <Search className="size-5" />
               </Link>
             </Button>
-            <Button asChild className="bg-red-900 text-white shadow-red-950/10 hover:bg-red-950 active:scale-95">
+            <Button asChild className="hidden bg-red-900 text-white shadow-red-950/10 hover:bg-red-950 active:scale-95 sm:inline-flex">
               <Link href="/checkout">
                 <Sparkles className="size-4" />
                 Book Now
               </Link>
             </Button>
+            <MobileNavigation
+              activeItem={activeItem}
+              contactEmail={contactEmail}
+              dropdowns={dropdowns}
+              hotline={hotline}
+              items={navigationItems.map((item) => ({ href: itemHref(item), label: item }))}
+            />
           </div>
         </div>
       </nav>

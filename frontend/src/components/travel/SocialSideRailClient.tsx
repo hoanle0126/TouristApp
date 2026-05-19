@@ -96,18 +96,18 @@ export function SocialSideRailClient({
   return (
     <aside
       aria-label="Social media"
-      className="fixed left-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-3 lg:flex"
+      className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-2 sm:left-4 sm:gap-3"
     >
       {links.map(({ href, label, icon: Icon, hover }) => (
         <Link
           aria-label={label}
-          className={`group flex size-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 shadow-md shadow-stone-950/5 transition-all duration-200 hover:scale-110 hover:shadow-xl ${hover}`}
+          className={`group flex size-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 shadow-md shadow-stone-950/5 transition-all duration-200 hover:scale-110 hover:shadow-xl sm:size-11 ${hover}`}
           href={href}
           key={label}
           rel="noopener noreferrer"
           target="_blank"
         >
-          <Icon className="size-5" />
+          <Icon className="size-4 sm:size-5" />
         </Link>
       ))}
     </aside>

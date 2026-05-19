@@ -14,7 +14,7 @@ export function CartSidebar() {
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
-        <Button aria-label="Open cart" className="relative hidden text-stone-600 hover:text-red-800 md:inline-flex" size="icon" variant="ghost">
+        <Button aria-label="Open cart" className="relative text-stone-600 hover:text-red-800" size="icon" variant="ghost">
           <ShoppingBag className="size-5" />
           <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-red-800 text-[10px] font-black text-white">
             {totalItems}

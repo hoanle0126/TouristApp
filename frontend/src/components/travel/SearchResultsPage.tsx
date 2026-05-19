@@ -231,7 +231,7 @@ export default function SearchResultsPage({
     <main className="min-h-screen bg-[#f9faf6] text-stone-950">
       <TravelHeader activeItem="Tours" />
 
-      <section className="mx-auto w-full max-w-screen-2xl px-8 pb-24 pt-32">
+      <section className="mx-auto w-full max-w-screen-2xl px-8 pb-24 pt-36 lg:pt-44">
         <header className="mb-16">
           <h1 className="mb-4 text-5xl font-bold leading-tight tracking-tight text-stone-950 md:text-[3.5rem]">
             {results.length} Journeys Found for{" "}

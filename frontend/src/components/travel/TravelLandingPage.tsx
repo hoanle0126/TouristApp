@@ -507,7 +507,7 @@ export default function TravelLandingPage({
   const heroSlides = buildHeroSlides(visualDiaryItems, siteContent);
   const featuredTourItems = buildTourHighlightItems(tourCards);
   const featuredHotelItems = buildHotelHighlightItems(hotelCards);
-  const promoEvent = eventCards[0];
+  const promoEvent = eventCards.find((e) => e.isPopup) ?? eventCards[0];
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">

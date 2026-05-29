@@ -108,6 +108,7 @@ export interface TravelEventCard {
   readonly location: string;
   readonly sortOrder?: number;
   readonly title: string;
+  readonly isPopup?: boolean;
 }
 
 export interface JournalPost {

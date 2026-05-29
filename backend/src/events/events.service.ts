@@ -22,6 +22,11 @@ export class EventsService {
   }
 
   async create(dto: CreateEventDto) {
+    if (dto.isPopup) {
+      await this.prisma.event.updateMany({
+        data: { isPopup: false },
+      });
+    }
     const event = await this.prisma.event.create({ data: dto });
     this.notifyNewsletterAboutEvent(event).catch((error: unknown) => {
       this.logger.error('Failed to send event announcement', error);
@@ -31,6 +36,12 @@ export class EventsService {
 
   async update(id: string, dto: UpdateEventDto) {
     await this.findExisting(id);
+    if (dto.isPopup) {
+      await this.prisma.event.updateMany({
+        where: { id: { not: id } },
+        data: { isPopup: false },
+      });
+    }
     const event = await this.prisma.event.update({ data: dto, where: { id } });
     return this.toResponse(event);
   }
@@ -67,6 +78,7 @@ export class EventsService {
       location: event.location,
       sortOrder: event.sortOrder,
       title: event.title,
+      isPopup: event.isPopup,
     };
   }
 

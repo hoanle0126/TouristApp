@@ -12,6 +12,7 @@ export type SaveEventInput = {
   readonly location: string;
   readonly sortOrder: number;
   readonly title: string;
+  readonly isPopup?: boolean;
 };
 
 export async function getEvents() {

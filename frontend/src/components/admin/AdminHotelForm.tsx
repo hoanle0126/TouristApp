@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import { BadgeCheck, BedDouble, Car, CheckCircle2, CircleAlert, Coffee, Dumbbell, ImageIcon, ListChecks, MapPinned, Plus, Save, Sparkles, Trash2, Utensils, Waves, Wifi } from "lucide-react";
 
@@ -658,6 +659,19 @@ function HotelEssentialsSection({
           </div>
           <TextField error={errors.price} id="hotel-price" label="Price" onChange={(value) => updateField("price", value)} value={form.price} />
           <TextField id="hotel-badge" label="Badge" onChange={(value) => updateField("badge", value)} value={form.badge} />
+          <div>
+            <Label htmlFor="hotel-status">Status</Label>
+            <Select value={form.status} onValueChange={(value: HotelCommercialStatus) => updateField("status", value)}>
+              <SelectTrigger id="hotel-status">
+                <SelectValue placeholder="Choose status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Draft">Draft</SelectItem>
+                <SelectItem value="Ready for review">Ready for review</SelectItem>
+                <SelectItem value="Published">Published</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -1088,9 +1102,31 @@ function SuitesEditor({
   onUpdate: <K extends keyof HotelSuiteRow>(id: string, field: K, value: HotelSuiteRow[K]) => void;
   suites: readonly HotelSuiteRow[];
 }>) {
+  const [uploadingRowId, setUploadingRowId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleUpload(rowId: string, file: File | undefined) {
+    if (!file) {
+      return;
+    }
+
+    setUploadingRowId(rowId);
+    setUploadError(null);
+
+    try {
+      const url = await uploadAdminImage(file);
+      onUpdate(rowId, "image", url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Unable to upload image.");
+    } finally {
+      setUploadingRowId(null);
+    }
+  }
+
   return (
     <div className="space-y-4 border-t border-stone-200 pt-5">
       <CollectionHeader addLabel="Add suite" icon={<BedDouble className="size-4" />} label="Suites" onAdd={onAdd} />
+      {uploadError ? <p className="text-xs font-semibold text-rose-700">{uploadError}</p> : null}
       <div className="space-y-4">
         {suites.map((suite, index) => (
           <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={suite.id}>
@@ -1100,12 +1136,43 @@ function SuitesEditor({
               onRemove={() => onRemove(suite.id)}
               removeLabel={`Remove suite ${index + 1}`}
             />
-            <div className="grid gap-4 md:grid-cols-2">
-              <TextField id={`${suite.id}-name`} label="Suite name" onChange={(value) => onUpdate(suite.id, "name", value)} value={suite.name} />
-              <TextField id={`${suite.id}-price`} label="Suite price" onChange={(value) => onUpdate(suite.id, "price", value)} value={suite.price} />
-              <TextField id={`${suite.id}-badge`} label="Suite badge" onChange={(value) => onUpdate(suite.id, "badge", value)} value={suite.badge} />
-              <TextField id={`${suite.id}-image`} label="Suite image URL" onChange={(value) => onUpdate(suite.id, "image", value)} value={suite.image} />
+            
+            <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+              <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
+                {suite.image ? (
+                  <div className="relative aspect-[4/3]">
+                    <Image alt={`Suite preview ${index + 1}`} className="object-cover" fill sizes="240px" src={suite.image} />
+                  </div>
+                ) : (
+                  <div className="flex aspect-[4/3] items-center justify-center bg-stone-100 text-sm font-semibold text-stone-400">
+                    No preview
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <TextField id={`${suite.id}-name`} label="Suite name" onChange={(value) => onUpdate(suite.id, "name", value)} value={suite.name} />
+                  <TextField id={`${suite.id}-price`} label="Suite price" onChange={(value) => onUpdate(suite.id, "price", value)} value={suite.price} />
+                  <TextField id={`${suite.id}-badge`} label="Suite badge" onChange={(value) => onUpdate(suite.id, "badge", value)} value={suite.badge} />
+                  <TextField id={`${suite.id}-image`} label="Suite image URL" onChange={(value) => onUpdate(suite.id, "image", value)} value={suite.image} />
+                </div>
+                <div>
+                  <Label htmlFor={`${suite.id}-upload`}>Upload suite image</Label>
+                  <Input
+                    accept="image/gif,image/jpeg,image/png,image/webp"
+                    disabled={uploadingRowId === suite.id}
+                    id={`${suite.id}-upload`}
+                    onChange={(event) => void handleUpload(suite.id, event.target.files?.[0])}
+                    type="file"
+                  />
+                  <p className="mt-2 text-xs font-medium text-stone-500">
+                    {uploadingRowId === suite.id ? "Uploading..." : "JPG, PNG, WebP, or GIF up to 5MB."}
+                  </p>
+                </div>
+              </div>
             </div>
+            
             <div className="mt-4">
               <Label htmlFor={`${suite.id}-description`}>Suite description</Label>
               <Textarea id={`${suite.id}-description`} onChange={(event) => onUpdate(suite.id, "description", event.target.value)} value={suite.description} />

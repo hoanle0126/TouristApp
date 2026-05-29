@@ -1,4 +1,4 @@
-import { IsInt, IsString, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateEventDto {
   @IsString()
@@ -28,4 +28,8 @@ export class CreateEventDto {
   @IsInt()
   @Min(0)
   sortOrder: number;
+
+  @IsBoolean()
+  @IsOptional()
+  isPopup?: boolean;
 }

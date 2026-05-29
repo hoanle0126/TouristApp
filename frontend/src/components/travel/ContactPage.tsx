@@ -21,6 +21,8 @@ function ContactHero({ content }: Readonly<{ content: ContactPageContent }>) {
 }
 
 function OfficeItem({ office }: Readonly<{ office: ContactOffice }>) {
+  const directionsUrl = "https://www.google.com/maps/dir/?api=1&destination=121%20Ho%C3%A0ng%20K%E1%BA%BF%20Vi%C3%Aam,%20Ng%C5%AF%20H%C3%A0nh%20S%C6%A1n,%20%C4%90%C3%A0%20N%E1%BA%B5ng";
+
   return (
     <article className="flex items-start gap-6">
       <MapPin className="mt-1 size-7 shrink-0 text-red-800" strokeWidth={1.6} />
@@ -31,9 +33,11 @@ function OfficeItem({ office }: Readonly<{ office: ContactOffice }>) {
             <span className="block" key={line}>{line}</span>
           ))}
         </p>
-        <Button className="h-auto text-sm font-bold text-red-800 hover:bg-transparent" variant="ghost">
-          View on map
-          <ArrowRight className="size-4" />
+        <Button asChild className="h-auto text-sm font-bold text-red-800 hover:bg-transparent" variant="ghost">
+          <a href={directionsUrl} target="_blank" rel="noopener noreferrer">
+            View on map
+            <ArrowRight className="size-4" />
+          </a>
         </Button>
       </div>
     </article>
@@ -116,17 +120,27 @@ function ContactForm({ content }: Readonly<{ content: ContactPageContent }>) {
 }
 
 function MapSection({ content }: Readonly<{ content: ContactPageContent }>) {
+  const mapEmbedUrl = "https://maps.google.com/maps?q=121%20Ho%C3%A0ng%20K%E1%BA%BF%20Vi%C3%Aam,%20Ng%C5%AF%20H%C3%A0nh%20S%C6%A1n,%20%C4%90%C3%A0%20N%E1%BA%B5ng&t=&z=16&ie=UTF8&iwloc=&output=embed";
+  const directionsUrl = "https://www.google.com/maps/dir/?api=1&destination=121%20Ho%C3%A0ng%20K%E1%BA%BF%20Vi%C3%Aam,%20Ng%C5%AF%20H%C3%A0nh%20S%C6%A1n,%20%C4%90%C3%A0%20N%E1%BA%B5ng";
+
   return (
     <section className="mx-auto max-w-screen-2xl px-8 pb-32 lg:px-24">
       <div className="group relative h-[500px] overflow-hidden rounded-[2rem] bg-stone-200 shadow-[0_25px_80px_-65px_rgba(28,25,23,0.7)]">
-        <Image alt={content.mapAlt} className="object-cover grayscale-[50%] sepia-[10%] transition-all duration-1000 group-hover:grayscale-0" fill sizes="100vw" src={content.mapImage} />
-        <div className="absolute inset-0 bg-stone-200/35 mix-blend-multiply transition-opacity duration-700 group-hover:opacity-0" />
-        <div className="absolute bottom-8 left-8 max-w-xs rounded-2xl border border-stone-200/70 bg-white/90 p-6 shadow-xl backdrop-blur-md">
-          <h2 className="mb-2 text-lg font-black text-stone-950">{content.mapTitle}</h2>
-          <p className="mb-4 text-sm leading-relaxed text-stone-600">{content.mapNote}</p>
-          <Button className="h-auto text-sm font-bold text-red-800 hover:bg-transparent" variant="ghost">
-            Get Directions
-            <ExternalLink className="size-4" />
+        <iframe
+          src={mapEmbedUrl}
+          className="size-full border-0 grayscale-[20%] transition-all duration-1000 group-hover:grayscale-0"
+          allowFullScreen
+          loading="lazy"
+          title="Company Location Map"
+        />
+        <div className="absolute bottom-8 left-8 max-w-xs rounded-2xl border border-stone-200/70 bg-white/95 p-6 shadow-xl backdrop-blur-md">
+          <h2 className="mb-2 text-lg font-black text-stone-950">{content.mapTitle || "Our Office"}</h2>
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">{content.mapNote || "121 Hoàng Kế Viêm, Ngũ Hành Sơn, Đà Nẵng"}</p>
+          <Button asChild className="h-auto text-sm font-bold text-red-800 hover:bg-transparent" variant="ghost">
+            <a href={directionsUrl} target="_blank" rel="noopener noreferrer">
+              Get Directions
+              <ExternalLink className="size-4" />
+            </a>
           </Button>
         </div>
       </div>

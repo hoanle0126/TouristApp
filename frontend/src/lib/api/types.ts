@@ -40,6 +40,7 @@ export type ApiEvent = {
   readonly location: string;
   readonly sortOrder: number;
   readonly title: string;
+  readonly isPopup?: boolean;
 };
 
 export type ApiHotelLink = {

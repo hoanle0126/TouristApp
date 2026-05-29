@@ -27,6 +27,7 @@ interface EventFormState {
   readonly location: string;
   readonly sortOrder: string;
   readonly title: string;
+  readonly isPopup: boolean;
 }
 
 function createEmptyFormState(nextSortOrder: number): EventFormState {
@@ -40,6 +41,7 @@ function createEmptyFormState(nextSortOrder: number): EventFormState {
     location: "",
     sortOrder: String(nextSortOrder),
     title: "",
+    isPopup: false,
   };
 }
 
@@ -55,6 +57,7 @@ function toFormState(event: ApiEvent): EventFormState {
     location: event.location,
     sortOrder: String(event.sortOrder),
     title: event.title,
+    isPopup: event.isPopup ?? false,
   };
 }
 
@@ -69,6 +72,7 @@ function toPayload(form: EventFormState): SaveEventInput {
     location: form.location.trim(),
     sortOrder: Number(form.sortOrder),
     title: form.title.trim(),
+    isPopup: form.isPopup,
   };
 }
 
@@ -116,9 +120,16 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
     try {
       const payload = toPayload(form);
       const response = form.id ? await updateEvent(form.id, payload) : await createEvent(payload);
-      const nextEvents = form.id
+      let nextEvents = form.id
         ? events.map((item) => (item.id === form.id ? response : item))
         : [...events, response];
+
+      if (response.isPopup) {
+        nextEvents = nextEvents.map((item) =>
+          item.id === response.id ? item : { ...item, isPopup: false }
+        );
+      }
+
       const sortedEvents = [...nextEvents].sort(
         (left, right) => left.sortOrder - right.sortOrder || left.title.localeCompare(right.title),
       );
@@ -220,7 +231,14 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-800">{event.badge}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-800">{event.badge}</p>
+                          {event.isPopup ? (
+                            <span className="rounded bg-red-800 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-white">
+                              Active Popup
+                            </span>
+                          ) : null}
+                        </div>
                         <p className="mt-2 text-lg font-bold tracking-tight text-stone-950">{event.title}</p>
                         <p className="mt-2 text-sm leading-relaxed text-stone-600">
                           Order {event.sortOrder} · {event.date} · {event.location}
@@ -287,6 +305,24 @@ export default function AdminEventsPage({ initialEvents }: Readonly<AdminEventsP
               <div className="space-y-2">
                 <Label htmlFor="event-alt">Image alt text</Label>
                 <Input id="event-alt" onChange={(event) => updateField("alt", event.target.value)} value={form.alt} />
+              </div>
+
+              <div className="flex items-center space-x-3 rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
+                <input
+                  id="event-is-popup"
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-stone-300 text-red-800 focus:ring-red-700 cursor-pointer"
+                  checked={form.isPopup}
+                  onChange={(event) => updateField("isPopup", event.target.checked)}
+                />
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-bold text-stone-950 cursor-pointer" htmlFor="event-is-popup">
+                    Show as Promo Popup
+                  </Label>
+                  <p className="text-xs text-stone-500 leading-relaxed">
+                    Mark this event to be displayed as the promotional popup advertisement on the homepage (only one active event allowed).
+                  </p>
+                </div>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">

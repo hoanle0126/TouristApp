@@ -130,6 +130,40 @@ function DestinationMarquee({ gallery }: { gallery?: readonly { image: string }[
   );
 }
 
+function RelatedCollection({
+  links,
+  title,
+}: Readonly<{
+  links: DestinationDetail["relatedHotels"];
+  title: string;
+}>) {
+  return (
+    <section>
+      <div className="mb-8 flex items-end justify-between gap-4 border-b border-stone-200 pb-6">
+        <div>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.3em] text-red-800">{title}</p>
+          <h2 className="text-4xl font-black tracking-tight text-stone-950 md:text-5xl">Related picks</h2>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {links.map((link) => (
+          <article className="rounded-[1.75rem] border border-stone-200 bg-white p-6 shadow-sm" key={link.title}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-red-800">{link.label}</p>
+            <h3 className="mt-3 text-2xl font-black tracking-tight text-stone-950">{link.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-stone-600">{link.meta}</p>
+            <Button asChild className="mt-6 text-xs uppercase tracking-widest text-red-800" size="sm" variant="ghost">
+              <Link href={link.href}>
+                Explore
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function CtaBand({ href, title }: Readonly<{ href: string; title: string }>) {
   return (
     <section>
@@ -163,6 +197,8 @@ export default function DestinationDetailPage({ detail }: Readonly<{ detail: Des
         <Overview detail={detail} />
         <Spotlight detail={detail} />
         <DestinationMarquee gallery={detail.gallery} />
+        <RelatedCollection links={detail.relatedTours} title="Journeys" />
+        <RelatedCollection links={detail.relatedHotels} title="Stays" />
         <CtaBand href="/contact" title={detail.card.title} />
       </div>
       <TravelFooter />

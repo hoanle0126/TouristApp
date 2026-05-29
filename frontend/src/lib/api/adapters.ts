@@ -308,6 +308,7 @@ export function toTravelEventCard(event: ApiEvent): TravelEventCard {
     location: event.location,
     sortOrder: event.sortOrder,
     title: event.title,
+    isPopup: event.isPopup ?? false,
   };
 }
 

@@ -96,15 +96,14 @@ function Spotlight({ detail }: Readonly<{ detail: DestinationDetail }>) {
   );
 }
 
-function DestinationMarquee({ heroImage }: { heroImage: string }) {
-  const images = [
-    heroImage,
-    "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=80",
-  ];
+function DestinationMarquee({ gallery }: { gallery?: readonly { image: string }[] }) {
+  if (!gallery || gallery.length === 0) {
+    return null;
+  }
+
+  const images = gallery.map((item) => item.image);
+  // Ensure we have at least 10 items in the marquee for a smooth infinite animation loop
+  const repeatedImages = Array(Math.ceil(10 / images.length)).fill(images).flat();
 
   return (
     <section className="overflow-hidden">
@@ -120,7 +119,7 @@ function DestinationMarquee({ heroImage }: { heroImage: string }) {
           }
         `}} />
         <div className="flex w-max min-w-full shrink-0 animate-marquee gap-6">
-          {[...images, ...images].map((img, i) => (
+          {repeatedImages.map((img, i) => (
             <div key={i} className="relative h-72 w-96 shrink-0 overflow-hidden rounded-[1.75rem] shadow-sm">
               <Image src={img} alt="Destination visuals" fill className="object-cover" />
             </div>
@@ -163,7 +162,7 @@ export default function DestinationDetailPage({ detail }: Readonly<{ detail: Des
       <div className="mx-auto max-w-screen-2xl space-y-24 px-8 py-24 md:space-y-32 md:py-32 lg:px-24">
         <Overview detail={detail} />
         <Spotlight detail={detail} />
-        <DestinationMarquee heroImage={detail.heroImage} />
+        <DestinationMarquee gallery={detail.gallery} />
         <CtaBand href="/contact" title={detail.card.title} />
       </div>
       <TravelFooter />

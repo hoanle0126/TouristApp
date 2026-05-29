@@ -26,6 +26,7 @@ export interface DestinationFormInitialValues {
   readonly intro: readonly DestinationTextRow[];
   readonly facts: readonly DestinationFactRow[];
   readonly spotlight: readonly DestinationTextRow[];
+  readonly gallery: readonly DestinationTextRow[];
 }
 
 export interface ResolvedAdminDestinationEditData {
@@ -55,6 +56,12 @@ export const createDestinationInitialValues: DestinationFormInitialValues = {
     { id: "spotlight-1", value: "" },
     { id: "spotlight-2", value: "" },
     { id: "spotlight-3", value: "" },
+  ],
+  gallery: [
+    { id: "gallery-1", value: "" },
+    { id: "gallery-2", value: "" },
+    { id: "gallery-3", value: "" },
+    { id: "gallery-4", value: "" },
   ],
 };
 
@@ -87,6 +94,7 @@ function factRows(values: readonly { readonly label: string; readonly value: str
 
 export function valuesFromDestinationDetail(destination: DestinationDetail): ResolvedAdminDestinationEditData {
   const slug = destination.card.href.split("/").filter(Boolean).at(-1) ?? slugifyDestinationTitle(destination.card.title);
+  const galleryImages = destination.gallery?.map((item) => item.image) ?? [];
 
   return {
     destinationTitle: destination.card.title,
@@ -106,6 +114,7 @@ export function valuesFromDestinationDetail(destination: DestinationDetail): Res
         "spotlight",
         destination.spotlight.map((item) => `${item.title}: ${item.description}`),
       ),
+      gallery: textRows("gallery", galleryImages),
     },
   };
 }

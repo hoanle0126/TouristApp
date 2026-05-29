@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import { BadgeCheck, BedDouble, Car, CheckCircle2, CircleAlert, Coffee, Dumbbell, ImageIcon, ListChecks, MapPinned, Plus, Save, Sparkles, Trash2, Utensils, Waves, Wifi } from "lucide-react";
 
@@ -706,7 +705,7 @@ function HotelImageUploadField({
       <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
         {value ? (
           <div className="relative aspect-[4/3]">
-            <Image alt={`${previewLabel} preview`} className="object-cover" fill sizes="(min-width: 768px) 50vw, 100vw" src={value} />
+            <img alt={`${previewLabel} preview`} className="object-cover absolute inset-0 w-full h-full" src={value} />
           </div>
         ) : (
           <div className="flex aspect-[4/3] items-center justify-center bg-stone-100 text-sm font-semibold text-stone-400">
@@ -1167,7 +1166,7 @@ function GalleryEditor({
               <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
                 {image.image ? (
                   <div className="relative aspect-[4/3]">
-                    <Image alt={`Gallery preview ${index + 1}`} className="object-cover" fill sizes="240px" src={image.image} />
+                    <img alt={`Gallery preview ${index + 1}`} className="object-cover absolute inset-0 w-full h-full" src={image.image} />
                   </div>
                 ) : (
                   <div className="flex aspect-[4/3] items-center justify-center bg-stone-100 text-sm font-semibold text-stone-400">

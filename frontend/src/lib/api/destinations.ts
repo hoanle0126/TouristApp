@@ -12,6 +12,7 @@ export type SaveDestinationInput = {
   readonly intro: readonly string[];
   readonly facts: readonly { readonly label: string; readonly value: string }[];
   readonly spotlight: readonly { readonly title: string; readonly description: string }[];
+  readonly gallery?: readonly { readonly image: string }[];
 };
 
 export async function getDestinations(query: { readonly search?: string; readonly market?: string; readonly perPage?: number; readonly region?: string; readonly style?: string } = {}) {

@@ -117,6 +117,7 @@ export class DestinationsService {
       intro: destination.intro ?? [],
       facts: destination.facts ?? [],
       spotlight: destination.spotlight ?? [],
+      gallery: destination.gallery ?? [],
       relatedTours: destination.tours.map((tour) =>
         this.toRelatedTourResponse(tour),
       ),

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, type ReactNode, useMemo, useState } from "react";
-import { BadgeCheck, CheckCircle2, CircleAlert, MapPinned, Plus, Save, Sparkles, Trash2 } from "lucide-react";
+import { BadgeCheck, CheckCircle2, CircleAlert, Images, MapPinned, Plus, Save, Sparkles, Trash2 } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
@@ -71,11 +71,30 @@ function splitSpotlight(value: string) {
   };
 }
 
+async function uploadAdminImage(file: File) {
+  const response = await fetch("/api/admin/uploads", {
+    body: file,
+    headers: {
+      "Content-Type": file.type,
+      "X-File-Name": encodeURIComponent(file.name),
+    },
+    method: "POST",
+  });
+
+  const payload = (await response.json()) as { error?: string; url?: string };
+  if (response.ok && typeof payload.url === "string") {
+    return payload.url;
+  }
+
+  throw new Error(typeof payload.error === "string" ? payload.error : "Unable to upload image.");
+}
+
 function toDestinationPayload(
   form: DestinationFormState,
   intro: readonly DestinationTextRow[],
   facts: readonly DestinationFactRow[],
   spotlight: readonly DestinationTextRow[],
+  gallery: readonly DestinationTextRow[],
 ): SaveDestinationInput {
   return {
     slug: form.slug,
@@ -89,6 +108,7 @@ function toDestinationPayload(
       .filter((item) => hasValue(item.label) && hasValue(item.value))
       .map(({ label, value }) => ({ label, value })),
     spotlight: spotlight.map((item) => splitSpotlight(item.value)).filter((item) => hasValue(item.title)),
+    gallery: gallery.map((item) => ({ image: item.value.trim() })).filter((item) => hasValue(item.image)),
   };
 }
 
@@ -97,6 +117,7 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
   const [intro, setIntro] = useState<readonly DestinationTextRow[]>(initialValues.intro);
   const [facts, setFacts] = useState<readonly DestinationFactRow[]>(initialValues.facts);
   const [spotlight, setSpotlight] = useState<readonly DestinationTextRow[]>(initialValues.spotlight);
+  const [gallery, setGallery] = useState<readonly DestinationTextRow[]>(initialValues.gallery);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saved, setSaved] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -172,7 +193,7 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
 
     setIsSubmitting(true);
     try {
-      const payload = toDestinationPayload(form, intro, facts, spotlight);
+      const payload = toDestinationPayload(form, intro, facts, spotlight, gallery);
       if (mode === "update") {
         await updateDestination(originalSlug ?? form.slug, payload);
       } else {
@@ -205,6 +226,10 @@ export function AdminDestinationForm({ copy, initialValues, mode = "create", ori
           setSpotlight={(items) => updateRows(setSpotlight, items)}
           spotlight={spotlight}
           updateField={updateField}
+        />
+        <DestinationGallerySection
+          gallery={gallery}
+          setGallery={(items) => updateRows(setGallery, items)}
         />
       </div>
 
@@ -590,5 +615,128 @@ function TextRowsEditor({
         ))}
       </div>
     </div>
+  );
+}
+
+function DestinationGallerySection({
+  gallery,
+  setGallery,
+}: Readonly<{
+  gallery: readonly DestinationTextRow[];
+  setGallery: (items: readonly DestinationTextRow[]) => void;
+}>) {
+  const [uploadingRowId, setUploadingRowId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleUpload(rowId: string, file: File | undefined) {
+    if (!file) {
+      return;
+    }
+
+    setUploadingRowId(rowId);
+    setUploadError(null);
+
+    try {
+      const url = await uploadAdminImage(file);
+      setGallery(updateRow(gallery, rowId, url));
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Unable to upload image.");
+    } finally {
+      setUploadingRowId(null);
+    }
+  }
+
+  return (
+    <Card>
+      <CardContent className="space-y-6 p-6 sm:p-7">
+        <SectionHeader
+          description="Visual assets that appear in the Visuals marquee slider on the destination detail page."
+          eyebrow="Visuals"
+          title="Gallery / Visual marquee"
+        />
+
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-stone-950">
+              <span className="flex size-9 items-center justify-center rounded-2xl bg-red-100 text-red-900">
+                <Images className="size-4" />
+              </span>
+              Gallery Images
+            </div>
+            <Button
+              aria-label="Add gallery image"
+              onClick={() => setGallery([...gallery, createRow("gallery")])}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              <Plus className="size-4" />
+              Add image
+            </Button>
+          </div>
+
+          {uploadError ? <p className="text-xs font-semibold text-rose-700">{uploadError}</p> : null}
+
+          <div className="space-y-4">
+            {gallery.map((row, index) => (
+              <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4" key={row.id}>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-sm font-bold text-stone-950">Image {index + 1}</p>
+                  <Button
+                    aria-label={`Remove gallery image ${index + 1}`}
+                    disabled={gallery.length <= 1}
+                    onClick={() => setGallery(removeRow(gallery, row.id))}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
+                  <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
+                    {row.value ? (
+                      <div className="relative aspect-[4/3]">
+                        <img
+                          alt={`Gallery preview ${index + 1}`}
+                          className="object-cover absolute inset-0 w-full h-full"
+                          src={row.value}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex aspect-[4/3] items-center justify-center bg-stone-100 text-sm font-semibold text-stone-400">
+                        No preview
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    <TextField
+                      id={`${row.id}-value`}
+                      label="Image URL"
+                      onChange={(value) => setGallery(updateRow(gallery, row.id, value))}
+                      value={row.value}
+                    />
+                    <div>
+                      <Label htmlFor={`${row.id}-upload`}>Upload image</Label>
+                      <Input
+                        accept="image/gif,image/jpeg,image/png,image/webp"
+                        disabled={uploadingRowId === row.id}
+                        id={`${row.id}-upload`}
+                        onChange={(event) => void handleUpload(row.id, event.target.files?.[0])}
+                        type="file"
+                      />
+                      <p className="mt-2 text-xs font-medium text-stone-500">
+                        {uploadingRowId === row.id ? "Uploading..." : "JPG, PNG, WebP, or GIF up to 5MB."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

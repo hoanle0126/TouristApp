@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsIn,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -52,6 +53,7 @@ export class CreateHotelDto {
   @IsArray()
   gallery: Array<{ image: string }>;
 
+  @IsObject()
   booking: {
     checkIn: string;
     checkOut: string;

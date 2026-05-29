@@ -52,6 +52,7 @@ export interface DestinationDetail {
   readonly relatedTours: readonly DestinationDetailRelatedLink[];
   readonly spotlight: readonly DestinationDetailHighlight[];
   readonly summary: string;
+  readonly gallery?: readonly { readonly image: string }[];
 }
 
 export interface BlogPost {

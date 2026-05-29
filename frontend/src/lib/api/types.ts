@@ -131,6 +131,7 @@ export type ApiDestinationDetail = {
     readonly meta: string;
     readonly title: string;
   }[];
+  readonly gallery?: readonly { readonly image: string }[];
 };
 
 export type ApiHotelAmenity =

@@ -67,6 +67,7 @@ model Destination {
   intro            Json
   facts            Json
   spotlight        Json
+  gallery          Json?
   tours            Tour[]
   hotels           Hotel[]
   mentionedInPosts BlogPost[] @relation("BlogMentionedDestinations")

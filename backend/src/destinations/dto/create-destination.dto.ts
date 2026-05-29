@@ -1,4 +1,4 @@
-import { IsArray, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class CreateDestinationDto {
   @IsString()
@@ -27,4 +27,8 @@ export class CreateDestinationDto {
 
   @IsArray()
   spotlight: Array<{ title: string; description: string }>;
+
+  @IsOptional()
+  @IsArray()
+  gallery?: Array<{ image: string }>;
 }

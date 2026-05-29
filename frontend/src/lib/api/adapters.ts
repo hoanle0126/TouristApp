@@ -169,6 +169,7 @@ export function toDestinationDetail(
     relatedTours: destination.relatedTours,
     spotlight: destination.spotlight,
     summary: destination.summary,
+    gallery: destination.gallery,
   };
 }
 
